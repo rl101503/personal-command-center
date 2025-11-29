@@ -505,6 +505,7 @@
     /* Tabs */
     .tab-nav {
       display: flex;
+      align-items: center;
       gap: 0.5rem;
       border-bottom: 1px solid #1797d7;
       margin-bottom: 1rem;
@@ -514,6 +515,11 @@
       background: #000000;
       z-index: 5;
       padding-top: 0.2rem;
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: 0.5rem;
     }
 
     .tab-button {
@@ -530,6 +536,12 @@
       background: #007f91;
       border-color: #ffc532;
       color: #f9fafb;
+    }
+
+    .save-dashboard-btn {
+      margin-left: auto;
+      padding-inline: 1.1rem;
+      white-space: nowrap;
     }
 
     .budget-wrapper table th {
@@ -776,9 +788,12 @@
     <div id="appContent" class="hidden">
       <!-- TAB NAV -->
       <div class="tab-nav">
-        <button class="tab-button active" data-tab="commission">Commission Tracker</button>
-        <button class="tab-button" data-tab="personal">Personal Finances</button>
-        <button class="tab-button" data-tab="goals">Goals</button>
+        <div class="tab-buttons">
+          <button class="tab-button active" data-tab="commission">Commission Tracker</button>
+          <button class="tab-button" data-tab="personal">Personal Finances</button>
+          <button class="tab-button" data-tab="goals">Goals</button>
+        </div>
+        <button type="button" class="save-dashboard-btn" onclick="onSaveDashboardClick()">Save Dashboard</button>
       </div>
 
       <!-- COMMISSION TAB -->
@@ -3252,6 +3267,10 @@
           renderGoals();
         };
       }
+    }
+
+    function onSaveDashboardClick() {
+      console.log("Save Dashboard clicked");
     }
 
     // --- Tabs logic ---
