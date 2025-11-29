@@ -1607,7 +1607,39 @@
     let readingEditMode = false;
     let debtGoalEditMode = false;
 
-    let personalFinanceData = { pf401k: null, debtNotes: "" };
+    let personalFinanceData = {
+      pf401k: null,
+      debtNotes: "",
+      budgetRows: [],
+      investmentRows: [],
+      readingCompletedRows: [],
+      readingToReadRows: []
+    };
+
+    const defaultPersonalBudgetRows = JSON.parse(JSON.stringify(personalBudgetRows));
+    const defaultInvestmentRows = JSON.parse(JSON.stringify(investmentRows));
+    const defaultReadingCompletedRows = JSON.parse(JSON.stringify(readingCompletedRows));
+    const defaultReadingToReadRows = JSON.parse(JSON.stringify(readingToReadRows));
+
+    function resetPersonalFinanceState() {
+      personalFinanceData = {
+        pf401k: null,
+        debtNotes: "",
+        budgetRows: JSON.parse(JSON.stringify(defaultPersonalBudgetRows)),
+        investmentRows: JSON.parse(JSON.stringify(defaultInvestmentRows)),
+        readingCompletedRows: JSON.parse(JSON.stringify(defaultReadingCompletedRows)),
+        readingToReadRows: JSON.parse(JSON.stringify(defaultReadingToReadRows))
+      };
+      personalBudgetRows = JSON.parse(JSON.stringify(defaultPersonalBudgetRows));
+      investmentRows = JSON.parse(JSON.stringify(defaultInvestmentRows));
+      readingCompletedRows = JSON.parse(JSON.stringify(defaultReadingCompletedRows));
+      readingToReadRows = JSON.parse(JSON.stringify(defaultReadingToReadRows));
+      debtStrategyNotes = "";
+      if (pf401kTrackerInput) {
+        pf401kTrackerInput.value = "";
+        updatePf401kInfo();
+      }
+    }
 
     // --- Helpers ---
     function formatNumberWithCommas(value) {
@@ -2364,7 +2396,14 @@
 
     async function savePersonalFinanceData(updates = {}) {
       if (!currentUser) return;
-      personalFinanceData = { ...personalFinanceData, ...updates };
+      personalFinanceData = {
+        ...personalFinanceData,
+        budgetRows: personalBudgetRows,
+        investmentRows: investmentRows,
+        readingCompletedRows,
+        readingToReadRows,
+        ...updates
+      };
       try {
         const docRef = db.collection("personalFinance").doc(currentUser.uid);
         await docRef.set(
@@ -2388,6 +2427,56 @@
         if (snap.exists) {
           const data = snap.data();
           personalFinanceData = { ...personalFinanceData, ...data };
+          if (Array.isArray(data.budgetRows) && data.budgetRows.length) {
+            personalBudgetRows = data.budgetRows.map(row => ({
+              category: row.category || "",
+              amount: typeof row.amount === "number" ? row.amount : null,
+              withdraw: row.withdraw || "",
+              type: row.type || "",
+              notes: row.notes || ""
+            }));
+          } else {
+            personalBudgetRows = JSON.parse(JSON.stringify(defaultPersonalBudgetRows));
+          }
+
+          if (Array.isArray(data.investmentRows) && data.investmentRows.length) {
+            investmentRows = data.investmentRows.map(row => ({
+              name: row.name || "",
+              balance: typeof row.balance === "number" ? row.balance : null
+            }));
+          } else {
+            investmentRows = JSON.parse(JSON.stringify(defaultInvestmentRows));
+          }
+
+          if (Array.isArray(data.readingCompletedRows) && data.readingCompletedRows.length) {
+            readingCompletedRows = data.readingCompletedRows.map(row => ({
+              title: row.title || "",
+              author: row.author || "",
+              format: row.format || "",
+              rating: row.rating || "",
+              notes: row.notes || ""
+            }));
+          } else {
+            readingCompletedRows = JSON.parse(JSON.stringify(defaultReadingCompletedRows));
+          }
+
+          if (Array.isArray(data.readingToReadRows) && data.readingToReadRows.length) {
+            readingToReadRows = data.readingToReadRows.map(row => ({
+              title: row.title || "",
+              author: row.author || ""
+            }));
+          } else {
+            readingToReadRows = JSON.parse(JSON.stringify(defaultReadingToReadRows));
+          }
+
+          personalFinanceData = {
+            ...personalFinanceData,
+            budgetRows: personalBudgetRows,
+            investmentRows: investmentRows,
+            readingCompletedRows,
+            readingToReadRows
+          };
+
           if (typeof data.pf401k === "number") {
             pf401kTrackerInput.value = formatNumberWithCommas(data.pf401k.toString());
           }
@@ -2545,7 +2634,10 @@
       const budgetEditBtn = document.getElementById("budgetEditBtn");
       if (budgetEditBtn) {
         budgetEditBtn.textContent = budgetEditMode ? "Done" : "Edit budget";
-        budgetEditBtn.onclick = () => {
+        budgetEditBtn.onclick = async () => {
+          if (budgetEditMode) {
+            await savePersonalFinanceData({ budgetRows: personalBudgetRows });
+          }
           budgetEditMode = !budgetEditMode;
           budgetEditBtn.textContent = budgetEditMode ? "Done" : "Edit budget";
           renderBudgetTable();
@@ -2841,7 +2933,10 @@
 
       if (editBtn) {
         editBtn.textContent = investEditMode ? "Done" : "Edit";
-        editBtn.onclick = () => {
+        editBtn.onclick = async () => {
+          if (investEditMode) {
+            await savePersonalFinanceData({ investmentRows });
+          }
           investEditMode = !investEditMode;
           renderInvestSection();
         };
@@ -2991,7 +3086,13 @@
 
       if (readingEditBtn) {
         readingEditBtn.textContent = readingEditMode ? "Done" : "Edit Reading List";
-        readingEditBtn.onclick = () => {
+        readingEditBtn.onclick = async () => {
+          if (readingEditMode) {
+            await savePersonalFinanceData({
+              readingCompletedRows,
+              readingToReadRows
+            });
+          }
           readingEditMode = !readingEditMode;
           renderGoals();
         };
@@ -3178,12 +3279,7 @@
         signInBtn.classList.remove("hidden");
         signOutBtn.classList.add("hidden");
         appContent.classList.add("hidden");
-        personalFinanceData = { pf401k: null, debtNotes: "" };
-        debtStrategyNotes = "";
-        if (pf401kTrackerInput) {
-          pf401kTrackerInput.value = "";
-          updatePf401kInfo();
-        }
+        resetPersonalFinanceState();
         historyBody.innerHTML = "";
         totalsAmountEl.textContent = "$0";
         totalsPostTaxEl.textContent = "$0";
