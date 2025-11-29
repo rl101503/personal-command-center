@@ -531,6 +531,53 @@
       color: #f9fafb;
     }
 
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    .insight-card {
+      background: #020617;
+      border-radius: 0.9rem;
+      padding: 1rem 1.2rem;
+      border: 1px solid rgba(23,151,215,0.6);
+      box-shadow: 0 14px 30px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .insight-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ffc532;
+    }
+
+    .insight-metric {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #f9fafb;
+      line-height: 1.2;
+    }
+
+    .insight-subtext {
+      font-size: 0.9rem;
+      color: #e5eef7;
+      opacity: 0.85;
+    }
+
+    .insight-progress-label {
+      font-size: 0.85rem;
+      color: #e5eef7;
+    }
+
+    .insight-chart { width: 100%; max-width: 240px; }
+
+    .insight-legend { font-size: 0.85rem; color: #e5eef7; display: flex; flex-direction: column; gap: 0.15rem; }
+
+    .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 999px; margin-right: 6px; }
+
     .save-dashboard-btn {
       margin-left: auto;
       padding-inline: 1.1rem;
@@ -814,6 +861,7 @@
           <button class="tab-button active" data-tab="commission">Commission Tracker</button>
           <button class="tab-button" data-tab="personal">Personal Finances</button>
           <button class="tab-button" data-tab="goals">Goals</button>
+          <button class="tab-button" data-tab="insights">Insights</button>
         </div>
         <button type="button" class="save-dashboard-btn" onclick="onSaveDashboardClick()">Save Dashboard</button>
         <span id="saveStatus" style="margin-left: 10px; font-size: 0.85rem;"></span>
@@ -1432,6 +1480,38 @@
           <textarea id="debtNotesInput" class="hidden" placeholder="Notes on payoff strategy"></textarea>
         </div>
       </div> <!-- end goalsTab -->
+
+      <!-- INSIGHTS TAB -->
+      <div id="insightsTab" class="hidden">
+        <div class="insights-grid">
+          <div class="insight-card">
+            <div class="insight-title">401k Tracker</div>
+            <div class="insight-metric" id="insights401kTotal">$0</div>
+            <div class="insight-subtext">Total 401k Balance</div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-title">Reading Goal Tracker</div>
+            <div class="progress-track"><div class="progress-bar" id="insightsReadingBar"></div></div>
+            <div class="insight-progress-label" id="insightsReadingLabel">0 of 0 books completed</div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-title">Total Debt</div>
+            <div class="insight-metric" id="insightsDebtTotal">$0</div>
+            <div class="insight-subtext">Sum of all outstanding debts</div>
+          </div>
+
+          <div class="insight-card" style="align-items:flex-start;">
+            <div class="insight-title">Variable Compensation Tracker</div>
+            <canvas id="insightsCompChart" class="insight-chart"></canvas>
+            <div class="insight-legend">
+              <span><span class="legend-dot" style="background:#22c55e;"></span>Earned</span>
+              <span><span class="legend-dot" style="background:#ef4444;"></span>Remaining to $250,000 target</span>
+            </div>
+          </div>
+        </div>
+      </div> <!-- end insightsTab -->
     </div> <!-- end appContent -->
   </div>
 
@@ -1478,6 +1558,8 @@
     const db = getFirestore(app);
 
     const PF_401K_TARGET = 23500;
+    const READING_TARGET = 55;
+    const VARIABLE_COMP_TARGET = 250000;
     let globalAvgMonthlyTakeHome = 0; // from comp tracker
     let globalTotalMonthlyTakeHome = 0;
     let globalMonthlyExpensesTotal = 0;
@@ -1569,6 +1651,14 @@
     const commissionTab = document.getElementById("commissionTab");
     const personalTab = document.getElementById("personalTab");
     const goalsTab = document.getElementById("goalsTab");
+    const insightsTab = document.getElementById("insightsTab");
+
+    // Insights elements
+    const insights401kTotalEl = document.getElementById("insights401kTotal");
+    const insightsReadingBar = document.getElementById("insightsReadingBar");
+    const insightsReadingLabel = document.getElementById("insightsReadingLabel");
+    const insightsDebtTotalEl = document.getElementById("insightsDebtTotal");
+    const insightsCompChartEl = document.getElementById("insightsCompChart");
 
     let currentUser = null;
 
@@ -1600,6 +1690,7 @@
 
     let compPieChart = null;
     let compLineChart = null;
+    let insightsCompChart = null;
 
     let commissionTrackerState = {
       annualTarget: compConfig.annualTarget || 0,
@@ -2179,6 +2270,39 @@
       const contributed = isNaN(val) ? 0 : val;
       const pct = PF_401K_TARGET > 0 ? (contributed / PF_401K_TARGET) * 100 : 0;
       pf401kPercentEl.textContent = pct.toFixed(1) + "%";
+    }
+
+    function setProgressWidth(el, pct) {
+      if (el) {
+        const clamped = Math.min(Math.max(pct, 0), 100);
+        el.style.width = clamped + "%";
+      }
+    }
+
+    function computeDebtTotal() {
+      let total = 0;
+      debtRows.forEach(row => {
+        const val = row.balance || 0;
+        if (!isNaN(val)) total += val;
+      });
+      return total;
+    }
+
+    function compute401kTotal() {
+      return investmentRows.reduce((sum, row) => {
+        const name = (row.name || "").toLowerCase();
+        if (name.includes("401k")) {
+          const val = row.balance || 0;
+          if (!isNaN(val)) {
+            return sum + val;
+          }
+        }
+        return sum;
+      }, 0);
+    }
+
+    function computeCompEarned() {
+      return fiscalMonths.reduce((total, month) => total + (compConfig.monthlyValues[month] || 0), 0);
     }
 
     // --- Term dropdown handling ---
@@ -2832,6 +2956,8 @@
         compLineChart.options.scales.x.ticks.font.size = 10;
         compLineChart.update();
       }
+
+      renderInsights();
     }
 
     // --- Personal finances rendering ---
@@ -3260,13 +3386,10 @@
       `).join("");
 
       function recalcDebtTotal() {
-        let total = 0;
-        debtRows.forEach(row => {
-          const val = row.balance || 0;
-          if (!isNaN(val)) total += val;
-        });
+        const total = computeDebtTotal();
         debtTotalEl.textContent = formatCurrency(total);
         renderGoals();
+        renderInsights();
       }
 
       if (debtEditMode) {
@@ -3343,6 +3466,7 @@
           if (!isNaN(val)) total += val;
         });
         investTotalEl.textContent = formatCurrency(total);
+        renderInsights();
       }
 
       if (investEditMode) {
@@ -3386,7 +3510,6 @@
     }
 
     function renderGoals() {
-      const readingTarget = 55;
       const readingSummaryEl = document.getElementById("readingGoalSummary");
       const readingGoalProgressEl = document.getElementById("readingGoalProgress");
       const readingCardProgressEl = document.getElementById("readingCardProgress");
@@ -3404,25 +3527,19 @@
       const debtNotesInput = document.getElementById("debtNotesInput");
       const debtGoalEditBtn = document.getElementById("debtGoalEditBtn");
 
-      const setProgressWidth = (el, pct) => {
-        if (el) {
-          const clamped = Math.min(Math.max(pct, 0), 100);
-          el.style.width = clamped + "%";
-        }
-      };
-
       const refreshReadingDisplays = () => {
         const completedCount = readingCompletedRows.filter(r => (r.title || "").trim()).length;
-        const remaining = Math.max(readingTarget - completedCount, 0);
-        const pct = readingTarget > 0 ? (completedCount / readingTarget) * 100 : 0;
+        const remaining = Math.max(READING_TARGET - completedCount, 0);
+        const pct = READING_TARGET > 0 ? (completedCount / READING_TARGET) * 100 : 0;
         if (readingSummaryEl) {
-          readingSummaryEl.textContent = `Completed: ${completedCount} / ${readingTarget}`;
+          readingSummaryEl.textContent = `Completed: ${completedCount} / ${READING_TARGET}`;
         }
         setProgressWidth(readingGoalProgressEl, pct);
         setProgressWidth(readingCardProgressEl, pct);
         if (readingStatsEl) {
-          readingStatsEl.textContent = `Target: ${readingTarget} · Completed: ${completedCount} · Remaining: ${remaining}`;
+          readingStatsEl.textContent = `Target: ${READING_TARGET} · Completed: ${completedCount} · Remaining: ${remaining}`;
         }
+        renderInsights();
       };
 
       refreshReadingDisplays();
@@ -3595,6 +3712,53 @@
       }
     }
 
+    function renderInsights() {
+      if (insights401kTotalEl) {
+        const total401k = compute401kTotal();
+        insights401kTotalEl.textContent = formatCurrency(total401k);
+      }
+
+      if (insightsReadingBar || insightsReadingLabel) {
+        const completedCount = readingCompletedRows.filter(r => (r.title || "").trim()).length;
+        const toReadCount = readingToReadRows.filter(r => (r.title || "").trim()).length;
+        const totalTarget = (completedCount + toReadCount) || READING_TARGET;
+        const pct = totalTarget > 0 ? (completedCount / totalTarget) * 100 : 0;
+        setProgressWidth(insightsReadingBar, pct);
+        if (insightsReadingLabel) {
+          insightsReadingLabel.textContent = `${completedCount} of ${totalTarget} books completed`;
+        }
+      }
+
+      if (insightsDebtTotalEl) {
+        const debtTotal = computeDebtTotal();
+        insightsDebtTotalEl.textContent = formatCurrency(debtTotal);
+      }
+
+      if (insightsCompChartEl) {
+        const earned = computeCompEarned();
+        const remaining = Math.max(VARIABLE_COMP_TARGET - earned, 0);
+        const pieData = [earned, remaining];
+
+        if (!insightsCompChart) {
+          insightsCompChart = new Chart(insightsCompChartEl.getContext("2d"), {
+            type: "doughnut",
+            data: {
+              labels: ["Earned", "Remaining"],
+              datasets: [{
+                data: pieData,
+                backgroundColor: ["#22c55e", "#ef4444"],
+                borderWidth: 0
+              }]
+            },
+            options: { cutout: "60%", plugins: { legend: { display: false } } }
+          });
+        } else {
+          insightsCompChart.data.datasets[0].data = pieData;
+          insightsCompChart.update();
+        }
+      }
+    }
+
     async function onSaveDashboardClick() {
       console.log("onSaveDashboardClick called");
 
@@ -3647,15 +3811,24 @@
           commissionTab.classList.remove("hidden");
           personalTab.classList.add("hidden");
           goalsTab.classList.add("hidden");
+          insightsTab.classList.add("hidden");
         } else if (tab === "personal") {
           commissionTab.classList.add("hidden");
           personalTab.classList.remove("hidden");
           goalsTab.classList.add("hidden");
-        } else {
+          insightsTab.classList.add("hidden");
+        } else if (tab === "goals") {
           commissionTab.classList.add("hidden");
           personalTab.classList.add("hidden");
           goalsTab.classList.remove("hidden");
           renderGoals();
+          insightsTab.classList.add("hidden");
+        } else {
+          commissionTab.classList.add("hidden");
+          personalTab.classList.add("hidden");
+          goalsTab.classList.add("hidden");
+          insightsTab.classList.remove("hidden");
+          renderInsights();
         }
       });
     });
