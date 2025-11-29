@@ -1555,6 +1555,16 @@
     let compPieChart = null;
     let compLineChart = null;
 
+    let commissionTrackerState = {
+      annualTarget: compConfig.annualTarget || 0,
+      monthlyValues: { ...compConfig.monthlyValues }
+    };
+
+    const defaultCommissionTrackerState = {
+      annualTarget: compConfig.annualTarget || 0,
+      monthlyValues: { ...compConfig.monthlyValues }
+    };
+
     // --- Personal finance data from spreadsheet ---
     const incomeSummary = {
       monthlyNet: 18640,
@@ -1656,6 +1666,13 @@
     let readingEditMode = false;
     let debtGoalEditMode = false;
 
+    let goalsState = {
+      readingCompletedRows: [],
+      readingToReadRows: [],
+      debtRows: [],
+      debtNotes: ""
+    };
+
     let personalFinanceState = {
       pf401k: null,
       debtNotes: "",
@@ -1677,6 +1694,12 @@
     const defaultStorePeriodHeaders = [...storePeriodHeaders];
     const defaultUpcomingRows = JSON.parse(JSON.stringify(upcomingRows));
     const defaultDebtRows = JSON.parse(JSON.stringify(debtRows));
+    const defaultGoalsState = {
+      readingCompletedRows: JSON.parse(JSON.stringify(defaultReadingCompletedRows)),
+      readingToReadRows: JSON.parse(JSON.stringify(defaultReadingToReadRows)),
+      debtRows: JSON.parse(JSON.stringify(defaultDebtRows)),
+      debtNotes: ""
+    };
 
     function resetPersonalFinanceState() {
       personalFinanceState = {
@@ -1704,6 +1727,66 @@
         pf401kTrackerInput.value = "";
         updatePf401kInfo();
       }
+    }
+
+    function buildCommissionTrackerStateFromDOM() {
+      return {
+        annualTarget: typeof compConfig.annualTarget === "number" ? compConfig.annualTarget : 0,
+        monthlyValues: { ...compConfig.monthlyValues }
+      };
+    }
+
+    function applyCommissionTrackerStateToDOM(state) {
+      const safeState = state || {};
+      const incomingMonthly = safeState.monthlyValues || {};
+      commissionTrackerState = {
+        annualTarget: typeof safeState.annualTarget === "number"
+          ? safeState.annualTarget
+          : defaultCommissionTrackerState.annualTarget,
+        monthlyValues: {
+          ...defaultCommissionTrackerState.monthlyValues,
+          ...Object.keys(incomingMonthly).reduce((acc, key) => {
+            const val = incomingMonthly[key];
+            acc[key] = typeof val === "number" ? val : 0;
+            return acc;
+          }, {})
+        }
+      };
+
+      compConfig.annualTarget = commissionTrackerState.annualTarget;
+      compConfig.monthlyValues = { ...commissionTrackerState.monthlyValues };
+
+      renderCompTracker();
+    }
+
+    async function loadCommissionTrackerDataForUser(uid) {
+      try {
+        const ref = doc(db, "dashboards", uid);
+        const snap = await getDoc(ref);
+
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.commissionTracker) {
+            commissionTrackerState = data.commissionTracker;
+            applyCommissionTrackerStateToDOM(commissionTrackerState);
+          } else {
+            commissionTrackerState = buildCommissionTrackerStateFromDOM();
+            await setDoc(ref, { commissionTracker: commissionTrackerState }, { merge: true });
+          }
+        } else {
+          commissionTrackerState = buildCommissionTrackerStateFromDOM();
+          await setDoc(ref, { commissionTracker: commissionTrackerState });
+        }
+      } catch (err) {
+        console.error("Error loading commission tracker data", err);
+        alert("There was a problem loading your data. Please refresh and try again.");
+      }
+    }
+
+    async function saveCommissionTrackerDataForUser(uid) {
+      const ref = doc(db, "dashboards", uid);
+      commissionTrackerState = buildCommissionTrackerStateFromDOM();
+      await setDoc(ref, { commissionTracker: commissionTrackerState }, { merge: true });
     }
 
     function buildPersonalFinanceStateFromDOM() {
@@ -1862,6 +1945,105 @@
       const ref = doc(db, "dashboards", uid);
       personalFinanceState = buildPersonalFinanceStateFromDOM();
       await setDoc(ref, { personalFinances: personalFinanceState }, { merge: true });
+    }
+
+    function buildGoalsStateFromDOM() {
+      return {
+        readingCompletedRows: readingCompletedRows.map(row => ({
+          title: row.title || "",
+          author: row.author || "",
+          format: row.format || "",
+          rating: row.rating || "",
+          monthFinished: row.monthFinished || "",
+          notes: row.notes || ""
+        })),
+        readingToReadRows: readingToReadRows.map(row => ({
+          title: row.title || "",
+          author: row.author || ""
+        })),
+        debtRows: debtRows.map(row => ({
+          name: row.name || "",
+          balance: typeof row.balance === "number" ? row.balance : null
+        })),
+        debtNotes: debtStrategyNotes || ""
+      };
+    }
+
+    function applyGoalsStateToDOM(state) {
+      const safeState = state || {};
+      goalsState = {
+        readingCompletedRows: Array.isArray(safeState.readingCompletedRows) && safeState.readingCompletedRows.length
+          ? safeState.readingCompletedRows.map(row => ({
+              title: row.title || "",
+              author: row.author || "",
+              format: row.format || "",
+              rating: row.rating || "",
+              monthFinished: row.monthFinished || "",
+              notes: row.notes || ""
+            }))
+          : JSON.parse(JSON.stringify(defaultGoalsState.readingCompletedRows)),
+        readingToReadRows: Array.isArray(safeState.readingToReadRows) && safeState.readingToReadRows.length
+          ? safeState.readingToReadRows.map(row => ({
+              title: row.title || "",
+              author: row.author || ""
+            }))
+          : JSON.parse(JSON.stringify(defaultGoalsState.readingToReadRows)),
+        debtRows: Array.isArray(safeState.debtRows) && safeState.debtRows.length
+          ? safeState.debtRows.map(row => ({
+              name: row.name || "",
+              balance: typeof row.balance === "number" ? row.balance : null
+            }))
+          : JSON.parse(JSON.stringify(defaultGoalsState.debtRows)),
+        debtNotes: typeof safeState.debtNotes === "string"
+          ? safeState.debtNotes
+          : defaultGoalsState.debtNotes
+      };
+
+      readingCompletedRows = goalsState.readingCompletedRows;
+      readingToReadRows = goalsState.readingToReadRows;
+      debtRows = goalsState.debtRows;
+      debtStrategyNotes = goalsState.debtNotes || "";
+
+      personalFinanceState = {
+        ...personalFinanceState,
+        readingCompletedRows,
+        readingToReadRows,
+        debtRows,
+        debtNotes: debtStrategyNotes
+      };
+
+      renderPersonalFinance();
+      renderGoals();
+    }
+
+    async function loadGoalsDataForUser(uid) {
+      try {
+        const ref = doc(db, "dashboards", uid);
+        const snap = await getDoc(ref);
+
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.goals) {
+            goalsState = data.goals;
+            applyGoalsStateToDOM(goalsState);
+          } else {
+            goalsState = buildGoalsStateFromDOM();
+            await setDoc(ref, { goals: goalsState }, { merge: true });
+          }
+        } else {
+          goalsState = buildGoalsStateFromDOM();
+          await setDoc(ref, { goals: goalsState });
+        }
+      } catch (err) {
+        console.error("Error loading goals data", err);
+        alert("There was a problem loading your data. Please refresh and try again.");
+      }
+    }
+
+    async function saveGoalsDataForUser(uid) {
+      const ref = doc(db, "dashboards", uid);
+      goalsState = buildGoalsStateFromDOM();
+      await setDoc(ref, { goals: goalsState }, { merge: true });
     }
 
     // --- Helpers ---
@@ -2209,44 +2391,12 @@
     async function loadCompTracker() {
       if (!currentUser) return;
 
-      try {
-        const docRef = compatDb.collection("compTrackers").doc(currentUser.uid);
-        const docSnap = await docRef.get();
-        if (docSnap.exists) {
-          const data = docSnap.data();
-          if (typeof data.annualTarget === "number") {
-            compConfig.annualTarget = data.annualTarget;
-          }
-          if (data.monthlyValues) {
-            compConfig.monthlyValues = {
-              ...compConfig.monthlyValues,
-              ...data.monthlyValues
-            };
-          }
-        }
-      } catch (err) {
-        console.error("Error loading comp tracker", err);
-      }
-
-      renderCompTracker();
+      await loadCommissionTrackerDataForUser(currentUser.uid);
     }
 
     async function saveCompTracker() {
       if (!currentUser) return;
-      try {
-        const docRef = compatDb.collection("compTrackers").doc(currentUser.uid);
-        await docRef.set(
-          {
-            userId: currentUser.uid,
-            annualTarget: compConfig.annualTarget || 0,
-            monthlyValues: compConfig.monthlyValues,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          },
-          { merge: true }
-        );
-      } catch (err) {
-        console.error("Error saving comp tracker", err);
-      }
+      await saveCommissionTrackerDataForUser(currentUser.uid);
     }
 
     function updateCompEditingState() {
@@ -3384,9 +3534,12 @@
 
       try {
         await savePersonalFinanceDataForUser(user.uid);
-        console.log("Personal finance data saved");
+        await saveCommissionTrackerDataForUser(user.uid);
+        await saveGoalsDataForUser(user.uid);
+
+        console.log("Dashboard saved");
       } catch (err) {
-        console.error("Error saving personal finance data", err);
+        console.error("Error saving dashboard", err);
         alert("There was a problem saving your data. Please try again.");
       }
     }
@@ -3446,6 +3599,7 @@
         await renderHistory();
         await loadCompTracker();
         await loadPersonalFinanceData();
+        await loadGoalsDataForUser(user.uid);
         renderPersonalFinance();
       } else {
         authStatus.textContent = "Not signed in.";
