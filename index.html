@@ -248,7 +248,7 @@
 
     th, td {
       padding: 0.25rem 0.35rem;
-      border-bottom: 1px solid rgba(23,151,215,0.6);
+      border: 1px solid rgba(23,151,215,0.6);
       text-align: left;
       white-space: nowrap;
       vertical-align: top;
@@ -260,13 +260,6 @@
       top: 0;
       z-index: 1;
       color: #f9fafb;
-    }
-
-    td:nth-last-child(2),
-    th:nth-last-child(2),
-    td:last-child,
-    th:last-child {
-      text-align: right;
     }
 
     .history-wrapper {
@@ -664,8 +657,8 @@
     }
 
     .reading-pill-row {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.75rem;
       margin-top: 0.8rem;
     }
@@ -897,7 +890,7 @@
 
               <div class="results-grid" style="margin-top:0.4rem;">
                 <div class="result-pill">
-                  <div class="result-label">Average monthly take home – post tax</div>
+                  <div class="result-label">Monthly Commission Post-Tax</div>
                   <div class="result-value" id="compAvgTakeHome">–</div>
                 </div>
               </div>
@@ -1036,11 +1029,11 @@
         <div class="pf-income-summary">
           <div class="results-grid">
             <div class="result-pill">
-              <div class="result-label">Current monthly take home</div>
+              <div class="result-label">Monthly Take-Home: Salary</div>
               <div class="result-value" id="pfMonthlyNet">–</div>
             </div>
             <div class="result-pill">
-              <div class="result-label">Average monthly take home – post tax</div>
+              <div class="result-label">Monthly Commission Post-Tax</div>
               <div class="result-value" id="pfAvgMonthlyTakeHome">–</div>
             </div>
             <div class="result-pill">
