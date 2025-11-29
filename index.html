@@ -440,6 +440,13 @@
       font-size: 0.78rem;
     }
 
+    .readonly-input {
+      background: #0a2235 !important;
+      color: #cbd5e1;
+      cursor: not-allowed;
+      opacity: 0.9;
+    }
+
     #compSummary {
       margin-top: 0.35rem;
     }
@@ -791,11 +798,16 @@
 
         <!-- VARIABLE COMP TRACKER -->
         <div class="card">
-          <h2>Variable Compensation Tracker</h2>
-          <p>
-            Track progress toward your annual variable target. Fiscal year runs July–June.
-            Values are saved to your account and are available on any device when you sign in with Google.
-          </p>
+          <div class="history-header-row">
+            <div>
+              <h2>Variable Compensation Tracker</h2>
+              <p>
+                Track progress toward your annual variable target. Fiscal year runs July–June.
+                Values are saved to your account and are available on any device when you sign in with Google.
+              </p>
+            </div>
+            <button type="button" id="compEditBtn" class="btn-secondary btn-small">Edit amounts</button>
+          </div>
 
           <div class="comp-layout">
             <div class="comp-settings">
@@ -1379,6 +1391,7 @@
     const kpiFiscalYtdFirst = document.getElementById("kpiFiscalYtdFirst");
 
     // Comp tracker elements
+    const compEditBtn = document.getElementById("compEditBtn");
     const annualTargetInput = document.getElementById("annualTarget");
     const compTableBody1 = document.getElementById("compTableBody1");
     const compTableBody2 = document.getElementById("compTableBody2");
@@ -1426,6 +1439,8 @@
         June: 0
       }
     };
+
+    let compEditMode = false;
 
     let compPieChart = null;
     let compLineChart = null;
@@ -1903,6 +1918,37 @@
       }
     }
 
+    function updateCompEditingState() {
+      const disabled = !compEditMode;
+
+      document.querySelectorAll(".comp-month-input").forEach(input => {
+        input.disabled = disabled;
+        input.classList.toggle("readonly-input", disabled);
+      });
+
+      if (annualTargetInput) {
+        annualTargetInput.disabled = disabled;
+        annualTargetInput.classList.toggle("readonly-input", disabled);
+      }
+
+      if (compEditBtn) {
+        compEditBtn.textContent = compEditMode ? "Done" : "Edit amounts";
+      }
+    }
+
+    function persistCompInputs() {
+      document.querySelectorAll(".comp-month-input").forEach(input => {
+        const month = input.getAttribute("data-month");
+        const val = getNumericValue(input.value);
+        compConfig.monthlyValues[month] = isNaN(val) ? 0 : val;
+      });
+
+      if (annualTargetInput) {
+        const val = getNumericValue(annualTargetInput.value);
+        compConfig.annualTarget = isNaN(val) ? 0 : val;
+      }
+    }
+
     function updateCompTakeHomeCells() {
       document.querySelectorAll(".comp-take-home").forEach(cell => {
         const month = cell.getAttribute("data-month");
@@ -1923,14 +1969,17 @@
       let rowsHtml2 = "";
       fiscalMonths.forEach((monthName, idx) => {
         const value = compConfig.monthlyValues[monthName] || 0;
+        const disabledAttr = compEditMode ? "" : "disabled";
+        const inputClasses = compEditMode ? "comp-month-input" : "comp-month-input readonly-input";
         const row = `
           <tr>
             <td>${monthName}</td>
             <td>
               <input
                 type="text"
-                class="comp-month-input"
+                class="${inputClasses}"
                 data-month="${monthName}"
+                ${disabledAttr}
                 value="${value ? formatNumberWithCommas(value.toString()) : ""}"
               />
             </td>
@@ -1973,8 +2022,26 @@
         updateCompChartsAndSummary();
       });
 
+      updateCompEditingState();
       updateCompTakeHomeCells();
       updateCompChartsAndSummary();
+    }
+
+    if (compEditBtn) {
+      compEditBtn.addEventListener("click", async () => {
+        if (!compEditMode) {
+          compEditMode = true;
+          updateCompEditingState();
+          return;
+        }
+
+        persistCompInputs();
+        updateCompTakeHomeCells();
+        await saveCompTracker();
+        updateCompChartsAndSummary();
+        compEditMode = false;
+        updateCompEditingState();
+      });
     }
 
     function updatePersonalIncomePills() {
