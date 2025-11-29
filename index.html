@@ -1932,7 +1932,9 @@
       }
 
       if (compEditBtn) {
-        compEditBtn.textContent = compEditMode ? "Done" : "Edit amounts";
+        compEditBtn.textContent = compEditMode
+          ? "Done editing monthly amounts"
+          : "Edit amounts";
       }
     }
 
@@ -2000,6 +2002,11 @@
         input.addEventListener("input", (e) => {
           const formatted = formatNumberWithCommas(e.target.value);
           e.target.value = formatted;
+          const month = e.target.getAttribute("data-month");
+          const val = getNumericValue(e.target.value);
+          compConfig.monthlyValues[month] = isNaN(val) ? 0 : val;
+          updateCompTakeHomeCells();
+          updateCompChartsAndSummary();
         });
         input.addEventListener("blur", async (e) => {
           const month = e.target.getAttribute("data-month");
@@ -2032,6 +2039,10 @@
         if (!compEditMode) {
           compEditMode = true;
           updateCompEditingState();
+          const firstMonthInput = document.querySelector(".comp-month-input");
+          if (firstMonthInput) {
+            firstMonthInput.focus();
+          }
           return;
         }
 
@@ -2180,20 +2191,30 @@
               {
                 label: "Cumulative target",
                 data: targetSeries,
-                tension: 0.2
+                tension: 0.2,
+                borderColor: "#2563eb",
+                backgroundColor: "transparent",
+                pointBackgroundColor: "#2563eb",
+                borderWidth: 2
               },
               {
                 label: "Cumulative actual",
                 data: monthlyActualsCumulative,
-                tension: 0.2
+                tension: 0.2,
+                borderColor: "#22c55e",
+                backgroundColor: "transparent",
+                pointBackgroundColor: "#22c55e",
+                borderWidth: 2
               },
               {
                 label: "Projected (avg of completed months)",
                 data: projectedCumulative,
                 tension: 0.2,
-                borderColor: "#d1d5db",
+                borderColor: "#9ca3af",
                 backgroundColor: "transparent",
-                borderDash: [6, 4]
+                borderDash: [6, 4],
+                pointBackgroundColor: "#9ca3af",
+                borderWidth: 2
               }
             ]
           },
@@ -2232,16 +2253,28 @@
             label: "Projected (avg of completed months)",
             data: projectedCumulative,
             tension: 0.2,
-            borderColor: "#d1d5db",
+            borderColor: "#9ca3af",
             backgroundColor: "transparent",
-            borderDash: [6, 4]
+            borderDash: [6, 4],
+            pointBackgroundColor: "#9ca3af",
+            borderWidth: 2
           });
         } else {
           compLineChart.data.datasets[2].data = projectedCumulative;
-          compLineChart.data.datasets[2].borderColor = "#d1d5db";
+          compLineChart.data.datasets[2].borderColor = "#9ca3af";
           compLineChart.data.datasets[2].backgroundColor = "transparent";
           compLineChart.data.datasets[2].borderDash = [6, 4];
+          compLineChart.data.datasets[2].pointBackgroundColor = "#9ca3af";
+          compLineChart.data.datasets[2].borderWidth = 2;
         }
+        compLineChart.data.datasets[0].borderColor = "#2563eb";
+        compLineChart.data.datasets[0].backgroundColor = "transparent";
+        compLineChart.data.datasets[0].pointBackgroundColor = "#2563eb";
+        compLineChart.data.datasets[0].borderWidth = 2;
+        compLineChart.data.datasets[1].borderColor = "#22c55e";
+        compLineChart.data.datasets[1].backgroundColor = "transparent";
+        compLineChart.data.datasets[1].pointBackgroundColor = "#22c55e";
+        compLineChart.data.datasets[1].borderWidth = 2;
         compLineChart.options.scales.y.max = 250000;
         compLineChart.options.scales.y.ticks.stepSize = 25000;
         compLineChart.options.scales.y.ticks.font.size = 10;
