@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Personal Command Center</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Inter Tight font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Inter Tight", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #000000;
+      color: #f9fafb;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: #ffc532;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      color: #e5eef7;
+      margin-top: 0.25rem;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .logo {
+      max-height: 42px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .auth-tile {
+      width: 130px;
+      height: 130px;
+      background: #103454;
+      border-radius: 0.9rem;
+      padding: 0.45rem 0.5rem;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+      border: 1px solid #1797d7;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 0.25rem;
+    }
+
+    .auth-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #ffc532;
+    }
+
+    .auth-status {
+      font-size: 0.7rem;
+      opacity: 0.9;
+      color: #e5eef7;
+      margin-top: 0.2rem;
+    }
+
+    .card {
+      background: #103454;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 14px 30px rgba(0,0,0,0.6);
+      border: 1px solid #1797d7;
+      margin-bottom: 1.2rem;
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.4rem;
+      color: #ffc532;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin-bottom: 0.8rem;
+      color: #e5eef7;
+    }
+
+    label {
+      font-size: 0.85rem;
+      display: block;
+      margin-bottom: 0.25rem;
+      color: #e5eef7;
+    }
+
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.5rem 0.6rem;
+      border-radius: 0.5rem;
+      border: 1px solid #1797d7;
+      background: #000000;
+      color: #f9fafb;
+      margin-bottom: 0.7rem;
+      font-size: 0.85rem;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 2.5rem;
+      max-height: 6rem;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #64748b;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #ffc532;
+      color: #000000;
+      margin-top: 0.3rem;
+      transition: filter 0.1s ease, transform 0.1s ease;
+    }
+
+    button:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid #1797d7;
+      color: #e5e7eb;
+    }
+
+    .btn-secondary:hover {
+      border-color: #ffc532;
+      color: #ffc532;
+    }
+
+    .btn-small {
+      padding: 0.35rem 0.9rem;
+      font-size: 0.75rem;
+      margin-top: 0.15rem;
+    }
+
+    #signInBtn {
+      width: 100%;
+      font-size: 0.7rem;
+      padding: 0.35rem 0.4rem;
+    }
+
+    #signOutBtn {
+      width: 100%;
+      font-size: 0.7rem;
+      padding: 0.3rem 0.4rem;
+    }
+
+    .results {
+      margin-top: 1.2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #1797d7;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .result-pill {
+      border-radius: 0.75rem;
+      padding: 0.6rem 0.8rem;
+      background: #020617;
+      border: 1px solid rgba(23,151,215,0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .result-pill.highlight {
+      border-color: #ffc532;
+      background: #111827;
+    }
+
+    .result-label {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .result-value {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .tiny {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      margin-top: 0.7rem;
+      color: #e5eef7;
+    }
+
+    /* History / tables (more compact) */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 0.25rem 0.35rem;
+      border-bottom: 1px solid rgba(23,151,215,0.6);
+      text-align: left;
+      white-space: nowrap;
+      vertical-align: top;
+    }
+
+    th {
+      background: #007f91;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      color: #f9fafb;
+    }
+
+    td:nth-last-child(2),
+    th:nth-last-child(2),
+    td:last-child,
+    th:last-child {
+      text-align: right;
+    }
+
+    .history-wrapper {
+      max-height: 260px;
+      overflow-y: auto;
+      overflow-x: auto;
+      border-radius: 0.5rem;
+      border: 1px solid #1797d7;
+      margin-top: 0.6rem;
+      background: #020617;
+    }
+
+    /* Larger, tighter budget table */
+    .budget-wrapper {
+      max-height: 420px;
+    }
+
+    .budget-wrapper table th,
+    .budget-wrapper table td {
+      padding: 0.2rem 0.3rem;
+      white-space: nowrap;
+      font-size: 0.75rem;
+    }
+
+    .budget-input {
+      font-size: 0.72rem;
+      padding: 0.18rem 0.25rem;
+      margin-bottom: 0.3rem;
+    }
+
+    /* Zebra stripes for history */
+    #historyBody tr:nth-child(odd) {
+      background-color: #f8f8f8;
+      color: #000000;
+    }
+
+    #historyBody tr:nth-child(even) {
+      background-color: #82889b;
+      color: #f8f8f8;
+    }
+
+    #historyBody tr td button.delete-btn {
+      color: #ffc532;
+      border-color: #e24301;
+      background: transparent;
+    }
+
+    .history-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .history-header-row h2 {
+      margin-bottom: 0.1rem;
+    }
+
+    .totals-row {
+      font-weight: 700;
+      background: #007f91;
+      border-top: 2px solid #ffc532;
+      color: #f9fafb;
+    }
+
+    .totals-note {
+      font-size: 0.75rem;
+      opacity: 0.9;
+    }
+
+    .totals-summary {
+      margin-top: 0.4rem;
+    }
+
+    .totals-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    .totals-table td {
+      padding: 0.25rem 0.35rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .delete-btn {
+      background: transparent;
+      border-radius: 999px;
+      border: 1px solid #e24301;
+      padding: 0.1rem 0.45rem;
+      font-size: 0.7rem;
+      color: #ffc532;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background: rgba(226,67,1,0.2);
+      border-color: #e24301;
+      color: #ffe4d5;
+    }
+
+    /* KPI Dashboard strip */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin: 0.6rem 0 0.4rem 0;
+    }
+
+    .kpi-card {
+      background: #020617;
+      border-radius: 0.75rem;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid rgba(23,151,215,0.6);
+    }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      margin-bottom: 0.15rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .kpi-value {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    /* Comp tracker */
+    .comp-layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .comp-settings {
+      flex: 1 1 350px;
+      min-width: 0;
+    }
+
+    .comp-chart-container {
+      flex: 0 0 260px;
+      max-width: 260px;
+    }
+
+    .comp-chart-container canvas {
+      width: 100%;
+      height: auto;
+    }
+
+    #compLineChart {
+      margin-top: 0.75rem;
+      max-height: 220px;
+    }
+
+    .comp-table-wrapper {
+      margin-top: 0.8rem;
+    }
+
+    .comp-table input[type="text"] {
+      padding: 0.25rem 0.35rem;
+      margin-bottom: 0;
+      font-size: 0.78rem;
+    }
+
+    .comp-table th,
+    .comp-table td {
+      white-space: nowrap;
+      padding: 0.2rem 0.3rem;
+      font-size: 0.78rem;
+    }
+
+    #compSummary {
+      margin-top: 0.35rem;
+    }
+
+    .comp-chart-labels {
+      margin-top: 0.6rem;
+      font-size: 0.8rem;
+    }
+
+    .comp-chart-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .comp-chart-label-title {
+      font-weight: 600;
+      font-size: 0.78rem;
+    }
+
+    .comp-chart-label-value {
+      font-weight: 600;
+      font-size: 0.78rem;
+    }
+
+    .comp-chart-earned {
+      color: #22c55e;
+    }
+
+    .comp-chart-remaining {
+      color: #ef4444;
+    }
+
+    .comp-tables-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.8rem;
+    }
+
+    .comp-table-wrapper.history-wrapper {
+      max-height: 230px;
+    }
+
+    .comp-table-wrapper {
+      flex: 1 1 0;
+    }
+
+    /* Tabs */
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid #1797d7;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .tab-button {
+      background: transparent;
+      border-radius: 999px;
+      padding: 0.4rem 1rem;
+      border: 1px solid transparent;
+      color: #e5eef7;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .tab-button.active {
+      background: #007f91;
+      border-color: #ffc532;
+      color: #f9fafb;
+    }
+
+    /* Personal finances layout helpers */
+    .pf-income-summary {
+      margin-bottom: 0.75rem;
+    }
+
+    .pf-income-summary .results-grid {
+      margin-bottom: 0;
+    }
+
+    .pf-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .pf-col-half {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .card-debt {
+      background: rgba(239,68,68,0.15);
+      border-color: #ef4444;
+    }
+
+    .card-invest {
+      background: rgba(34,197,94,0.15);
+      border-color: #22c55e;
+    }
+
+    .pill-input {
+      margin-bottom: 0.2rem;
+      padding: 0.35rem 0.6rem;
+      font-size: 0.85rem;
+    }
+
+    .sort-btn {
+      background: transparent;
+      border: 1px solid #1797d7;
+      color: #e5eef7;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 999px;
+      margin-left: 0.25rem;
+      margin-top: 0;
+    }
+
+    .sort-btn:hover {
+      border-color: #ffc532;
+      color: #ffc532;
+      background: rgba(15,23,42,0.4);
+    }
+
+    .store-header {
+      width: 100%;
+      padding: 0.2rem 0.3rem;
+      margin-bottom: 0;
+      font-size: 0.75rem;
+      background: #000000;
+      color: #f9fafb;
+      border-radius: 0.3rem;
+      border: 1px solid #1797d7;
+    }
+
+    /* Single Deal layout */
+    .singledeal-layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      margin-top: 0.6rem;
+      align-items: flex-start;
+    }
+
+    .singledeal-inputs {
+      flex: 1 1 300px;
+      min-width: 0;
+    }
+
+    .singledeal-results {
+      flex: 0 0 280px;
+      max-width: 280px;
+    }
+
+    .singledeal-inputs-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .singledeal-notes {
+      margin-top: 0.3rem;
+    }
+
+    @media (max-width: 800px) {
+      .header-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-right {
+        align-items: center;
+      }
+      .logo {
+        max-height: 40px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .card {
+        padding: 1.2rem;
+      }
+      .singledeal-layout {
+        flex-direction: column;
+      }
+      .singledeal-results {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      table {
+        font-size: 0.75rem;
+      }
+      th, td {
+        padding: 0.2rem 0.3rem;
+      }
+      .comp-chart-container {
+        flex: 1 1 100%;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER WITH LOGO + AUTH TILE -->
+    <div class="header-row">
+      <div>
+        <h1>Personal Command Center</h1>
+        <p class="subtitle">Commission tracker plus a living monthly budget in one place.</p>
+      </div>
+      <div class="header-right">
+        <img
+          src="https://companieslogo.com/img/orig/PINC.D-30c75340.png?t=1720244493"
+          alt="Premier Inc. logo"
+          class="logo"
+        />
+        <div class="auth-tile">
+          <div class="auth-title">Account</div>
+          <button type="button" id="signInBtn">Sign in with Google</button>
+          <button type="button" id="signOutBtn" class="btn-secondary btn-small hidden">Sign out</button>
+          <div id="authStatus" class="auth-status">Not signed in.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN APP CONTENT (shown only when signed in) -->
+    <div id="appContent" class="hidden">
+      <!-- TAB NAV -->
+      <div class="tab-nav">
+        <button class="tab-button active" data-tab="commission">Commission Tracker</button>
+        <button class="tab-button" data-tab="personal">Personal Finances</button>
+      </div>
+
+      <!-- COMMISSION TAB -->
+      <div id="commissionTab">
+        <!-- SINGLE DEAL CALCULATOR -->
+        <div class="card">
+          <h2>Single Deal Calculator</h2>
+          <p>
+            Enter the deal amount (ARR or TCV), pick the deal type and term, and we’ll calculate
+            your total commission, post-tax amount, and first-month payout. Each calculation will
+            be saved to your history in the cloud.
+          </p>
+
+          <div class="singledeal-layout">
+            <!-- Left: inputs -->
+            <div class="singledeal-inputs">
+              <div class="singledeal-inputs-row">
+                <div>
+                  <label for="dealAmount">Deal Amount (USD)</label>
+                  <input
+                    id="dealAmount"
+                    type="text"
+                    placeholder="e.g., 250,000"
+                  />
+                </div>
+                <div>
+                  <label for="dealType">Deal Type</label>
+                  <select id="dealType">
+                    <option value="New">New business</option>
+                    <option value="RenewalOut">Renewal with any-time out clause</option>
+                    <option value="Renewal&lt;100%">Renewal &lt;100% of prior value</option>
+                    <option value="Renewal=100%">Renewal =100% of prior value</option>
+                    <option value="Renewal&gt;100%">Renewal &gt;100% of prior value</option>
+                  </select>
+                </div>
+                <div id="termRow">
+                  <label for="dealTerm">Term</label>
+                  <select id="dealTerm"></select>
+                </div>
+              </div>
+
+              <div class="singledeal-notes">
+                <label for="dealNotes">Deal Notes (optional)</label>
+                <textarea
+                  id="dealNotes"
+                  placeholder="e.g., Client signed at steering committee; includes add-on analytics module."
+                ></textarea>
+              </div>
+
+              <button type="button" id="calcBtn">Calculate Commission</button>
+
+              <p class="tiny">
+                Assumes 34% tax (you keep 66%). For <strong>new business</strong>, assumes 50% of the commission is paid in month 1 (≈33% of total commission pre-tax). For <strong>renewals</strong>, 100% of commission is paid in the first month.
+              </p>
+            </div>
+
+            <!-- Right: results pills -->
+            <div class="singledeal-results">
+              <div class="results">
+                <div class="results-grid">
+                  <div class="result-pill highlight">
+                    <div class="result-label">First-month commission (post-tax)</div>
+                    <div class="result-value" id="firstMonthDisplay">–</div>
+                  </div>
+                  <div class="result-pill">
+                    <div class="result-label">Total commission (post-tax)</div>
+                    <div class="result-value" id="totalCommissionPostTaxDisplay">–</div>
+                  </div>
+                  <div class="result-pill">
+                    <div class="result-label">Total commission (pre-tax)</div>
+                    <div class="result-value" id="totalCommissionDisplay">–</div>
+                  </div>
+                  <div class="result-pill">
+                    <div class="result-label">Rate used</div>
+                    <div class="result-value" id="rateDisplay">–</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VARIABLE COMP TRACKER -->
+        <div class="card">
+          <h2>Variable Compensation Tracker</h2>
+          <p>
+            Track progress toward your annual variable target. Fiscal year runs July–June.
+            Values are saved to your account and are available on any device when you sign in with Google.
+          </p>
+
+          <div class="comp-layout">
+            <div class="comp-settings">
+              <label for="annualTarget">Annual variable target (USD)</label>
+              <input id="annualTarget" type="text" />
+
+              <div class="results-grid" style="margin-top:0.4rem;">
+                <div class="result-pill">
+                  <div class="result-label">Average monthly take home – post tax</div>
+                  <div class="result-value" id="compAvgTakeHome">–</div>
+                </div>
+              </div>
+
+              <p class="tiny" id="compSummary" style="margin-top:0.4rem;">
+                Loading compensation tracker…
+              </p>
+
+              <canvas id="compLineChart"></canvas>
+            </div>
+
+            <div class="comp-chart-container">
+              <canvas id="compPieChart"></canvas>
+              <div class="comp-chart-labels">
+                <div class="comp-chart-line">
+                  <span class="comp-chart-label-title comp-chart-earned">Amount earned</span>
+                  <span id="compEarnedLabel" class="comp-chart-label-value comp-chart-earned">$0</span>
+                </div>
+                <div class="comp-chart-line">
+                  <span class="comp-chart-label-title comp-chart-remaining">Remaining amount to be earned</span>
+                  <span id="compRemainingLabel" class="comp-chart-label-value comp-chart-remaining">$0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="comp-tables-row">
+            <div class="comp-table-wrapper history-wrapper">
+              <table class="comp-table">
+                <thead>
+                  <tr>
+                    <th>Month</th>
+                    <th>Variable compensation</th>
+                    <th>Take home (66%)</th>
+                  </tr>
+                </thead>
+                <tbody id="compTableBody1">
+                  <!-- populated by JS -->
+                </tbody>
+              </table>
+            </div>
+            <div class="comp-table-wrapper history-wrapper">
+              <table class="comp-table">
+                <thead>
+                  <tr>
+                    <th>Month</th>
+                    <th>Variable compensation</th>
+                    <th>Take home (66%)</th>
+                  </tr>
+                </thead>
+                <tbody id="compTableBody2">
+                  <!-- populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="card">
+          <div class="history-header-row">
+            <div>
+              <h2>History</h2>
+              <p class="tiny" style="margin-top:0;">
+                Stored in Firestore for your account. Sign in on any device with the same Google account
+                to see the same history.
+              </p>
+            </div>
+            <button type="button" id="clearHistoryBtn" class="btn-secondary btn-small">Clear History</button>
+          </div>
+
+          <!-- Mini dashboard strip -->
+          <div class="kpi-row">
+            <div class="kpi-card">
+              <div class="kpi-label">This month (post-tax)</div>
+              <div class="kpi-value" id="kpiThisMonth">$0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Fiscal YTD (post-tax)</div>
+              <div class="kpi-value" id="kpiFiscalYtd">$0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Largest deal amount</div>
+              <div class="kpi-value" id="kpiLargestDeal">$0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Fiscal YTD first-month</div>
+              <div class="kpi-value" id="kpiFiscalYtdFirst">$0</div>
+            </div>
+          </div>
+
+          <div class="history-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Deal Type</th>
+                  <th>Term</th>
+                  <th>Amount</th>
+                  <th>Total Post-tax</th>
+                  <th>First Month</th>
+                  <th>Notes</th>
+                  <th></th> <!-- delete column -->
+                </tr>
+              </thead>
+              <tbody id="historyBody">
+                <!-- rows added by JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Totals always visible -->
+          <div class="totals-summary">
+            <table class="totals-table">
+              <tbody>
+                <tr class="totals-row">
+                  <td>Totals</td>
+                  <td colspan="2" class="totals-note">
+                    Amount = deal size; Total Post-tax = total commission after tax; First Month = post-tax commission paid in month 1.
+                  </td>
+                  <td id="totalsAmount">$0</td>
+                  <td id="totalsPostTax">$0</td>
+                  <td id="totalsFirstMonth">$0</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div> <!-- end commissionTab -->
+
+      <!-- PERSONAL FINANCES TAB -->
+      <div id="personalTab" class="hidden">
+        <!-- Income summary pills at top -->
+        <div class="pf-income-summary">
+          <div class="results-grid">
+            <div class="result-pill">
+              <div class="result-label">Current monthly take home</div>
+              <div class="result-value" id="pfMonthlyNet">–</div>
+            </div>
+            <div class="result-pill">
+              <div class="result-label">Average monthly take home – post tax</div>
+              <div class="result-value" id="pfAvgMonthlyTakeHome">–</div>
+            </div>
+            <div class="result-pill">
+              <div class="result-label">Total Monthly Take home</div>
+              <div class="result-value" id="pfTotalMonthly">–</div>
+            </div>
+            <div class="result-pill">
+              <div class="result-label">401k tracker (USD)</div>
+              <input
+                id="pf401kTracker"
+                type="text"
+                class="pill-input"
+                placeholder="$0"
+              />
+              <div class="result-label" id="pf401kTargetText">
+                Target: $23,500 · <span id="pf401kPercent">0%</span> of target
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Income & Monthly Budget -->
+        <div class="card">
+          <div class="history-header-row">
+            <div>
+              <h2>Income & Monthly Budget</h2>
+              <p>
+                Editable monthly budget based on your spreadsheet. Numbers here are your working “source of truth”
+                for fixed + variable expenses.
+              </p>
+            </div>
+            <button type="button" id="budgetEditBtn" class="btn-secondary btn-small">Edit budget</button>
+          </div>
+
+          <div class="history-wrapper budget-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>
+                    Category
+                    <button type="button" id="budgetSortCategory" class="sort-btn">Sort A/Z</button>
+                  </th>
+                  <th>
+                    Amount (USD)
+                    <button type="button" id="budgetSortAmount" class="sort-btn">Sort ↑↓</button>
+                  </th>
+                  <th>Withdraw date</th>
+                  <th>Fixed / Variable</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="budgetTableBody">
+                <!-- populated by JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="totals-summary">
+            <table class="totals-table">
+              <tbody>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td id="budgetTotal">$0</td>
+                  <td colspan="3"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="totals-summary">
+            <div class="results-grid">
+              <div class="result-pill">
+                <div class="result-label">Total monthly expenses as % of total monthly take-home</div>
+                <div class="result-value" id="budgetPctOfIncome">–</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Groceries + Upcoming Purchases row -->
+        <div class="pf-row">
+          <!-- Groceries / Amazon / Retail -->
+          <div class="pf-col-half">
+            <div class="card">
+              <h2>Groceries & Retail Averages</h2>
+              <p>
+                Store-level monthly averages for Amazon, Teeter, Walmart, Publix, and Target.
+                Period headers are editable so you can label any time ranges (e.g., Feb24–Jan25).
+              </p>
+
+              <div class="history-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th><input type="text" id="periodHeader1" class="store-header" value="Period 1" /></th>
+                      <th><input type="text" id="periodHeader2" class="store-header" value="Period 2" /></th>
+                      <th><input type="text" id="periodHeader3" class="store-header" value="Period 3" /></th>
+                    </tr>
+                  </thead>
+                  <tbody id="storeTableBody">
+                    <!-- populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="totals-summary">
+                <table class="totals-table">
+                  <tbody>
+                    <tr class="totals-row">
+                      <td>Total (all stores)</td>
+                      <td id="storeTotalCol1">$0</td>
+                      <td id="storeTotalCol2">$0</td>
+                      <td id="storeTotalCol3">$0</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upcoming Purchases -->
+          <div class="pf-col-half">
+            <div class="card">
+              <h2>Upcoming Purchases</h2>
+              <p>
+                Free-form list of upcoming purchases. Edit categories and amounts as needed.
+              </p>
+
+              <div class="history-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Amount (USD)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="upcomingTableBody">
+                    <!-- populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="totals-summary">
+                <table class="totals-table">
+                  <tbody>
+                    <tr class="totals-row">
+                      <td>Total</td>
+                      <td id="upcomingTotal">$0</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Debt + Investments row -->
+        <div class="pf-row">
+          <!-- Debt Balances -->
+          <div class="pf-col-half">
+            <div class="card card-debt">
+              <h2>Debt Balances</h2>
+              <p>
+                Snapshot of major debts. Balances are editable; total updates automatically.
+              </p>
+
+              <div class="history-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Debt</th>
+                      <th>Balance (USD)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="debtTableBody">
+                    <!-- populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="totals-summary">
+                <table class="totals-table">
+                  <tbody>
+                    <tr class="totals-row">
+                      <td>Total</td>
+                      <td id="debtTotal">$0</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Investments -->
+          <div class="pf-col-half">
+            <div class="card card-invest">
+              <h2>Investments and Balances</h2>
+              <p>
+                High-level view of investable accounts and cash balances. Edit balances as needed; totals will update.
+              </p>
+
+              <div class="history-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Account</th>
+                      <th>Balance (USD)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="investTableBody">
+                    <!-- populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="totals-summary">
+                <table class="totals-table">
+                  <tbody>
+                    <tr class="totals-row">
+                      <td>Total</td>
+                      <td id="investTotal">$0</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> <!-- end personalTab -->
+    </div> <!-- end appContent -->
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- Chart.js for charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    // === FIREBASE CONFIG ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyDaUhACWzw3VQWf3lJWcmuSYp8ti2FxG3I",
+      authDomain: "commission-calculator-2c9b5.firebaseapp.com",
+      projectId: "commission-calculator-2c9b5",
+      storageBucket: "commission-calculator-2c9b5.firebasestorage.app",
+      messagingSenderId: "808002258792",
+      appId: "1:808002258792:web:db8677e98715f06ee8f8dd",
+      measurementId: "G-P1510E4556"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const PF_401K_TARGET = 23500;
+    let globalAvgMonthlyTakeHome = 0; // from comp tracker
+    let globalTotalMonthlyTakeHome = 0;
+    let globalMonthlyExpensesTotal = 0;
+
+    // ---- RATE TABLE ----
+    const rateTable = {
+      "New": 0.00408,                // New business, any term
+      "RenewalOut|Out": 0.00032,     // 0.032%
+      "Renewal<100%|1-2": 0.00079,   // 0.079%
+      "Renewal<100%|3+": 0.00079,    // 0.079%
+      "Renewal=100%|1-2": 0.00118,   // 0.118%
+      "Renewal=100%|3+": 0.00118,    // 0.118%
+      "Renewal>100%|1-2": 0.00157,   // 0.157%
+      "Renewal>100%|3+": 0.00157     // 0.157%
+    };
+
+    const termOptionsByType = {
+      "RenewalOut": [
+        { value: "Out", label: "Any-time out clause" }
+      ],
+      "Renewal<100%": [
+        { value: "1-2", label: "1–2 years" },
+        { value: "3+", label: "3+ years" }
+      ],
+      "Renewal=100%": [
+        { value: "1-2", label: "1–2 years" },
+        { value: "3+", label: "3+ years" }
+      ],
+      "Renewal>100%": [
+        { value: "1-2", label: "1–2 years" },
+        { value: "3+", label: "3+ years" }
+      ]
+    };
+
+    // DOM elements
+    const signInBtn = document.getElementById("signInBtn");
+    const signOutBtn = document.getElementById("signOutBtn");
+    const authStatus = document.getElementById("authStatus");
+    const appContent = document.getElementById("appContent");
+
+    const dealAmountInput = document.getElementById("dealAmount");
+    const dealTypeSelect = document.getElementById("dealType");
+    const dealTermSelect = document.getElementById("dealTerm");
+    const termRow = document.getElementById("termRow");
+    const dealNotesInput = document.getElementById("dealNotes");
+    const calcBtn = document.getElementById("calcBtn");
+
+    const rateDisplay = document.getElementById("rateDisplay");
+    const totalCommissionDisplay = document.getElementById("totalCommissionDisplay");
+    const totalCommissionPostTaxDisplay = document.getElementById("totalCommissionPostTaxDisplay");
+    const firstMonthDisplay = document.getElementById("firstMonthDisplay");
+
+    const historyBody = document.getElementById("historyBody");
+    const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
+    const totalsAmountEl = document.getElementById("totalsAmount");
+    const totalsPostTaxEl = document.getElementById("totalsPostTax");
+    const totalsFirstMonthEl = document.getElementById("totalsFirstMonth");
+
+    // KPI elements
+    const kpiThisMonth = document.getElementById("kpiThisMonth");
+    const kpiFiscalYtd = document.getElementById("kpiFiscalYtd");
+    const kpiLargestDeal = document.getElementById("kpiLargestDeal");
+    const kpiFiscalYtdFirst = document.getElementById("kpiFiscalYtdFirst");
+
+    // Comp tracker elements
+    const annualTargetInput = document.getElementById("annualTarget");
+    const compTableBody1 = document.getElementById("compTableBody1");
+    const compTableBody2 = document.getElementById("compTableBody2");
+    const compSummaryEl = document.getElementById("compSummary");
+    const compEarnedLabel = document.getElementById("compEarnedLabel");
+    const compRemainingLabel = document.getElementById("compRemainingLabel");
+    const compAvgTakeHomeEl = document.getElementById("compAvgTakeHome");
+
+    // Personal finances elements that need global access
+    const pfMonthlyNetEl = document.getElementById("pfMonthlyNet");
+    const pfAvgMonthlyTakeHomeEl = document.getElementById("pfAvgMonthlyTakeHome");
+    const pfTotalMonthlyEl = document.getElementById("pfTotalMonthly");
+    const pf401kTrackerInput = document.getElementById("pf401kTracker");
+    const pf401kPercentEl = document.getElementById("pf401kPercent");
+    const budgetPctOfIncomeEl = document.getElementById("budgetPctOfIncome");
+
+    // Tabs
+    const tabButtons = document.querySelectorAll(".tab-button");
+    const commissionTab = document.getElementById("commissionTab");
+    const personalTab = document.getElementById("personalTab");
+
+    let currentUser = null;
+
+    // Comp tracker state (per user)
+    const fiscalMonths = [
+      "July","August","September","October","November","December",
+      "January","February","March","April","May","June"
+    ];
+
+    let compConfig = {
+      annualTarget: 250000,
+      monthlyValues: {
+        July: 6523,
+        August: 9389,
+        September: 26688,
+        October: 17673,
+        November: 0,
+        December: 0,
+        January: 0,
+        February: 0,
+        March: 0,
+        April: 0,
+        May: 0,
+        June: 0
+      }
+    };
+
+    let compPieChart = null;
+    let compLineChart = null;
+
+    // --- Personal finance data from spreadsheet ---
+    const incomeSummary = {
+      monthlyNet: 18640,
+      annualNet: 223680
+    };
+
+    const personalBudgetRows = [
+      { category: "Mortgage", amount: 2483, withdraw: "5th", type: "Fixed", notes: "" },
+      { category: "Electric", amount: 256, withdraw: "23rd", type: "Fixed", notes: "Average of last 12 months (analyzed June 24)" },
+      { category: "Groceries and etc.", amount: 2100, withdraw: "Ongoing", type: "Fixed", notes: "Target/Teeter/Walmart/Publix" },
+      { category: "Amazon", amount: 1300, withdraw: "Ongoing", type: "Variable", notes: "Misc." },
+      { category: "YouTube TV", amount: 100, withdraw: "29th", type: "Fixed", notes: "$300 NFL; plus $75/month" },
+      { category: "Clothes", amount: 500, withdraw: "Ongoing", type: "Variable", notes: "" },
+      { category: "Kids Preschool/Activities", amount: 400, withdraw: "", type: "Fixed", notes: "" },
+      { category: "Fort Mill Golf", amount: 200, withdraw: "21st", type: "Fixed", notes: "" },
+      { category: "Orange Theory", amount: 150, withdraw: "12th", type: "Fixed", notes: "" },
+      { category: "Chiro; massages", amount: 170, withdraw: "", type: "Fixed", notes: "" },
+      { category: "Amy and Ryan Psych", amount: 180, withdraw: "", type: "Variable", notes: "" },
+      { category: "Misc. Subscriptions", amount: 100, withdraw: "Ongoing", type: "Variable", notes: "Apple storage; Apple+, HBO, Audible, Canva, ChatGPT, Garmin, Sunsama" },
+      { category: "DoorDash", amount: 150, withdraw: "Ongoing", type: "Variable", notes: "" },
+      { category: "Eating out", amount: 650, withdraw: "Ongoing", type: "Variable", notes: "" },
+      { category: "Daily Harvest", amount: 101, withdraw: "19th", type: "Fixed", notes: "" },
+      { category: "Lucy", amount: 200, withdraw: "Ongoing", type: "Fixed", notes: "ie. Fetch; vet. Etc." },
+      { category: "CVS", amount: 75, withdraw: "Ongoing", type: "Fixed", notes: "" },
+      { category: "Netflix/Apple Music", amount: 40, withdraw: "22nd", type: "Fixed", notes: "" },
+      { category: "Amy/Ryan Car Insurance", amount: 170, withdraw: "", type: "Fixed", notes: "" },
+      { category: "Gas", amount: 53, withdraw: "5th", type: "Fixed", notes: "" },
+      { category: "CPI", amount: 40, withdraw: "20th", type: "Fixed", notes: "" },
+      { category: "Water", amount: 85, withdraw: "18th", type: "Fixed", notes: "" },
+      { category: "HOA", amount: 110, withdraw: "", type: "Fixed", notes: "$330/quarter" },
+      { category: "Cell/Internet", amount: 400, withdraw: "19th", type: "Fixed", notes: "Cell $337; Internet $110 ($150 Premier credit)" },
+      { category: "Gas (cars) for both", amount: 100, withdraw: "Ongoing", type: "Fixed", notes: "" },
+      { category: "Haircuts", amount: 100, withdraw: "Ongoing", type: "Fixed", notes: "" },
+      { category: "Peloton", amount: 50, withdraw: "21st", type: "Fixed", notes: "" },
+      { category: "Lawn care", amount: 150, withdraw: "Ongoing", type: "Fixed", notes: "True Green = 30; Lawn mowing = 120" },
+      { category: "Life/Disability", amount: 176, withdraw: "11th", type: "Fixed", notes: "" },
+      { category: "Lowes and Home Depot", amount: null, withdraw: "", type: "Variable", notes: "" },
+      { category: "Amy IRA", amount: 583, withdraw: "5th", type: "Fixed", notes: "" },
+      { category: "Myrtle expenses", amount: 3000, withdraw: "7th", type: "Fixed", notes: "Interest only is $1,600 (HOA; utilities)" },
+      { category: "Earth Fare", amount: 150, withdraw: "Ongoing", type: "Variable", notes: "" }
+    ];
+
+    const storeSpendingRows = [
+      { store: "Amazon", col1: 1176, col2: 1094, col3: 1354 },
+      { store: "Teeter", col1: 829, col2: 901, col3: 996 },
+      { store: "Walmart", col1: 215, col2: 18.5, col3: 564 },
+      { store: "Publix", col1: 317, col2: 300, col3: 159 },
+      { store: "Target", col1: 397, col2: 342, col3: 385 }
+    ];
+
+    const debtRows = [
+      { name: "Half Pint Loop Mortgage", balance: 318986 },
+      { name: "Myrtle Beach Mortgage", balance: 242293 },
+      { name: "Capital One", balance: null },
+      { name: "Citi Credit Card", balance: null }
+    ];
+
+    const investmentRows = [
+      { name: "401k", balance: null },
+      { name: "529s", balance: null },
+      { name: "Brokerage", balance: null },
+      { name: "BOA Balance", balance: null },
+      { name: "FCB Balance", balance: null },
+      { name: "Myrtle Beach Checking Balance", balance: null },
+      { name: "Premier 401k", balance: null }
+    ];
+
+    let budgetSortAmountAsc = true;
+    let budgetSortCategoryAsc = true;
+    let budgetSortHandlersAttached = false;
+    let budgetEditMode = false;
+    let budgetEditBtnInitialized = false;
+
+    // --- Helpers ---
+    function formatNumberWithCommas(value) {
+      if (value === "") return "";
+      const numeric = value.replace(/,/g, "").replace(/[^\d.]/g, "");
+      if (numeric === "") return "";
+      const parts = numeric.split(".");
+      const intPart = parts[0];
+      const decPart = parts[1] || "";
+      const intFormatted = parseInt(intPart, 10).toLocaleString("en-US");
+      return decPart ? intFormatted + "." + decPart.slice(0, 2) : intFormatted;
+    }
+
+    function getNumericValue(str) {
+      if (!str) return NaN;
+      const cleaned = str.replace(/,/g, "");
+      return parseFloat(cleaned);
+    }
+
+    function formatCurrency(amount) {
+      if (isNaN(amount)) return "$0";
+      const rounded = Math.round(amount);
+      return "$" + rounded.toLocaleString("en-US");
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function updateBudgetPctOfIncome() {
+      if (!budgetPctOfIncomeEl) return;
+      if (!globalTotalMonthlyTakeHome || globalTotalMonthlyTakeHome <= 0) {
+        budgetPctOfIncomeEl.textContent = "—";
+        return;
+      }
+      const pct = (globalMonthlyExpensesTotal / globalTotalMonthlyTakeHome) * 100;
+      budgetPctOfIncomeEl.textContent = pct.toFixed(1) + "%";
+    }
+
+    function updatePf401kInfo() {
+      if (!pf401kTrackerInput || !pf401kPercentEl) return;
+      const val = getNumericValue(pf401kTrackerInput.value);
+      const contributed = isNaN(val) ? 0 : val;
+      const pct = PF_401K_TARGET > 0 ? (contributed / PF_401K_TARGET) * 100 : 0;
+      pf401kPercentEl.textContent = pct.toFixed(1) + "%";
+    }
+
+    // --- Term dropdown handling ---
+    function populateTerms() {
+      const type = dealTypeSelect.value;
+
+      if (type === "New") {
+        termRow.classList.add("hidden");
+        dealTermSelect.innerHTML = "";
+        return;
+      }
+
+      termRow.classList.remove("hidden");
+      const options = termOptionsByType[type] || [];
+      dealTermSelect.innerHTML = options
+        .map(o => `<option value="${o.value}">${o.label}</option>`)
+        .join("");
+    }
+
+    dealTypeSelect.addEventListener("change", populateTerms);
+
+    // Ensure commas for deal amount
+    dealAmountInput.addEventListener("input", (e) => {
+      e.target.value = formatNumberWithCommas(e.target.value);
+    });
+    dealAmountInput.addEventListener("blur", (e) => {
+      e.target.value = formatNumberWithCommas(e.target.value);
+    });
+
+    // --- Firestore helpers for History ---
+    async function fetchHistory() {
+      if (!currentUser) return [];
+      const snapshot = await db.collection("deals")
+        .where("userId", "==", currentUser.uid)
+        .get();
+
+      const items = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      items.sort((a, b) => {
+        const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+        const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+        return tb - ta;
+      });
+
+      return items;
+    }
+
+    async function deleteEntry(id) {
+      if (!currentUser) return;
+      try {
+        await db.collection("deals").doc(id).delete();
+        await renderHistory();
+      } catch (err) {
+        console.error("Error deleting entry", err);
+        alert("Error deleting entry.");
+      }
+    }
+
+    async function clearHistoryForUser() {
+      if (!currentUser) return;
+      const snapshot = await db.collection("deals")
+        .where("userId", "==", currentUser.uid)
+        .get();
+
+      const batch = db.batch();
+      snapshot.docs.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+      await renderHistory();
+    }
+
+    clearHistoryBtn.addEventListener("click", () => {
+      if (confirm("Clear all saved history for this account?")) {
+        clearHistoryForUser();
+      }
+    });
+
+    function isSameMonthYear(date, now) {
+      return (
+        date.getFullYear() === now.getFullYear() &&
+        date.getMonth() === now.getMonth()
+      );
+    }
+
+    function getFiscalYearStart(now) {
+      const year = now.getFullYear();
+      if (now.getMonth() >= 6) {
+        return new Date(year, 6, 1);
+      } else {
+        return new Date(year - 1, 6, 1);
+      }
+    }
+
+    function isInFiscalYear(date, now) {
+      const fyStart = getFiscalYearStart(now);
+      return date >= fyStart && date <= now;
+    }
+
+    async function renderHistory() {
+      if (!currentUser) {
+        historyBody.innerHTML = `
+          <tr>
+            <td colspan="8" style="opacity:0.7;">Sign in to see your history.</td>
+          </tr>`;
+        totalsAmountEl.textContent = "$0";
+        totalsPostTaxEl.textContent = "$0";
+        totalsFirstMonthEl.textContent = "$0";
+        kpiThisMonth.textContent = "$0";
+        kpiFiscalYtd.textContent = "$0";
+        kpiLargestDeal.textContent = "$0";
+        kpiFiscalYtdFirst.textContent = "$0";
+        return;
+      }
+
+      const history = await fetchHistory();
+      historyBody.innerHTML = "";
+
+      if (!history.length) {
+        historyBody.innerHTML = `
+          <tr>
+            <td colspan="8" style="opacity:0.7;">No deals recorded yet.</td>
+          </tr>`;
+        totalsAmountEl.textContent = "$0";
+        totalsPostTaxEl.textContent = "$0";
+        totalsFirstMonthEl.textContent = "$0";
+        kpiThisMonth.textContent = "$0";
+        kpiFiscalYtd.textContent = "$0";
+        kpiLargestDeal.textContent = "$0";
+        kpiFiscalYtdFirst.textContent = "$0";
+        return;
+      }
+
+      let totalAmount = 0;
+      let totalPostTax = 0;
+      let totalFirstMonth = 0;
+
+      let thisMonthPostTax = 0;
+      let fiscalYtdPostTax = 0;
+      let fiscalYtdFirstMonth = 0;
+      let largestDealAmount = 0;
+
+      const now = new Date();
+
+      let rowsHtml = "";
+
+      history.forEach(entry => {
+        totalAmount += entry.amount || 0;
+        totalPostTax += entry.totalPostTax || 0;
+        totalFirstMonth += entry.firstMonthPostTax || 0;
+
+        const createdDate = entry.createdAt && entry.createdAt.toDate ? entry.createdAt.toDate() : null;
+        if (createdDate) {
+          if (isSameMonthYear(createdDate, now)) {
+            thisMonthPostTax += entry.totalPostTax || 0;
+          }
+          if (isInFiscalYear(createdDate, now)) {
+            fiscalYtdPostTax += entry.totalPostTax || 0;
+            fiscalYtdFirstMonth += entry.firstMonthPostTax || 0;
+          }
+        }
+
+        if (entry.amount && entry.amount > largestDealAmount) {
+          largestDealAmount = entry.amount;
+        }
+
+        const safeDate = escapeHtml(entry.date || "");
+        const safeType = escapeHtml(entry.dealType || "");
+        const safeTerm = escapeHtml(entry.termLabel || entry.termValue || "");
+        const safeNotes = escapeHtml(entry.notes || "");
+
+        rowsHtml += `
+          <tr>
+            <td>${safeDate}</td>
+            <td>${safeType}</td>
+            <td>${safeTerm}</td>
+            <td>${formatCurrency(entry.amount)}</td>
+            <td>${formatCurrency(entry.totalPostTax)}</td>
+            <td>${formatCurrency(entry.firstMonthPostTax)}</td>
+            <td title="${safeNotes}">${safeNotes}</td>
+            <td>
+              <button class="delete-btn" onclick="deleteEntry('${entry.id}')">x</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      historyBody.innerHTML = rowsHtml;
+
+      totalsAmountEl.textContent = formatCurrency(totalAmount);
+      totalsPostTaxEl.textContent = formatCurrency(totalPostTax);
+      totalsFirstMonthEl.textContent = formatCurrency(totalFirstMonth);
+
+      kpiThisMonth.textContent = formatCurrency(thisMonthPostTax);
+      kpiFiscalYtd.textContent = formatCurrency(fiscalYtdPostTax);
+      kpiLargestDeal.textContent = formatCurrency(largestDealAmount);
+      kpiFiscalYtdFirst.textContent = formatCurrency(fiscalYtdFirstMonth);
+    }
+
+    window.deleteEntry = deleteEntry;
+
+    // --- Main calculation ---
+    calcBtn.addEventListener("click", async () => {
+      if (!currentUser) {
+        alert("Please sign in first.");
+        return;
+      }
+
+      const amount = getNumericValue(dealAmountInput.value);
+
+      if (isNaN(amount) || amount <= 0) {
+        alert("Please enter a deal amount greater than 0.");
+        return;
+      }
+
+      const type = dealTypeSelect.value;
+      let termValue = "";
+      let key = "";
+
+      if (type === "New") {
+        key = "New";
+        termValue = "Any";
+      } else {
+        termValue = dealTermSelect.value;
+        key = `${type}|${termValue}`;
+      }
+
+      const rate = rateTable[key];
+
+      if (rate === undefined) {
+        alert("No rate found for this combination of deal type and term.");
+        return;
+      }
+
+      const notes = dealNotesInput.value.trim();
+
+      const totalCommission = amount * rate;
+      const totalCommissionPostTax = totalCommission * 0.66;
+
+      // First-month logic:
+      // - New business: 50% of post-tax in month 1
+      // - Renewals: 100% of post-tax in month 1
+      let firstMonthCommission;
+      if (type.startsWith("Renewal")) {
+        firstMonthCommission = totalCommissionPostTax;
+      } else {
+        firstMonthCommission = totalCommissionPostTax * 0.5;
+      }
+
+      rateDisplay.textContent = (rate * 100).toFixed(3) + "%";
+      totalCommissionDisplay.textContent = formatCurrency(totalCommission);
+      totalCommissionPostTaxDisplay.textContent = formatCurrency(totalCommissionPostTax);
+      firstMonthDisplay.textContent = formatCurrency(firstMonthCommission);
+
+      const now = new Date();
+      const dateStr = now.toLocaleString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      const entry = {
+        userId: currentUser.uid,
+        date: dateStr,
+        dealType: type,
+        termValue: termValue,
+        notes: notes,
+        amount: amount,
+        totalPostTax: totalCommissionPostTax,
+        firstMonthPostTax: firstMonthCommission,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      await db.collection("deals").add(entry);
+      await renderHistory();
+    });
+
+    // --- Comp Tracker Firestore helpers ---
+    async function loadCompTracker() {
+      if (!currentUser) return;
+
+      try {
+        const docRef = db.collection("compTrackers").doc(currentUser.uid);
+        const docSnap = await docRef.get();
+        if (docSnap.exists) {
+          const data = docSnap.data();
+          if (typeof data.annualTarget === "number") {
+            compConfig.annualTarget = data.annualTarget;
+          }
+          if (data.monthlyValues) {
+            compConfig.monthlyValues = {
+              ...compConfig.monthlyValues,
+              ...data.monthlyValues
+            };
+          }
+        }
+      } catch (err) {
+        console.error("Error loading comp tracker", err);
+      }
+
+      renderCompTracker();
+    }
+
+    async function saveCompTracker() {
+      if (!currentUser) return;
+      try {
+        const docRef = db.collection("compTrackers").doc(currentUser.uid);
+        await docRef.set(
+          {
+            userId: currentUser.uid,
+            annualTarget: compConfig.annualTarget || 0,
+            monthlyValues: compConfig.monthlyValues,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          },
+          { merge: true }
+        );
+      } catch (err) {
+        console.error("Error saving comp tracker", err);
+      }
+    }
+
+    function updateCompTakeHomeCells() {
+      document.querySelectorAll(".comp-take-home").forEach(cell => {
+        const month = cell.getAttribute("data-month");
+        const v = compConfig.monthlyValues[month] || 0;
+        const takeHome = v * 0.66;
+        cell.textContent = v ? formatCurrency(takeHome) : "$0";
+      });
+    }
+
+    function renderCompTracker() {
+      // Annual target input
+      annualTargetInput.value = formatNumberWithCommas(
+        (compConfig.annualTarget || 0).toString()
+      );
+
+      // Build month tables
+      let rowsHtml1 = "";
+      let rowsHtml2 = "";
+      fiscalMonths.forEach((monthName, idx) => {
+        const value = compConfig.monthlyValues[monthName] || 0;
+        const row = `
+          <tr>
+            <td>${monthName}</td>
+            <td>
+              <input
+                type="text"
+                class="comp-month-input"
+                data-month="${monthName}"
+                value="${value ? formatNumberWithCommas(value.toString()) : ""}"
+              />
+            </td>
+            <td class="comp-take-home" data-month="${monthName}">$0</td>
+          </tr>
+        `;
+        if (idx < 6) {
+          rowsHtml1 += row;
+        } else {
+          rowsHtml2 += row;
+        }
+      });
+      compTableBody1.innerHTML = rowsHtml1;
+      compTableBody2.innerHTML = rowsHtml2;
+
+      // Attach listeners to month inputs
+      document.querySelectorAll(".comp-month-input").forEach(input => {
+        input.addEventListener("input", (e) => {
+          const formatted = formatNumberWithCommas(e.target.value);
+          e.target.value = formatted;
+        });
+        input.addEventListener("blur", async (e) => {
+          const month = e.target.getAttribute("data-month");
+          const val = getNumericValue(e.target.value);
+          compConfig.monthlyValues[month] = isNaN(val) ? 0 : val;
+          updateCompTakeHomeCells();
+          await saveCompTracker();
+          updateCompChartsAndSummary();
+        });
+      });
+
+      annualTargetInput.addEventListener("input", (e) => {
+        const formatted = formatNumberWithCommas(e.target.value);
+        e.target.value = formatted;
+      });
+      annualTargetInput.addEventListener("blur", async (e) => {
+        const val = getNumericValue(e.target.value);
+        compConfig.annualTarget = isNaN(val) ? 0 : val;
+        await saveCompTracker();
+        updateCompChartsAndSummary();
+      });
+
+      updateCompTakeHomeCells();
+      updateCompChartsAndSummary();
+    }
+
+    function updatePersonalIncomePills() {
+      if (pfMonthlyNetEl) {
+        pfMonthlyNetEl.textContent = formatCurrency(incomeSummary.monthlyNet);
+      }
+      if (pfAvgMonthlyTakeHomeEl) {
+        pfAvgMonthlyTakeHomeEl.textContent =
+          globalAvgMonthlyTakeHome > 0 ? formatCurrency(globalAvgMonthlyTakeHome) : "$0";
+      }
+      if (pfTotalMonthlyEl) {
+        const total = (incomeSummary.monthlyNet || 0) + (globalAvgMonthlyTakeHome || 0);
+        pfTotalMonthlyEl.textContent = formatCurrency(total);
+        globalTotalMonthlyTakeHome = total;
+      }
+      updateBudgetPctOfIncome();
+    }
+
+    function updateCompChartsAndSummary() {
+      const annualTarget = compConfig.annualTarget || 0;
+      let earned = 0;
+      const monthlyRaw = [];
+      fiscalMonths.forEach(m => {
+        const v = compConfig.monthlyValues[m] || 0;
+        earned += v;
+        monthlyRaw.push(v);
+      });
+      const remaining = Math.max(annualTarget - earned, 0);
+
+      const pct = annualTarget > 0 ? (earned / annualTarget) * 100 : 0;
+      const pctText = annualTarget > 0 ? pct.toFixed(1) + "%" : "—";
+
+      compSummaryEl.textContent =
+        "YTD variable: " + formatCurrency(earned) +
+        " of " + formatCurrency(annualTarget) +
+        " (" + pctText + " of target).";
+
+      // Update big labels next to pie chart
+      if (compEarnedLabel) {
+        compEarnedLabel.textContent = formatCurrency(earned);
+      }
+      if (compRemainingLabel) {
+        compRemainingLabel.textContent = formatCurrency(remaining);
+      }
+
+      // Average monthly take-home (post tax, 66% of monthly) based ONLY on months with data
+      const monthlyTakeHomes = monthlyRaw.map(v => v * 0.66);
+      const nonZeroTakeHomes = monthlyTakeHomes.filter(v => v > 0);
+      const avgTakeHome = nonZeroTakeHomes.length
+        ? nonZeroTakeHomes.reduce((a, b) => a + b, 0) / nonZeroTakeHomes.length
+        : 0;
+
+      globalAvgMonthlyTakeHome = avgTakeHome || 0;
+      if (compAvgTakeHomeEl) {
+        compAvgTakeHomeEl.textContent = formatCurrency(globalAvgMonthlyTakeHome);
+      }
+      updatePersonalIncomePills();
+
+      // --- Pie chart (Earned vs Remaining) ---
+      const pieCtx = document.getElementById("compPieChart").getContext("2d");
+      const pieData = [earned, remaining];
+
+      if (!compPieChart) {
+        compPieChart = new Chart(pieCtx, {
+          type: "doughnut",
+          data: {
+            labels: ["Earned", "Remaining"],
+            datasets: [{
+              data: pieData,
+              backgroundColor: ["#22c55e", "#ef4444"],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            plugins: {
+              legend: {
+                position: "bottom"
+              }
+            },
+            cutout: "60%"
+          }
+        });
+      } else {
+        compPieChart.data.datasets[0].data = pieData;
+        compPieChart.update();
+      }
+
+      // --- Line chart (CUMULATIVE target vs actual) ---
+      const lineCtx = document.getElementById("compLineChart").getContext("2d");
+      const monthlyTarget = annualTarget > 0 ? (annualTarget / 12) : 0;
+
+      // Build cumulative target
+      const targetSeries = [];
+      let runningTarget = 0;
+      for (let i = 0; i < 12; i++) {
+        runningTarget += monthlyTarget;
+        targetSeries.push(runningTarget);
+      }
+
+      // Build cumulative actuals
+      const monthlyActualsCumulative = [];
+      let runningActual = 0;
+      for (let i = 0; i < monthlyRaw.length; i++) {
+        runningActual += monthlyRaw[i];
+        monthlyActualsCumulative.push(runningActual);
+      }
+
+      if (!compLineChart) {
+        compLineChart = new Chart(lineCtx, {
+          type: "line",
+          data: {
+            labels: fiscalMonths,
+            datasets: [
+              {
+                label: "Cumulative target",
+                data: targetSeries,
+                tension: 0.2
+              },
+              {
+                label: "Cumulative actual",
+                data: monthlyActualsCumulative,
+                tension: 0.2
+              }
+            ]
+          },
+          options: {
+            plugins: {
+              legend: {
+                position: "bottom"
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 250000,
+                ticks: {
+                  stepSize: 25000,
+                  font: {
+                    size: 10
+                  }
+                }
+              },
+              x: {
+                ticks: {
+                  font: {
+                    size: 10
+                  }
+                }
+              }
+            }
+          }
+        });
+      } else {
+        compLineChart.data.datasets[0].data = targetSeries;
+        compLineChart.data.datasets[1].data = monthlyActualsCumulative;
+        compLineChart.options.scales.y.max = 250000;
+        compLineChart.options.scales.y.ticks.stepSize = 25000;
+        compLineChart.options.scales.y.ticks.font.size = 10;
+        compLineChart.options.scales.x.ticks.font.size = 10;
+        compLineChart.update();
+      }
+    }
+
+    // --- Personal finances rendering ---
+    function renderPersonalFinance() {
+      const budgetTableBody = document.getElementById("budgetTableBody");
+      const budgetTotalEl = document.getElementById("budgetTotal");
+      const storeTableBody = document.getElementById("storeTableBody");
+      const storeTotalCol1 = document.getElementById("storeTotalCol1");
+      const storeTotalCol2 = document.getElementById("storeTotalCol2");
+      const storeTotalCol3 = document.getElementById("storeTotalCol3");
+      const debtTableBody = document.getElementById("debtTableBody");
+      const debtTotalEl = document.getElementById("debtTotal");
+      const investTableBody = document.getElementById("investTableBody");
+      const investTotalEl = document.getElementById("investTotal");
+      const upcomingTableBody = document.getElementById("upcomingTableBody");
+      const upcomingTotalEl = document.getElementById("upcomingTotal");
+
+      if (!budgetTableBody) return; // safety
+
+      updatePersonalIncomePills();
+
+      if (pf401kTrackerInput) {
+        pf401kTrackerInput.addEventListener("input", (e) => {
+          e.target.value = formatNumberWithCommas(e.target.value);
+          updatePf401kInfo();
+        });
+        pf401kTrackerInput.addEventListener("blur", updatePf401kInfo);
+        updatePf401kInfo();
+      }
+
+      // ---- Budget table with View/Edit mode ----
+      function calcBudgetTotalFromData() {
+        let total = 0;
+        personalBudgetRows.forEach(row => {
+          const amt = row.amount || 0;
+          if (!isNaN(amt)) total += amt;
+        });
+        budgetTotalEl.textContent = formatCurrency(total);
+        globalMonthlyExpensesTotal = total;
+        updateBudgetPctOfIncome();
+      }
+
+      function renderBudgetTable() {
+        if (!budgetEditMode) {
+          // VIEW MODE: no inputs, just text
+          budgetTableBody.innerHTML = personalBudgetRows.map(row => `
+            <tr>
+              <td>${escapeHtml(row.category)}</td>
+              <td>${row.amount != null ? formatCurrency(row.amount) : ""}</td>
+              <td>${escapeHtml(row.withdraw || "")}</td>
+              <td>${escapeHtml(row.type || "")}</td>
+              <td>${escapeHtml(row.notes || "")}</td>
+            </tr>
+          `).join("");
+        } else {
+          // EDIT MODE: inputs
+          budgetTableBody.innerHTML = personalBudgetRows.map((row, idx) => `
+            <tr>
+              <td>
+                <input
+                  type="text"
+                  class="budget-input budget-category"
+                  data-index="${idx}"
+                  value="${escapeHtml(row.category)}"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="budget-input budget-amount"
+                  data-index="${idx}"
+                  value="${row.amount != null ? formatNumberWithCommas(row.amount.toString()) : ""}"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="budget-input budget-withdraw"
+                  data-index="${idx}"
+                  value="${escapeHtml(row.withdraw || "")}"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="budget-input budget-type"
+                  data-index="${idx}"
+                  value="${escapeHtml(row.type || "")}"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="budget-input budget-notes"
+                  data-index="${idx}"
+                  value="${escapeHtml(row.notes || "")}"
+                />
+              </td>
+            </tr>
+          `).join("");
+
+          document.querySelectorAll(".budget-category").forEach(input => {
+            input.addEventListener("blur", (e) => {
+              const idx = parseInt(e.target.getAttribute("data-index"), 10);
+              personalBudgetRows[idx].category = e.target.value;
+            });
+          });
+
+          document.querySelectorAll(".budget-amount").forEach(input => {
+            input.addEventListener("input", (e) => {
+              e.target.value = formatNumberWithCommas(e.target.value);
+              calcBudgetTotalFromData();
+            });
+            input.addEventListener("blur", (e) => {
+              const idx = parseInt(e.target.getAttribute("data-index"), 10);
+              const val = getNumericValue(e.target.value);
+              personalBudgetRows[idx].amount = isNaN(val) ? null : val;
+              calcBudgetTotalFromData();
+            });
+          });
+
+          document.querySelectorAll(".budget-withdraw").forEach(input => {
+            input.addEventListener("blur", (e) => {
+              const idx = parseInt(e.target.getAttribute("data-index"), 10);
+              personalBudgetRows[idx].withdraw = e.target.value;
+            });
+          });
+
+          document.querySelectorAll(".budget-type").forEach(input => {
+            input.addEventListener("blur", (e) => {
+              const idx = parseInt(e.target.getAttribute("data-index"), 10);
+              personalBudgetRows[idx].type = e.target.value;
+            });
+          });
+
+          document.querySelectorAll(".budget-notes").forEach(input => {
+            input.addEventListener("blur", (e) => {
+              const idx = parseInt(e.target.getAttribute("data-index"), 10);
+              personalBudgetRows[idx].notes = e.target.value;
+            });
+          });
+        }
+
+        calcBudgetTotalFromData();
+      }
+
+      renderBudgetTable();
+
+      if (!budgetEditBtnInitialized) {
+        const budgetEditBtn = document.getElementById("budgetEditBtn");
+        if (budgetEditBtn) {
+          budgetEditBtn.addEventListener("click", () => {
+            budgetEditMode = !budgetEditMode;
+            budgetEditBtn.textContent = budgetEditMode ? "Done" : "Edit budget";
+            renderBudgetTable();
+          });
+          budgetEditBtnInitialized = true;
+        }
+      }
+
+      if (!budgetSortHandlersAttached) {
+        const sortAmountBtn = document.getElementById("budgetSortAmount");
+        const sortCategoryBtn = document.getElementById("budgetSortCategory");
+
+        if (sortAmountBtn) {
+          sortAmountBtn.addEventListener("click", () => {
+            budgetSortAmountAsc = !budgetSortAmountAsc;
+            personalBudgetRows.sort((a, b) => {
+              const va = a.amount || 0;
+              const vb = b.amount || 0;
+              return budgetSortAmountAsc ? vb - va : va - vb;
+            });
+            renderBudgetTable();
+          });
+        }
+
+        if (sortCategoryBtn) {
+          sortCategoryBtn.addEventListener("click", () => {
+            budgetSortCategoryAsc = !budgetSortCategoryAsc;
+            personalBudgetRows.sort((a, b) => {
+              const ca = (a.category || "").toLowerCase();
+              const cb = (b.category || "").toLowerCase();
+              if (ca < cb) return budgetSortCategoryAsc ? -1 : 1;
+              if (ca > cb) return budgetSortCategoryAsc ? 1 : -1;
+              return 0;
+            });
+            renderBudgetTable();
+          });
+        }
+
+        budgetSortHandlersAttached = true;
+      }
+
+      // ---- Store spending table ----
+      storeTableBody.innerHTML = storeSpendingRows.map((row, idx) => `
+        <tr>
+          <td>${escapeHtml(row.store)}</td>
+          <td>
+            <input
+              type="text"
+              class="store-amount"
+              data-row="${idx}"
+              data-col="1"
+              value="${row.col1 != null ? formatNumberWithCommas(row.col1.toString()) : ""}"
+            />
+          </td>
+          <td>
+            <input
+              type="text"
+              class="store-amount"
+              data-row="${idx}"
+              data-col="2"
+              value="${row.col2 != null ? formatNumberWithCommas(row.col2.toString()) : ""}"
+            />
+          </td>
+          <td>
+            <input
+              type="text"
+              class="store-amount"
+              data-row="${idx}"
+              data-col="3"
+              value="${row.col3 != null ? formatNumberWithCommas(row.col3.toString()) : ""}"
+            />
+          </td>
+        </tr>
+      `).join("");
+
+      function recalcStoreTotals() {
+        let t1 = 0, t2 = 0, t3 = 0;
+        document.querySelectorAll(".store-amount").forEach(input => {
+          const col = input.getAttribute("data-col");
+          const val = getNumericValue(input.value);
+          if (isNaN(val)) return;
+          if (col === "1") t1 += val;
+          if (col === "2") t2 += val;
+          if (col === "3") t3 += val;
+        });
+        storeTotalCol1.textContent = formatCurrency(t1);
+        storeTotalCol2.textContent = formatCurrency(t2);
+        storeTotalCol3.textContent = formatCurrency(t3);
+      }
+
+      document.querySelectorAll(".store-amount").forEach(input => {
+        input.addEventListener("input", (e) => {
+          e.target.value = formatNumberWithCommas(e.target.value);
+          recalcStoreTotals();
+        });
+        input.addEventListener("blur", recalcStoreTotals);
+      });
+
+      recalcStoreTotals();
+
+      // ---- Debt table ----
+      debtTableBody.innerHTML = debtRows.map((row, idx) => `
+        <tr>
+          <td>${escapeHtml(row.name)}</td>
+          <td>
+            <input
+              type="text"
+              class="debt-amount"
+              data-index="${idx}"
+              value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}"
+            />
+          </td>
+        </tr>
+      `).join("");
+
+      function recalcDebtTotal() {
+        let total = 0;
+        document.querySelectorAll(".debt-amount").forEach(input => {
+          const val = getNumericValue(input.value);
+          if (!isNaN(val)) total += val;
+        });
+        debtTotalEl.textContent = formatCurrency(total);
+      }
+
+      document.querySelectorAll(".debt-amount").forEach(input => {
+        input.addEventListener("input", (e) => {
+          e.target.value = formatNumberWithCommas(e.target.value);
+          recalcDebtTotal();
+        });
+        input.addEventListener("blur", (e) => {
+          const idx = parseInt(e.target.getAttribute("data-index"), 10);
+          const val = getNumericValue(e.target.value);
+          debtRows[idx].balance = isNaN(val) ? null : val;
+          recalcDebtTotal();
+        });
+      });
+
+      recalcDebtTotal();
+
+      // ---- Investments table ----
+      investTableBody.innerHTML = investmentRows.map((row, idx) => `
+        <tr>
+          <td>${escapeHtml(row.name)}</td>
+          <td>
+            <input
+              type="text"
+              class="invest-amount"
+              data-index="${idx}"
+              value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}"
+            />
+          </td>
+        </tr>
+      `).join("");
+
+      function recalcInvestTotal() {
+        let total = 0;
+        document.querySelectorAll(".invest-amount").forEach(input => {
+          const val = getNumericValue(input.value);
+          if (!isNaN(val)) total += val;
+        });
+        investTotalEl.textContent = formatCurrency(total);
+      }
+
+      document.querySelectorAll(".invest-amount").forEach(input => {
+        input.addEventListener("input", (e) => {
+          e.target.value = formatNumberWithCommas(e.target.value);
+          recalcInvestTotal();
+        });
+        input.addEventListener("blur", (e) => {
+          const idx = parseInt(e.target.getAttribute("data-index"), 10);
+          const val = getNumericValue(e.target.value);
+          investmentRows[idx].balance = isNaN(val) ? null : val;
+          recalcInvestTotal();
+        });
+      });
+
+      recalcInvestTotal();
+
+      // ---- Upcoming purchases table (5 blank rows) ----
+      upcomingTableBody.innerHTML = Array.from({ length: 5 }).map((_, idx) => `
+        <tr>
+          <td>
+            <input
+              type="text"
+              class="upcoming-category"
+              data-index="${idx}"
+              value=""
+            />
+          </td>
+          <td>
+            <input
+              type="text"
+              class="upcoming-amount"
+              data-index="${idx}"
+              value=""
+            />
+          </td>
+        </tr>
+      `).join("");
+
+      function recalcUpcomingTotal() {
+        let total = 0;
+        document.querySelectorAll(".upcoming-amount").forEach(input => {
+          const val = getNumericValue(input.value);
+          if (!isNaN(val)) total += val;
+        });
+        upcomingTotalEl.textContent = formatCurrency(total);
+      }
+
+      document.querySelectorAll(".upcoming-amount").forEach(input => {
+        input.addEventListener("input", (e) => {
+          e.target.value = formatNumberWithCommas(e.target.value);
+          recalcUpcomingTotal();
+        });
+        input.addEventListener("blur", recalcUpcomingTotal);
+      });
+
+      recalcUpcomingTotal();
+    }
+
+    // --- Tabs logic ---
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tab = btn.getAttribute("data-tab");
+        tabButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        if (tab === "commission") {
+          commissionTab.classList.remove("hidden");
+          personalTab.classList.add("hidden");
+        } else {
+          commissionTab.classList.add("hidden");
+          personalTab.classList.remove("hidden");
+        }
+      });
+    });
+
+    // --- Auth (Google) ---
+    signInBtn.addEventListener("click", async () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      try {
+        await auth.signInWithPopup(provider);
+      } catch (err) {
+        console.error("Sign-in error", err);
+        alert("Error signing in: " + (err.message || err));
+      }
+    });
+
+    signOutBtn.addEventListener("click", async () => {
+      try {
+        await auth.signOut();
+      } catch (err) {
+        console.error("Sign-out error", err);
+        alert("Error signing out: " + (err.message || err));
+      }
+    });
+
+    auth.onAuthStateChanged(async (user) => {
+      currentUser = user;
+      if (user) {
+        authStatus.textContent = "Signed in as " + user.email;
+        signInBtn.classList.add("hidden");
+        signOutBtn.classList.remove("hidden");
+        appContent.classList.remove("hidden");
+        populateTerms();
+        await renderHistory();
+        await loadCompTracker();
+        renderPersonalFinance();
+      } else {
+        authStatus.textContent = "Not signed in.";
+        signInBtn.classList.remove("hidden");
+        signOutBtn.classList.add("hidden");
+        appContent.classList.add("hidden");
+        historyBody.innerHTML = "";
+        totalsAmountEl.textContent = "$0";
+        totalsPostTaxEl.textContent = "$0";
+        totalsFirstMonthEl.textContent = "$0";
+        kpiThisMonth.textContent = "$0";
+        kpiFiscalYtd.textContent = "$0";
+        kpiLargestDeal.textContent = "$0";
+        kpiFiscalYtdFirst.textContent = "$0";
+        compSummaryEl.textContent = "Sign in to view your compensation tracker.";
+        if (compPieChart) {
+          compPieChart.destroy();
+          compPieChart = null;
+        }
+        if (compLineChart) {
+          compLineChart.destroy();
+          compLineChart = null;
+        }
+      }
+    });
+
+    // Initialize term dropdown on first load
+    populateTerms();
+  </script>
+</body>
+</html>
