@@ -674,6 +674,35 @@
       min-width: 160px;
     }
 
+    .reading-tables {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .reading-table {
+      flex: 1 1 320px;
+      min-width: 0;
+    }
+
+    .reading-table .section-controls {
+      margin-top: 0;
+    }
+
+    .reading-table .history-wrapper {
+      margin-top: 0.4rem;
+    }
+
+    .table-link {
+      color: #ffc532;
+      text-decoration: underline;
+    }
+
+    .table-link:hover {
+      color: #ffe08a;
+    }
+
     .store-header {
       width: 100%;
       padding: 0.2rem 0.3rem;
@@ -1318,42 +1347,48 @@
             <div class="reading-pill">Books To Read</div>
           </div>
 
-          <div class="section-controls">
-            <h3 style="margin:0;">Books Completed</h3>
-            <button type="button" id="goalsSortReading" class="sort-btn">Sort reading A/Z</button>
-          </div>
-          <div class="history-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>Author</th>
-                  <th>Format (Text/Audio)</th>
-                  <th>Rating</th>
-                  <th>Month Finished</th>
-                  <th>Notes</th>
-                </tr>
-              </thead>
-              <tbody id="booksCompletedBody"></tbody>
-            </table>
-          </div>
-          <button type="button" id="booksCompletedAddBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
+          <div class="reading-tables">
+            <div class="reading-table">
+              <div class="section-controls">
+                <h3 style="margin:0;">Books Completed</h3>
+                <button type="button" id="goalsSortReading" class="sort-btn">Sort reading A/Z</button>
+              </div>
+              <div class="history-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Author</th>
+                      <th>Format (Text/Audio)</th>
+                      <th>Rating</th>
+                      <th>Month Finished</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody id="booksCompletedBody"></tbody>
+                </table>
+              </div>
+              <button type="button" id="booksCompletedAddBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
+            </div>
 
-          <div class="section-controls" style="margin-top:1rem;">
-            <h3 style="margin:0;">Books To Read</h3>
+            <div class="reading-table">
+              <div class="section-controls">
+                <h3 style="margin:0;">Books To Read</h3>
+              </div>
+              <div class="history-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Author</th>
+                    </tr>
+                  </thead>
+                  <tbody id="booksToReadBody"></tbody>
+                </table>
+              </div>
+              <button type="button" id="booksToReadAddBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
+            </div>
           </div>
-          <div class="history-wrapper" style="margin-top:0.4rem;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>Author</th>
-                </tr>
-              </thead>
-              <tbody id="booksToReadBody"></tbody>
-            </table>
-          </div>
-          <button type="button" id="booksToReadAddBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
         </div>
 
         <div class="card">
@@ -1646,6 +1681,13 @@
       { name: "Half Pint Value", balance: null },
       { name: "Asheville land value", balance: null }
     ];
+
+    const assetLinkMap = {
+      "529s": "https://www.secureaccountview.com/BFWeb/clients/futurescholar/portfolio",
+      "Brokerage": "https://workplaceservices.fidelity.com/mybenefits/navstation/navigation#/",
+      "Premier 401k": "https://workplaceservices.fidelity.com/mybenefits/navstation/navigation#/",
+      "401k": "https://workplaceservices.fidelity.com/mybenefits/navstation/navigation#/"
+    };
 
     let upcomingRows = Array.from({ length: 5 }).map(() => ({ category: "", amount: null }));
 
@@ -2099,6 +2141,15 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+    }
+
+    function renderAssetName(name) {
+      const trimmed = (name || "").trim();
+      const link = assetLinkMap[trimmed];
+      if (link) {
+        return `<a class="table-link" href="${link}" target="_blank" rel="noopener noreferrer">${escapeHtml(trimmed)}</a>`;
+      }
+      return escapeHtml(trimmed);
     }
 
     function updateBudgetPctOfIncome() {
@@ -3280,7 +3331,7 @@
         </tr>
       ` : `
         <tr>
-          <td>${escapeHtml(row.name)}</td>
+          <td>${renderAssetName(row.name)}</td>
           <td>${row.balance != null ? formatCurrency(row.balance) : ""}</td>
         </tr>
       `).join("");
