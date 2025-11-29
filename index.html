@@ -3552,6 +3552,8 @@
     }
 
     async function onSaveDashboardClick() {
+      console.log("onSaveDashboardClick called");
+
       const statusEl = document.getElementById("saveStatus");
       if (statusEl) {
         statusEl.textContent = "Saving...";
@@ -3560,10 +3562,14 @@
       const user = auth.currentUser;
       if (!user) {
         alert("Please sign in to save your dashboard.");
+        if (statusEl) {
+          statusEl.textContent = "Save failed. Not signed in.";
+        }
         return;
       }
 
       try {
+        console.log("Starting save operations for user", user.uid);
         await savePersonalFinanceDataForUser(user.uid);
         await saveCommissionTrackerDataForUser(user.uid);
         await saveGoalsDataForUser(user.uid);
@@ -3573,7 +3579,7 @@
           statusEl.textContent = formatSaveTimestamp(now);
         }
 
-        console.log("Dashboard saved");
+        console.log("Dashboard saved successfully at", now.toISOString());
       } catch (err) {
         console.error("Error saving dashboard", err);
         alert("There was a problem saving your data. Please try again.");
