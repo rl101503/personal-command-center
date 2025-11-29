@@ -642,6 +642,33 @@
       flex-wrap: wrap;
     }
 
+    .section-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .reading-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.8rem;
+    }
+
+    .reading-pill {
+      background: #020617;
+      border: 1px solid rgba(23,151,215,0.6);
+      border-radius: 999px;
+      padding: 0.5rem 0.85rem;
+      font-weight: 600;
+      color: #e5eef7;
+      text-align: left;
+      min-width: 160px;
+    }
+
     .store-header {
       width: 100%;
       padding: 0.2rem 0.3rem;
@@ -1253,16 +1280,6 @@
 
       <!-- GOALS TAB -->
       <div id="goalsTab" class="hidden">
-        <div class="goals-sort-row">
-          <div>
-            <h2 style="margin-bottom:0.15rem;">Goals controls</h2>
-            <p class="tiny">Quick actions to keep the goals lists tidy.</p>
-          </div>
-          <div class="goals-sort-actions">
-            <button type="button" id="goalsSortReading" class="sort-btn">Sort reading A/Z</button>
-            <button type="button" id="goalsSortDebt" class="sort-btn">Sort debt high/low</button>
-          </div>
-        </div>
         <div class="results-grid" style="margin-bottom:1rem;">
           <div class="result-pill">
             <div class="result-label">Reading Goal – 55 Books</div>
@@ -1287,7 +1304,15 @@
             <button type="button" id="readingEditBtn" class="btn-secondary btn-small">Edit Reading List</button>
           </div>
 
-          <h3 style="margin-top:1rem;">Books Completed</h3>
+          <div class="reading-pill-row">
+            <div class="reading-pill">Books Completed</div>
+            <div class="reading-pill">Books To Read</div>
+          </div>
+
+          <div class="section-controls">
+            <h3 style="margin:0;">Books Completed</h3>
+            <button type="button" id="goalsSortReading" class="sort-btn">Sort reading A/Z</button>
+          </div>
           <div class="history-wrapper">
             <table>
               <thead>
@@ -1296,6 +1321,7 @@
                   <th>Author</th>
                   <th>Format (Text/Audio)</th>
                   <th>Rating</th>
+                  <th>Month Finished</th>
                   <th>Notes</th>
                 </tr>
               </thead>
@@ -1304,8 +1330,8 @@
           </div>
           <button type="button" id="booksCompletedAddBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
 
-          <div style="margin-top:1rem; display:flex; align-items:center; gap:0.5rem;">
-            <span class="result-label" style="opacity:0.9;">Books To Read</span>
+          <div class="section-controls" style="margin-top:1rem;">
+            <h3 style="margin:0;">Books To Read</h3>
           </div>
           <div class="history-wrapper" style="margin-top:0.4rem;">
             <table>
@@ -1328,6 +1354,11 @@
               <p>Live snapshot of current debts pulled from the Debt Balances section.</p>
             </div>
             <button type="button" id="debtGoalEditBtn" class="btn-secondary btn-small">Edit</button>
+          </div>
+
+          <div class="section-controls">
+            <h3 style="margin:0;">Debt Snapshot</h3>
+            <button type="button" id="goalsSortDebt" class="sort-btn">Sort debt high/low</button>
           </div>
 
           <div class="history-wrapper">
@@ -1585,6 +1616,7 @@
       author: "",
       format: "",
       rating: "",
+      monthFinished: "",
       notes: ""
     }));
 
@@ -2454,6 +2486,7 @@
               author: row.author || "",
               format: row.format || "",
               rating: row.rating || "",
+              monthFinished: row.monthFinished || "",
               notes: row.notes || ""
             }));
           } else {
@@ -3101,7 +3134,7 @@
       if (booksCompletedAddBtn) {
         booksCompletedAddBtn.classList.toggle("hidden", !readingEditMode);
         booksCompletedAddBtn.onclick = () => {
-          readingCompletedRows.push({ title: "", author: "", format: "", rating: "", notes: "" });
+          readingCompletedRows.push({ title: "", author: "", format: "", rating: "", monthFinished: "", notes: "" });
           renderGoals();
         };
       }
@@ -3121,6 +3154,7 @@
             <td><input type="text" class="completed-author" data-index="${idx}" value="${escapeHtml(row.author)}" /></td>
             <td><input type="text" class="completed-format" data-index="${idx}" value="${escapeHtml(row.format)}" /></td>
             <td><input type="text" class="completed-rating" data-index="${idx}" value="${escapeHtml(row.rating)}" /></td>
+            <td><input type="text" class="completed-month" data-index="${idx}" value="${escapeHtml(row.monthFinished || "")}" /></td>
             <td><input type="text" class="completed-notes" data-index="${idx}" value="${escapeHtml(row.notes)}" /></td>
           </tr>
         ` : `
@@ -3129,6 +3163,7 @@
             <td>${escapeHtml(row.author)}</td>
             <td>${escapeHtml(row.format)}</td>
             <td>${escapeHtml(row.rating)}</td>
+            <td>${escapeHtml(row.monthFinished || "")}</td>
             <td>${escapeHtml(row.notes)}</td>
           </tr>
         `).join("");
@@ -3148,6 +3183,7 @@
           bindInput(".completed-author", "author");
           bindInput(".completed-format", "format");
           bindInput(".completed-rating", "rating");
+          bindInput(".completed-month", "monthFinished");
           bindInput(".completed-notes", "notes");
         }
       }
