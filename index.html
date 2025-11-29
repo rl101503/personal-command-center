@@ -1407,14 +1407,32 @@
   </div>
 
   <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <!-- Chart.js for charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script type="module">
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      onAuthStateChanged,
+      signInWithPopup,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      collection,
+      query,
+      where,
+      getDocs,
+      deleteDoc,
+      addDoc,
+      writeBatch,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
     // === FIREBASE CONFIG ===
     const firebaseConfig = {
       apiKey: "AIzaSyDaUhACWzw3VQWf3lJWcmuSYp8ti2FxG3I",
@@ -1426,9 +1444,8 @@
       measurementId: "G-P1510E4556"
     };
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const compatDb = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
 
     const PF_401K_TARGET = 23500;
@@ -2139,13 +2156,12 @@
     // --- Firestore helpers for History ---
     async function fetchHistory() {
       if (!currentUser) return [];
-      const snapshot = await compatDb.collection("deals")
-        .where("userId", "==", currentUser.uid)
-        .get();
+      const dealsRef = collection(db, "deals");
+      const snapshot = await getDocs(query(dealsRef, where("userId", "==", currentUser.uid)));
 
-      const items = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
+      const items = snapshot.docs.map(snap => ({
+        id: snap.id,
+        ...snap.data()
       }));
 
       items.sort((a, b) => {
@@ -2160,7 +2176,7 @@
     async function deleteEntry(id) {
       if (!currentUser) return;
       try {
-        await compatDb.collection("deals").doc(id).delete();
+        await deleteDoc(doc(db, "deals", id));
         await renderHistory();
       } catch (err) {
         console.error("Error deleting entry", err);
@@ -2170,12 +2186,11 @@
 
     async function clearHistoryForUser() {
       if (!currentUser) return;
-      const snapshot = await compatDb.collection("deals")
-        .where("userId", "==", currentUser.uid)
-        .get();
+      const dealsRef = collection(db, "deals");
+      const snapshot = await getDocs(query(dealsRef, where("userId", "==", currentUser.uid)));
 
-      const batch = compatDb.batch();
-      snapshot.docs.forEach(doc => batch.delete(doc.ref));
+      const batch = writeBatch(db);
+      snapshot.docs.forEach(snap => batch.delete(snap.ref));
       await batch.commit();
       await renderHistory();
     }
@@ -2380,10 +2395,10 @@
         amount: amount,
         totalPostTax: totalCommissionPostTax,
         firstMonthPostTax: firstMonthCommission,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        createdAt: serverTimestamp()
       };
 
-      await compatDb.collection("deals").add(entry);
+      await addDoc(collection(db, "deals"), entry);
       await renderHistory();
     });
 
@@ -3570,9 +3585,9 @@
 
     // --- Auth (Google) ---
     signInBtn.addEventListener("click", async () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
+      const provider = new GoogleAuthProvider();
       try {
-        await auth.signInWithPopup(provider);
+        await signInWithPopup(auth, provider);
       } catch (err) {
         console.error("Sign-in error", err);
         alert("Error signing in: " + (err.message || err));
@@ -3581,14 +3596,14 @@
 
     signOutBtn.addEventListener("click", async () => {
       try {
-        await auth.signOut();
+        await signOut(auth);
       } catch (err) {
         console.error("Sign-out error", err);
         alert("Error signing out: " + (err.message || err));
       }
     });
 
-    auth.onAuthStateChanged(async (user) => {
+    onAuthStateChanged(auth, async (user) => {
       currentUser = user;
       if (user) {
         authStatus.textContent = "Signed in as " + user.email;
