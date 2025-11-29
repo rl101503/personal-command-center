@@ -1413,7 +1413,8 @@
   <!-- Chart.js for charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <script>
+  <script type="module">
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
     // === FIREBASE CONFIG ===
     const firebaseConfig = {
       apiKey: "AIzaSyDaUhACWzw3VQWf3lJWcmuSYp8ti2FxG3I",
@@ -1425,9 +1426,10 @@
       measurementId: "G-P1510E4556"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore();
+    const compatDb = firebase.firestore();
+    const db = getFirestore(app);
 
     const PF_401K_TARGET = 23500;
     let globalAvgMonthlyTakeHome = 0; // from comp tracker
@@ -1654,38 +1656,212 @@
     let readingEditMode = false;
     let debtGoalEditMode = false;
 
-    let personalFinanceData = {
+    let personalFinanceState = {
       pf401k: null,
       debtNotes: "",
       budgetRows: [],
       investmentRows: [],
       readingCompletedRows: [],
-      readingToReadRows: []
+      readingToReadRows: [],
+      storePeriodHeaders: [],
+      storeSpendingRows: [],
+      upcomingRows: [],
+      debtRows: []
     };
 
     const defaultPersonalBudgetRows = JSON.parse(JSON.stringify(personalBudgetRows));
     const defaultInvestmentRows = JSON.parse(JSON.stringify(investmentRows));
     const defaultReadingCompletedRows = JSON.parse(JSON.stringify(readingCompletedRows));
     const defaultReadingToReadRows = JSON.parse(JSON.stringify(readingToReadRows));
+    const defaultStoreSpendingRows = JSON.parse(JSON.stringify(storeSpendingRows));
+    const defaultStorePeriodHeaders = [...storePeriodHeaders];
+    const defaultUpcomingRows = JSON.parse(JSON.stringify(upcomingRows));
+    const defaultDebtRows = JSON.parse(JSON.stringify(debtRows));
 
     function resetPersonalFinanceState() {
-      personalFinanceData = {
+      personalFinanceState = {
         pf401k: null,
         debtNotes: "",
         budgetRows: JSON.parse(JSON.stringify(defaultPersonalBudgetRows)),
         investmentRows: JSON.parse(JSON.stringify(defaultInvestmentRows)),
         readingCompletedRows: JSON.parse(JSON.stringify(defaultReadingCompletedRows)),
-        readingToReadRows: JSON.parse(JSON.stringify(defaultReadingToReadRows))
+        readingToReadRows: JSON.parse(JSON.stringify(defaultReadingToReadRows)),
+        storeSpendingRows: JSON.parse(JSON.stringify(defaultStoreSpendingRows)),
+        storePeriodHeaders: [...defaultStorePeriodHeaders],
+        upcomingRows: JSON.parse(JSON.stringify(defaultUpcomingRows)),
+        debtRows: JSON.parse(JSON.stringify(defaultDebtRows))
       };
       personalBudgetRows = JSON.parse(JSON.stringify(defaultPersonalBudgetRows));
       investmentRows = JSON.parse(JSON.stringify(defaultInvestmentRows));
       readingCompletedRows = JSON.parse(JSON.stringify(defaultReadingCompletedRows));
       readingToReadRows = JSON.parse(JSON.stringify(defaultReadingToReadRows));
+      storeSpendingRows = JSON.parse(JSON.stringify(defaultStoreSpendingRows));
+      storePeriodHeaders = [...defaultStorePeriodHeaders];
+      upcomingRows = JSON.parse(JSON.stringify(defaultUpcomingRows));
+      debtRows = JSON.parse(JSON.stringify(defaultDebtRows));
       debtStrategyNotes = "";
       if (pf401kTrackerInput) {
         pf401kTrackerInput.value = "";
         updatePf401kInfo();
       }
+    }
+
+    function buildPersonalFinanceStateFromDOM() {
+      const pf401kValue = pf401kTrackerInput ? getNumericValue(pf401kTrackerInput.value) : null;
+      return {
+        pf401k: isNaN(pf401kValue) ? null : pf401kValue,
+        debtNotes: debtStrategyNotes || "",
+        budgetRows: personalBudgetRows.map(row => ({
+          category: row.category || "",
+          amount: typeof row.amount === "number" ? row.amount : null,
+          withdraw: row.withdraw || "",
+          type: row.type || "",
+          notes: row.notes || ""
+        })),
+        investmentRows: investmentRows.map(row => ({
+          name: row.name || "",
+          balance: typeof row.balance === "number" ? row.balance : null
+        })),
+        readingCompletedRows: readingCompletedRows.map(row => ({
+          title: row.title || "",
+          author: row.author || "",
+          format: row.format || "",
+          rating: row.rating || "",
+          monthFinished: row.monthFinished || "",
+          notes: row.notes || ""
+        })),
+        readingToReadRows: readingToReadRows.map(row => ({
+          title: row.title || "",
+          author: row.author || ""
+        })),
+        storePeriodHeaders: [...storePeriodHeaders],
+        storeSpendingRows: storeSpendingRows.map(row => ({
+          store: row.store || "",
+          col1: typeof row.col1 === "number" ? row.col1 : null,
+          col2: typeof row.col2 === "number" ? row.col2 : null,
+          col3: typeof row.col3 === "number" ? row.col3 : null
+        })),
+        upcomingRows: upcomingRows.map(row => ({
+          category: row.category || "",
+          amount: typeof row.amount === "number" ? row.amount : null
+        })),
+        debtRows: debtRows.map(row => ({
+          name: row.name || "",
+          balance: typeof row.balance === "number" ? row.balance : null
+        }))
+      };
+    }
+
+    function applyPersonalFinanceStateToDOM(state) {
+      const safeState = state || {};
+      personalFinanceState = {
+        pf401k: typeof safeState.pf401k === "number" ? safeState.pf401k : null,
+        debtNotes: typeof safeState.debtNotes === "string" ? safeState.debtNotes : "",
+        budgetRows: Array.isArray(safeState.budgetRows) && safeState.budgetRows.length
+          ? safeState.budgetRows.map(row => ({
+              category: row.category || "",
+              amount: typeof row.amount === "number" ? row.amount : null,
+              withdraw: row.withdraw || "",
+              type: row.type || "",
+              notes: row.notes || ""
+            }))
+          : JSON.parse(JSON.stringify(defaultPersonalBudgetRows)),
+        investmentRows: Array.isArray(safeState.investmentRows) && safeState.investmentRows.length
+          ? safeState.investmentRows.map(row => ({
+              name: row.name || "",
+              balance: typeof row.balance === "number" ? row.balance : null
+            }))
+          : JSON.parse(JSON.stringify(defaultInvestmentRows)),
+        readingCompletedRows: Array.isArray(safeState.readingCompletedRows) && safeState.readingCompletedRows.length
+          ? safeState.readingCompletedRows.map(row => ({
+              title: row.title || "",
+              author: row.author || "",
+              format: row.format || "",
+              rating: row.rating || "",
+              monthFinished: row.monthFinished || "",
+              notes: row.notes || ""
+            }))
+          : JSON.parse(JSON.stringify(defaultReadingCompletedRows)),
+        readingToReadRows: Array.isArray(safeState.readingToReadRows) && safeState.readingToReadRows.length
+          ? safeState.readingToReadRows.map(row => ({
+              title: row.title || "",
+              author: row.author || ""
+            }))
+          : JSON.parse(JSON.stringify(defaultReadingToReadRows)),
+        storePeriodHeaders: Array.isArray(safeState.storePeriodHeaders) && safeState.storePeriodHeaders.length
+          ? [...safeState.storePeriodHeaders]
+          : [...defaultStorePeriodHeaders],
+        storeSpendingRows: Array.isArray(safeState.storeSpendingRows) && safeState.storeSpendingRows.length
+          ? safeState.storeSpendingRows.map(row => ({
+              store: row.store || "",
+              col1: typeof row.col1 === "number" ? row.col1 : null,
+              col2: typeof row.col2 === "number" ? row.col2 : null,
+              col3: typeof row.col3 === "number" ? row.col3 : null
+            }))
+          : JSON.parse(JSON.stringify(defaultStoreSpendingRows)),
+        upcomingRows: Array.isArray(safeState.upcomingRows) && safeState.upcomingRows.length
+          ? safeState.upcomingRows.map(row => ({
+              category: row.category || "",
+              amount: typeof row.amount === "number" ? row.amount : null
+            }))
+          : JSON.parse(JSON.stringify(defaultUpcomingRows)),
+        debtRows: Array.isArray(safeState.debtRows) && safeState.debtRows.length
+          ? safeState.debtRows.map(row => ({
+              name: row.name || "",
+              balance: typeof row.balance === "number" ? row.balance : null
+            }))
+          : JSON.parse(JSON.stringify(defaultDebtRows))
+      };
+
+      personalBudgetRows = personalFinanceState.budgetRows;
+      investmentRows = personalFinanceState.investmentRows;
+      readingCompletedRows = personalFinanceState.readingCompletedRows;
+      readingToReadRows = personalFinanceState.readingToReadRows;
+      storeSpendingRows = personalFinanceState.storeSpendingRows;
+      storePeriodHeaders = personalFinanceState.storePeriodHeaders;
+      upcomingRows = personalFinanceState.upcomingRows;
+      debtRows = personalFinanceState.debtRows;
+      debtStrategyNotes = personalFinanceState.debtNotes || "";
+
+      if (pf401kTrackerInput) {
+        pf401kTrackerInput.value = personalFinanceState.pf401k != null
+          ? formatNumberWithCommas(personalFinanceState.pf401k.toString())
+          : "";
+      }
+
+      renderPersonalFinance();
+      renderGoals();
+      updatePf401kInfo();
+    }
+
+    async function loadPersonalFinanceDataForUser(uid) {
+      try {
+        const ref = doc(db, "dashboards", uid);
+        const snap = await getDoc(ref);
+
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.personalFinances) {
+            personalFinanceState = data.personalFinances;
+            applyPersonalFinanceStateToDOM(personalFinanceState);
+          } else {
+            personalFinanceState = buildPersonalFinanceStateFromDOM();
+            await setDoc(ref, { personalFinances: personalFinanceState }, { merge: true });
+          }
+        } else {
+          personalFinanceState = buildPersonalFinanceStateFromDOM();
+          await setDoc(ref, { personalFinances: personalFinanceState });
+        }
+      } catch (err) {
+        console.error("Error loading personal finance data", err);
+        alert("There was a problem loading your data. Please refresh and try again.");
+      }
+    }
+
+    async function savePersonalFinanceDataForUser(uid) {
+      const ref = doc(db, "dashboards", uid);
+      personalFinanceState = buildPersonalFinanceStateFromDOM();
+      await setDoc(ref, { personalFinances: personalFinanceState }, { merge: true });
     }
 
     // --- Helpers ---
@@ -1781,7 +1957,7 @@
     // --- Firestore helpers for History ---
     async function fetchHistory() {
       if (!currentUser) return [];
-      const snapshot = await db.collection("deals")
+      const snapshot = await compatDb.collection("deals")
         .where("userId", "==", currentUser.uid)
         .get();
 
@@ -1802,7 +1978,7 @@
     async function deleteEntry(id) {
       if (!currentUser) return;
       try {
-        await db.collection("deals").doc(id).delete();
+        await compatDb.collection("deals").doc(id).delete();
         await renderHistory();
       } catch (err) {
         console.error("Error deleting entry", err);
@@ -1812,11 +1988,11 @@
 
     async function clearHistoryForUser() {
       if (!currentUser) return;
-      const snapshot = await db.collection("deals")
+      const snapshot = await compatDb.collection("deals")
         .where("userId", "==", currentUser.uid)
         .get();
 
-      const batch = db.batch();
+      const batch = compatDb.batch();
       snapshot.docs.forEach(doc => batch.delete(doc.ref));
       await batch.commit();
       await renderHistory();
@@ -2025,7 +2201,7 @@
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       };
 
-      await db.collection("deals").add(entry);
+      await compatDb.collection("deals").add(entry);
       await renderHistory();
     });
 
@@ -2034,7 +2210,7 @@
       if (!currentUser) return;
 
       try {
-        const docRef = db.collection("compTrackers").doc(currentUser.uid);
+        const docRef = compatDb.collection("compTrackers").doc(currentUser.uid);
         const docSnap = await docRef.get();
         if (docSnap.exists) {
           const data = docSnap.data();
@@ -2058,7 +2234,7 @@
     async function saveCompTracker() {
       if (!currentUser) return;
       try {
-        const docRef = db.collection("compTrackers").doc(currentUser.uid);
+        const docRef = compatDb.collection("compTrackers").doc(currentUser.uid);
         await docRef.set(
           {
             userId: currentUser.uid,
@@ -2443,100 +2619,30 @@
 
     async function savePersonalFinanceData(updates = {}) {
       if (!currentUser) return;
-      personalFinanceData = {
-        ...personalFinanceData,
-        budgetRows: personalBudgetRows,
-        investmentRows: investmentRows,
-        readingCompletedRows,
-        readingToReadRows,
-        ...updates
-      };
+      if (updates.budgetRows) personalBudgetRows = updates.budgetRows;
+      if (updates.investmentRows) investmentRows = updates.investmentRows;
+      if (updates.readingCompletedRows) readingCompletedRows = updates.readingCompletedRows;
+      if (updates.readingToReadRows) readingToReadRows = updates.readingToReadRows;
+      if (updates.storeSpendingRows) storeSpendingRows = updates.storeSpendingRows;
+      if (updates.storePeriodHeaders) storePeriodHeaders = updates.storePeriodHeaders;
+      if (updates.upcomingRows) upcomingRows = updates.upcomingRows;
+      if (updates.debtRows) debtRows = updates.debtRows;
+      if (typeof updates.debtNotes === "string") debtStrategyNotes = updates.debtNotes;
+      if (typeof updates.pf401k === "number" && pf401kTrackerInput) {
+        pf401kTrackerInput.value = formatNumberWithCommas(updates.pf401k.toString());
+      }
+
       try {
-        const docRef = db.collection("personalFinance").doc(currentUser.uid);
-        await docRef.set(
-          {
-            ...personalFinanceData,
-            userId: currentUser.uid,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          },
-          { merge: true }
-        );
+        await savePersonalFinanceDataForUser(currentUser.uid);
       } catch (err) {
         console.error("Error saving personal finance data", err);
+        alert("There was a problem saving your data. Please try again.");
       }
     }
 
     async function loadPersonalFinanceData() {
       if (!currentUser) return;
-      try {
-        const docRef = db.collection("personalFinance").doc(currentUser.uid);
-        const snap = await docRef.get();
-        if (snap.exists) {
-          const data = snap.data();
-          personalFinanceData = { ...personalFinanceData, ...data };
-          if (Array.isArray(data.budgetRows) && data.budgetRows.length) {
-            personalBudgetRows = data.budgetRows.map(row => ({
-              category: row.category || "",
-              amount: typeof row.amount === "number" ? row.amount : null,
-              withdraw: row.withdraw || "",
-              type: row.type || "",
-              notes: row.notes || ""
-            }));
-          } else {
-            personalBudgetRows = JSON.parse(JSON.stringify(defaultPersonalBudgetRows));
-          }
-
-          if (Array.isArray(data.investmentRows) && data.investmentRows.length) {
-            investmentRows = data.investmentRows.map(row => ({
-              name: row.name || "",
-              balance: typeof row.balance === "number" ? row.balance : null
-            }));
-          } else {
-            investmentRows = JSON.parse(JSON.stringify(defaultInvestmentRows));
-          }
-
-          if (Array.isArray(data.readingCompletedRows) && data.readingCompletedRows.length) {
-            readingCompletedRows = data.readingCompletedRows.map(row => ({
-              title: row.title || "",
-              author: row.author || "",
-              format: row.format || "",
-              rating: row.rating || "",
-              monthFinished: row.monthFinished || "",
-              notes: row.notes || ""
-            }));
-          } else {
-            readingCompletedRows = JSON.parse(JSON.stringify(defaultReadingCompletedRows));
-          }
-
-          if (Array.isArray(data.readingToReadRows) && data.readingToReadRows.length) {
-            readingToReadRows = data.readingToReadRows.map(row => ({
-              title: row.title || "",
-              author: row.author || ""
-            }));
-          } else {
-            readingToReadRows = JSON.parse(JSON.stringify(defaultReadingToReadRows));
-          }
-
-          personalFinanceData = {
-            ...personalFinanceData,
-            budgetRows: personalBudgetRows,
-            investmentRows: investmentRows,
-            readingCompletedRows,
-            readingToReadRows
-          };
-
-          if (typeof data.pf401k === "number") {
-            pf401kTrackerInput.value = formatNumberWithCommas(data.pf401k.toString());
-          }
-          if (typeof data.debtNotes === "string") {
-            debtStrategyNotes = data.debtNotes;
-          }
-        }
-      } catch (err) {
-        console.error("Error loading personal finance data", err);
-      }
-      updatePf401kInfo();
-      renderGoals();
+      await loadPersonalFinanceDataForUser(currentUser.uid);
     }
 
     function attachPf401kListeners() {
@@ -3269,8 +3375,20 @@
       }
     }
 
-    function onSaveDashboardClick() {
-      console.log("Save Dashboard clicked");
+    async function onSaveDashboardClick() {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please sign in to save your dashboard.");
+        return;
+      }
+
+      try {
+        await savePersonalFinanceDataForUser(user.uid);
+        console.log("Personal finance data saved");
+      } catch (err) {
+        console.error("Error saving personal finance data", err);
+        alert("There was a problem saving your data. Please try again.");
+      }
     }
 
     // --- Tabs logic ---
