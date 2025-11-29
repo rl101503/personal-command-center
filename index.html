@@ -794,6 +794,7 @@
           <button class="tab-button" data-tab="goals">Goals</button>
         </div>
         <button type="button" class="save-dashboard-btn" onclick="onSaveDashboardClick()">Save Dashboard</button>
+        <span id="saveStatus" style="margin-left: 10px; font-size: 0.85rem;"></span>
       </div>
 
       <!-- COMMISSION TAB -->
@@ -2064,6 +2065,16 @@
     }
 
     // --- Helpers ---
+    function formatSaveTimestamp(date) {
+      const options = { hour: "numeric", minute: "2-digit" };
+      const time = date.toLocaleTimeString([], options);
+
+      const dateOptions = { year: "numeric", month: "short", day: "numeric" };
+      const datePart = date.toLocaleDateString([], dateOptions);
+
+      return `Saved at ${time} on ${datePart}`;
+    }
+
     function formatNumberWithCommas(value) {
       if (value === "") return "";
       const numeric = value.replace(/,/g, "").replace(/[^\d.]/g, "");
@@ -3541,6 +3552,11 @@
     }
 
     async function onSaveDashboardClick() {
+      const statusEl = document.getElementById("saveStatus");
+      if (statusEl) {
+        statusEl.textContent = "Saving...";
+      }
+
       const user = auth.currentUser;
       if (!user) {
         alert("Please sign in to save your dashboard.");
@@ -3552,10 +3568,19 @@
         await saveCommissionTrackerDataForUser(user.uid);
         await saveGoalsDataForUser(user.uid);
 
+        const now = new Date();
+        if (statusEl) {
+          statusEl.textContent = formatSaveTimestamp(now);
+        }
+
         console.log("Dashboard saved");
       } catch (err) {
         console.error("Error saving dashboard", err);
         alert("There was a problem saving your data. Please try again.");
+
+        if (statusEl) {
+          statusEl.textContent = "Save failed. Please try again.";
+        }
       }
     }
 
@@ -3618,6 +3643,11 @@
         await loadPersonalFinanceData();
         await loadGoalsDataForUser(user.uid);
         renderPersonalFinance();
+
+        const statusEl = document.getElementById("saveStatus");
+        if (statusEl) {
+          statusEl.textContent = "";
+        }
       } else {
         authStatus.textContent = "Not signed in.";
         signInBtn.classList.remove("hidden");
