@@ -496,6 +496,11 @@
       border-bottom: 1px solid #1797d7;
       margin-bottom: 1rem;
       padding-bottom: 0.5rem;
+      position: sticky;
+      top: 0;
+      background: #000000;
+      z-index: 5;
+      padding-top: 0.2rem;
     }
 
     .tab-button {
@@ -512,6 +517,30 @@
       background: #007f91;
       border-color: #ffc532;
       color: #f9fafb;
+    }
+
+    .budget-wrapper table th {
+      text-align: center;
+    }
+
+    .budget-wrapper table td {
+      text-align: left;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(23,151,215,0.6);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+      width: 0%;
+      transition: width 0.2s ease;
     }
 
     /* Personal finances layout helpers */
@@ -677,6 +706,7 @@
       <div class="tab-nav">
         <button class="tab-button active" data-tab="commission">Commission Tracker</button>
         <button class="tab-button" data-tab="personal">Personal Finances</button>
+        <button class="tab-button" data-tab="goals">Goals</button>
       </div>
 
       <!-- COMMISSION TAB -->
@@ -707,9 +737,9 @@
                   <select id="dealType">
                     <option value="New">New business</option>
                     <option value="RenewalOut">Renewal with any-time out clause</option>
-                    <option value="Renewal&lt;100%">Renewal &lt;100% of prior value</option>
-                    <option value="Renewal=100%">Renewal =100% of prior value</option>
-                    <option value="Renewal&gt;100%">Renewal &gt;100% of prior value</option>
+                    <option value="Renewal&lt;100%">Renewal &lt;100%</option>
+                    <option value="Renewal=100%">Renewal =100%</option>
+                    <option value="Renewal&gt;100%">Renewal &gt;100%</option>
                   </select>
                 </div>
                 <div id="termRow">
@@ -1000,27 +1030,26 @@
           <!-- Groceries / Amazon / Retail -->
           <div class="pf-col-half">
             <div class="card">
-              <h2>Groceries & Retail Averages</h2>
-              <p>
-                Store-level monthly averages for Amazon, Teeter, Walmart, Publix, and Target.
-                Period headers are editable so you can label any time ranges (e.g., Feb24–Jan25).
-              </p>
+              <div class="history-header-row">
+                <div>
+                  <h2>Groceries & Retail Averages</h2>
+                  <p>
+                    Store-level monthly averages for Amazon, Teeter, Walmart, Publix, and Target.
+                    Period headers are editable so you can label any time ranges (e.g., Feb24–Jan25).
+                  </p>
+                </div>
+                <button type="button" id="storeEditBtn" class="btn-secondary btn-small">Edit</button>
+              </div>
 
               <div class="history-wrapper">
                 <table>
-                  <thead>
-                    <tr>
-                      <th>Category</th>
-                      <th><input type="text" id="periodHeader1" class="store-header" value="Period 1" /></th>
-                      <th><input type="text" id="periodHeader2" class="store-header" value="Period 2" /></th>
-                      <th><input type="text" id="periodHeader3" class="store-header" value="Period 3" /></th>
-                    </tr>
-                  </thead>
+                  <thead id="storeTableHead"></thead>
                   <tbody id="storeTableBody">
                     <!-- populated by JS -->
                   </tbody>
                 </table>
               </div>
+              <button type="button" id="storeAddRowBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
               <div class="totals-summary">
                 <table class="totals-table">
                   <tbody>
@@ -1039,10 +1068,15 @@
           <!-- Upcoming Purchases -->
           <div class="pf-col-half">
             <div class="card">
-              <h2>Upcoming Purchases</h2>
-              <p>
-                Free-form list of upcoming purchases. Edit categories and amounts as needed.
-              </p>
+              <div class="history-header-row">
+                <div>
+                  <h2>Upcoming Purchases</h2>
+                  <p>
+                    Free-form list of upcoming purchases. Edit categories and amounts as needed.
+                  </p>
+                </div>
+                <button type="button" id="upcomingEditBtn" class="btn-secondary btn-small">Edit</button>
+              </div>
 
               <div class="history-wrapper">
                 <table>
@@ -1057,6 +1091,7 @@
                   </tbody>
                 </table>
               </div>
+              <button type="button" id="upcomingAddRowBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
               <div class="totals-summary">
                 <table class="totals-table">
                   <tbody>
@@ -1076,10 +1111,15 @@
           <!-- Debt Balances -->
           <div class="pf-col-half">
             <div class="card card-debt">
-              <h2>Debt Balances</h2>
-              <p>
-                Snapshot of major debts. Balances are editable; total updates automatically.
-              </p>
+              <div class="history-header-row">
+                <div>
+                  <h2>Debt Balances</h2>
+                  <p>
+                    Snapshot of major debts. Balances are editable; total updates automatically.
+                  </p>
+                </div>
+                <button type="button" id="debtEditBtn" class="btn-secondary btn-small">Edit</button>
+              </div>
 
               <div class="history-wrapper">
                 <table>
@@ -1094,6 +1134,7 @@
                   </tbody>
                 </table>
               </div>
+              <button type="button" id="debtAddRowBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
               <div class="totals-summary">
                 <table class="totals-table">
                   <tbody>
@@ -1110,10 +1151,15 @@
           <!-- Investments -->
           <div class="pf-col-half">
             <div class="card card-invest">
-              <h2>Investments and Balances</h2>
-              <p>
-                High-level view of investable accounts and cash balances. Edit balances as needed; totals will update.
-              </p>
+              <div class="history-header-row">
+                <div>
+                  <h2>Assets</h2>
+                  <p>
+                    High-level view of assets and account balances. Edit balances as needed; totals will update.
+                  </p>
+                </div>
+                <button type="button" id="investEditBtn" class="btn-secondary btn-small">Edit</button>
+              </div>
 
               <div class="history-wrapper">
                 <table>
@@ -1128,6 +1174,7 @@
                   </tbody>
                 </table>
               </div>
+              <button type="button" id="investAddRowBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
               <div class="totals-summary">
                 <table class="totals-table">
                   <tbody>
@@ -1142,6 +1189,103 @@
           </div>
         </div>
       </div> <!-- end personalTab -->
+
+      <!-- GOALS TAB -->
+      <div id="goalsTab" class="hidden">
+        <div class="results-grid" style="margin-bottom:1rem;">
+          <div class="result-pill">
+            <div class="result-label">Reading Goal – 55 Books</div>
+            <div class="result-value" id="readingGoalSummary">Completed: 0 / 55</div>
+            <div class="progress-track"><div class="progress-bar" id="readingGoalProgress"></div></div>
+          </div>
+          <div class="result-pill">
+            <div class="result-label">Debt Payoff</div>
+            <div class="result-value" id="debtGoalSummary">Total debt: $0</div>
+            <div class="progress-track"><div class="progress-bar" id="debtGoalProgress"></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="history-header-row">
+            <div>
+              <h2>Reading Goal – 55 Books</h2>
+              <p>Track completed books and plan your next reads. Toggle edit mode to update lists.</p>
+              <p class="tiny" id="readingGoalStats">Target: 55 · Completed: 0 · Remaining: 55</p>
+              <div class="progress-track"><div class="progress-bar" id="readingCardProgress"></div></div>
+            </div>
+            <button type="button" id="readingEditBtn" class="btn-secondary btn-small">Edit Reading List</button>
+          </div>
+
+          <h3 style="margin-top:1rem;">Books Completed</h3>
+          <div class="history-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Format (Text/Audio)</th>
+                  <th>Rating</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="booksCompletedBody"></tbody>
+            </table>
+          </div>
+          <button type="button" id="booksCompletedAddBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
+
+          <div style="margin-top:1rem; display:flex; align-items:center; gap:0.5rem;">
+            <span class="result-label" style="opacity:0.9;">Books To Read</span>
+          </div>
+          <div class="history-wrapper" style="margin-top:0.4rem;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Author</th>
+                </tr>
+              </thead>
+              <tbody id="booksToReadBody"></tbody>
+            </table>
+          </div>
+          <button type="button" id="booksToReadAddBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
+        </div>
+
+        <div class="card">
+          <div class="history-header-row">
+            <div>
+              <h2>Debt Payoff Goal</h2>
+              <p>Live snapshot of current debts pulled from the Debt Balances section.</p>
+            </div>
+            <button type="button" id="debtGoalEditBtn" class="btn-secondary btn-small">Edit</button>
+          </div>
+
+          <div class="history-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Debt</th>
+                  <th>Balance (USD)</th>
+                </tr>
+              </thead>
+              <tbody id="debtGoalBody"></tbody>
+            </table>
+          </div>
+          <div class="totals-summary">
+            <table class="totals-table">
+              <tbody>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td id="debtGoalTotal">$0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="margin-top:0.8rem;">Debt Strategy Notes</h3>
+          <div id="debtNotesView" class="tiny" style="white-space:pre-wrap;"></div>
+          <textarea id="debtNotesInput" class="hidden" placeholder="Notes on payoff strategy"></textarea>
+        </div>
+      </div> <!-- end goalsTab -->
     </div> <!-- end appContent -->
   </div>
 
@@ -1255,6 +1399,7 @@
     const tabButtons = document.querySelectorAll(".tab-button");
     const commissionTab = document.getElementById("commissionTab");
     const personalTab = document.getElementById("personalTab");
+    const goalsTab = document.getElementById("goalsTab");
 
     let currentUser = null;
 
@@ -1327,7 +1472,7 @@
       { category: "Earth Fare", amount: 150, withdraw: "Ongoing", type: "Variable", notes: "" }
     ];
 
-    const storeSpendingRows = [
+    let storeSpendingRows = [
       { store: "Amazon", col1: 1176, col2: 1094, col3: 1354 },
       { store: "Teeter", col1: 829, col2: 901, col3: 996 },
       { store: "Walmart", col1: 215, col2: 18.5, col3: 564 },
@@ -1335,28 +1480,54 @@
       { store: "Target", col1: 397, col2: 342, col3: 385 }
     ];
 
-    const debtRows = [
+    let storePeriodHeaders = ["Period 1", "Period 2", "Period 3"];
+
+    let debtRows = [
       { name: "Half Pint Loop Mortgage", balance: 318986 },
       { name: "Myrtle Beach Mortgage", balance: 242293 },
       { name: "Capital One", balance: null },
       { name: "Citi Credit Card", balance: null }
     ];
 
-    const investmentRows = [
+    let investmentRows = [
       { name: "401k", balance: null },
       { name: "529s", balance: null },
       { name: "Brokerage", balance: null },
       { name: "BOA Balance", balance: null },
       { name: "FCB Balance", balance: null },
       { name: "Myrtle Beach Checking Balance", balance: null },
-      { name: "Premier 401k", balance: null }
+      { name: "Premier 401k", balance: null },
+      { name: "Half Pint Value", balance: null },
+      { name: "Asheville land value", balance: null }
     ];
+
+    let upcomingRows = Array.from({ length: 5 }).map(() => ({ category: "", amount: null }));
+
+    let readingCompletedRows = Array.from({ length: 5 }).map(() => ({
+      title: "",
+      author: "",
+      format: "",
+      rating: "",
+      notes: ""
+    }));
+
+    let readingToReadRows = Array.from({ length: 5 }).map(() => ({ title: "", author: "" }));
+
+    let debtStrategyNotes = "";
 
     let budgetSortAmountAsc = true;
     let budgetSortCategoryAsc = true;
     let budgetSortHandlersAttached = false;
     let budgetEditMode = false;
-    let budgetEditBtnInitialized = false;
+
+    let storeEditMode = false;
+    let upcomingEditMode = false;
+    let debtEditMode = false;
+    let investEditMode = false;
+    let readingEditMode = false;
+    let debtGoalEditMode = false;
+
+    let personalFinanceData = { pf401k: null, debtNotes: "" };
 
     // --- Helpers ---
     function formatNumberWithCommas(value) {
@@ -1911,6 +2082,28 @@
         monthlyActualsCumulative.push(runningActual);
       }
 
+      // Build projected cumulative based on average of completed months
+      let completedSum = 0;
+      let completedCount = 0;
+      const projectedMonthly = [];
+      monthlyRaw.forEach(val => {
+        if (val > 0) {
+          completedSum += val;
+          completedCount += 1;
+          projectedMonthly.push(val);
+        } else {
+          const avg = completedCount ? completedSum / completedCount : 0;
+          projectedMonthly.push(avg);
+        }
+      });
+
+      const projectedCumulative = [];
+      let runningProjected = 0;
+      for (let i = 0; i < projectedMonthly.length; i++) {
+        runningProjected += projectedMonthly[i];
+        projectedCumulative.push(runningProjected);
+      }
+
       if (!compLineChart) {
         compLineChart = new Chart(lineCtx, {
           type: "line",
@@ -1926,6 +2119,14 @@
                 label: "Cumulative actual",
                 data: monthlyActualsCumulative,
                 tension: 0.2
+              },
+              {
+                label: "Projected (avg of completed months)",
+                data: projectedCumulative,
+                tension: 0.2,
+                borderColor: "#d1d5db",
+                backgroundColor: "transparent",
+                borderDash: [6, 4]
               }
             ]
           },
@@ -1959,6 +2160,21 @@
       } else {
         compLineChart.data.datasets[0].data = targetSeries;
         compLineChart.data.datasets[1].data = monthlyActualsCumulative;
+        if (compLineChart.data.datasets.length < 3) {
+          compLineChart.data.datasets.push({
+            label: "Projected (avg of completed months)",
+            data: projectedCumulative,
+            tension: 0.2,
+            borderColor: "#d1d5db",
+            backgroundColor: "transparent",
+            borderDash: [6, 4]
+          });
+        } else {
+          compLineChart.data.datasets[2].data = projectedCumulative;
+          compLineChart.data.datasets[2].borderColor = "#d1d5db";
+          compLineChart.data.datasets[2].backgroundColor = "transparent";
+          compLineChart.data.datasets[2].borderDash = [6, 4];
+        }
         compLineChart.options.scales.y.max = 250000;
         compLineChart.options.scales.y.ticks.stepSize = 25000;
         compLineChart.options.scales.y.ticks.font.size = 10;
@@ -1968,34 +2184,69 @@
     }
 
     // --- Personal finances rendering ---
-    function renderPersonalFinance() {
+    let pf401kListenersAttached = false;
+
+    async function savePersonalFinanceData(updates = {}) {
+      if (!currentUser) return;
+      personalFinanceData = { ...personalFinanceData, ...updates };
+      try {
+        const docRef = db.collection("personalFinance").doc(currentUser.uid);
+        await docRef.set(
+          {
+            ...personalFinanceData,
+            userId: currentUser.uid,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          },
+          { merge: true }
+        );
+      } catch (err) {
+        console.error("Error saving personal finance data", err);
+      }
+    }
+
+    async function loadPersonalFinanceData() {
+      if (!currentUser) return;
+      try {
+        const docRef = db.collection("personalFinance").doc(currentUser.uid);
+        const snap = await docRef.get();
+        if (snap.exists) {
+          const data = snap.data();
+          personalFinanceData = { ...personalFinanceData, ...data };
+          if (typeof data.pf401k === "number") {
+            pf401kTrackerInput.value = formatNumberWithCommas(data.pf401k.toString());
+          }
+          if (typeof data.debtNotes === "string") {
+            debtStrategyNotes = data.debtNotes;
+          }
+        }
+      } catch (err) {
+        console.error("Error loading personal finance data", err);
+      }
+      updatePf401kInfo();
+      renderGoals();
+    }
+
+    function attachPf401kListeners() {
+      if (!pf401kTrackerInput || pf401kListenersAttached) return;
+      pf401kTrackerInput.addEventListener("input", (e) => {
+        e.target.value = formatNumberWithCommas(e.target.value);
+        updatePf401kInfo();
+      });
+      pf401kTrackerInput.addEventListener("blur", async (e) => {
+        const val = getNumericValue(e.target.value);
+        const numeric = isNaN(val) ? null : val;
+        updatePf401kInfo();
+        await savePersonalFinanceData({ pf401k: numeric });
+      });
+      pf401kListenersAttached = true;
+      updatePf401kInfo();
+    }
+
+    function renderBudgetSection() {
       const budgetTableBody = document.getElementById("budgetTableBody");
       const budgetTotalEl = document.getElementById("budgetTotal");
-      const storeTableBody = document.getElementById("storeTableBody");
-      const storeTotalCol1 = document.getElementById("storeTotalCol1");
-      const storeTotalCol2 = document.getElementById("storeTotalCol2");
-      const storeTotalCol3 = document.getElementById("storeTotalCol3");
-      const debtTableBody = document.getElementById("debtTableBody");
-      const debtTotalEl = document.getElementById("debtTotal");
-      const investTableBody = document.getElementById("investTableBody");
-      const investTotalEl = document.getElementById("investTotal");
-      const upcomingTableBody = document.getElementById("upcomingTableBody");
-      const upcomingTotalEl = document.getElementById("upcomingTotal");
+      if (!budgetTableBody || !budgetTotalEl) return;
 
-      if (!budgetTableBody) return; // safety
-
-      updatePersonalIncomePills();
-
-      if (pf401kTrackerInput) {
-        pf401kTrackerInput.addEventListener("input", (e) => {
-          e.target.value = formatNumberWithCommas(e.target.value);
-          updatePf401kInfo();
-        });
-        pf401kTrackerInput.addEventListener("blur", updatePf401kInfo);
-        updatePf401kInfo();
-      }
-
-      // ---- Budget table with View/Edit mode ----
       function calcBudgetTotalFromData() {
         let total = 0;
         personalBudgetRows.forEach(row => {
@@ -2009,7 +2260,6 @@
 
       function renderBudgetTable() {
         if (!budgetEditMode) {
-          // VIEW MODE: no inputs, just text
           budgetTableBody.innerHTML = personalBudgetRows.map(row => `
             <tr>
               <td>${escapeHtml(row.category)}</td>
@@ -2020,7 +2270,6 @@
             </tr>
           `).join("");
         } else {
-          // EDIT MODE: inputs
           budgetTableBody.innerHTML = personalBudgetRows.map((row, idx) => `
             <tr>
               <td>
@@ -2044,24 +2293,21 @@
                   type="text"
                   class="budget-input budget-withdraw"
                   data-index="${idx}"
-                  value="${escapeHtml(row.withdraw || "")}"
-                />
+                  value="${escapeHtml(row.withdraw || "")}" />
               </td>
               <td>
                 <input
                   type="text"
                   class="budget-input budget-type"
                   data-index="${idx}"
-                  value="${escapeHtml(row.type || "")}"
-                />
+                  value="${escapeHtml(row.type || "")}" />
               </td>
               <td>
                 <input
                   type="text"
                   class="budget-input budget-notes"
                   data-index="${idx}"
-                  value="${escapeHtml(row.notes || "")}"
-                />
+                  value="${escapeHtml(row.notes || "")}" />
               </td>
             </tr>
           `).join("");
@@ -2076,6 +2322,9 @@
           document.querySelectorAll(".budget-amount").forEach(input => {
             input.addEventListener("input", (e) => {
               e.target.value = formatNumberWithCommas(e.target.value);
+              const idx = parseInt(e.target.getAttribute("data-index"), 10);
+              const val = getNumericValue(e.target.value);
+              personalBudgetRows[idx].amount = isNaN(val) ? null : val;
               calcBudgetTotalFromData();
             });
             input.addEventListener("blur", (e) => {
@@ -2113,16 +2362,14 @@
 
       renderBudgetTable();
 
-      if (!budgetEditBtnInitialized) {
-        const budgetEditBtn = document.getElementById("budgetEditBtn");
-        if (budgetEditBtn) {
-          budgetEditBtn.addEventListener("click", () => {
-            budgetEditMode = !budgetEditMode;
-            budgetEditBtn.textContent = budgetEditMode ? "Done" : "Edit budget";
-            renderBudgetTable();
-          });
-          budgetEditBtnInitialized = true;
-        }
+      const budgetEditBtn = document.getElementById("budgetEditBtn");
+      if (budgetEditBtn) {
+        budgetEditBtn.textContent = budgetEditMode ? "Done" : "Edit budget";
+        budgetEditBtn.onclick = () => {
+          budgetEditMode = !budgetEditMode;
+          budgetEditBtn.textContent = budgetEditMode ? "Done" : "Edit budget";
+          renderBudgetTable();
+        };
       }
 
       if (!budgetSortHandlersAttached) {
@@ -2157,184 +2404,506 @@
 
         budgetSortHandlersAttached = true;
       }
+    }
 
-      // ---- Store spending table ----
-      storeTableBody.innerHTML = storeSpendingRows.map((row, idx) => `
+    function renderStoreSection() {
+      const storeTableHead = document.getElementById("storeTableHead");
+      const storeTableBody = document.getElementById("storeTableBody");
+      const storeTotalCol1 = document.getElementById("storeTotalCol1");
+      const storeTotalCol2 = document.getElementById("storeTotalCol2");
+      const storeTotalCol3 = document.getElementById("storeTotalCol3");
+      const editBtn = document.getElementById("storeEditBtn");
+      const addBtn = document.getElementById("storeAddRowBtn");
+      if (!storeTableHead || !storeTableBody) return;
+
+      if (editBtn) {
+        editBtn.textContent = storeEditMode ? "Done" : "Edit";
+        editBtn.onclick = () => {
+          storeEditMode = !storeEditMode;
+          renderStoreSection();
+        };
+      }
+
+      if (addBtn) {
+        addBtn.classList.toggle("hidden", !storeEditMode);
+        addBtn.onclick = () => {
+          storeSpendingRows.push({ store: "", col1: null, col2: null, col3: null });
+          renderStoreSection();
+        };
+      }
+
+      storeTableHead.innerHTML = `
+        <tr>
+          <th>Category</th>
+          ${storePeriodHeaders.map((h, idx) => `<th>${storeEditMode ? `<input type="text" class="store-header" data-index="${idx}" value="${escapeHtml(h)}" />` : escapeHtml(h)}</th>`).join("")}
+        </tr>
+      `;
+
+      storeTableBody.innerHTML = storeSpendingRows.map((row, idx) => storeEditMode ? `
+        <tr>
+          <td><input type="text" class="store-name" data-index="${idx}" value="${escapeHtml(row.store)}" /></td>
+          <td><input type="text" class="store-amount" data-row="${idx}" data-col="1" value="${row.col1 != null ? formatNumberWithCommas(row.col1.toString()) : ""}" /></td>
+          <td><input type="text" class="store-amount" data-row="${idx}" data-col="2" value="${row.col2 != null ? formatNumberWithCommas(row.col2.toString()) : ""}" /></td>
+          <td><input type="text" class="store-amount" data-row="${idx}" data-col="3" value="${row.col3 != null ? formatNumberWithCommas(row.col3.toString()) : ""}" /></td>
+        </tr>
+      ` : `
         <tr>
           <td>${escapeHtml(row.store)}</td>
-          <td>
-            <input
-              type="text"
-              class="store-amount"
-              data-row="${idx}"
-              data-col="1"
-              value="${row.col1 != null ? formatNumberWithCommas(row.col1.toString()) : ""}"
-            />
-          </td>
-          <td>
-            <input
-              type="text"
-              class="store-amount"
-              data-row="${idx}"
-              data-col="2"
-              value="${row.col2 != null ? formatNumberWithCommas(row.col2.toString()) : ""}"
-            />
-          </td>
-          <td>
-            <input
-              type="text"
-              class="store-amount"
-              data-row="${idx}"
-              data-col="3"
-              value="${row.col3 != null ? formatNumberWithCommas(row.col3.toString()) : ""}"
-            />
-          </td>
+          <td>${row.col1 != null ? formatCurrency(row.col1) : ""}</td>
+          <td>${row.col2 != null ? formatCurrency(row.col2) : ""}</td>
+          <td>${row.col3 != null ? formatCurrency(row.col3) : ""}</td>
         </tr>
       `).join("");
 
       function recalcStoreTotals() {
         let t1 = 0, t2 = 0, t3 = 0;
-        document.querySelectorAll(".store-amount").forEach(input => {
-          const col = input.getAttribute("data-col");
-          const val = getNumericValue(input.value);
-          if (isNaN(val)) return;
-          if (col === "1") t1 += val;
-          if (col === "2") t2 += val;
-          if (col === "3") t3 += val;
+        storeSpendingRows.forEach(row => {
+          t1 += row.col1 || 0;
+          t2 += row.col2 || 0;
+          t3 += row.col3 || 0;
         });
-        storeTotalCol1.textContent = formatCurrency(t1);
-        storeTotalCol2.textContent = formatCurrency(t2);
-        storeTotalCol3.textContent = formatCurrency(t3);
+        if (storeTotalCol1) storeTotalCol1.textContent = formatCurrency(t1);
+        if (storeTotalCol2) storeTotalCol2.textContent = formatCurrency(t2);
+        if (storeTotalCol3) storeTotalCol3.textContent = formatCurrency(t3);
       }
 
-      document.querySelectorAll(".store-amount").forEach(input => {
-        input.addEventListener("input", (e) => {
-          e.target.value = formatNumberWithCommas(e.target.value);
-          recalcStoreTotals();
+      if (storeEditMode) {
+        document.querySelectorAll(".store-header").forEach(input => {
+          input.addEventListener("input", (e) => {
+            const idx = parseInt(e.target.getAttribute("data-index"), 10);
+            storePeriodHeaders[idx] = e.target.value;
+          });
         });
-        input.addEventListener("blur", recalcStoreTotals);
-      });
+
+        document.querySelectorAll(".store-name").forEach(input => {
+          input.addEventListener("blur", (e) => {
+            const idx = parseInt(e.target.getAttribute("data-index"), 10);
+            storeSpendingRows[idx].store = e.target.value;
+          });
+        });
+
+        document.querySelectorAll(".store-amount").forEach(input => {
+          input.addEventListener("input", (e) => {
+            e.target.value = formatNumberWithCommas(e.target.value);
+            const rowIdx = parseInt(e.target.getAttribute("data-row"), 10);
+            const col = e.target.getAttribute("data-col");
+            const val = getNumericValue(e.target.value);
+            storeSpendingRows[rowIdx][`col${col}`] = isNaN(val) ? null : val;
+            recalcStoreTotals();
+          });
+          input.addEventListener("blur", (e) => {
+            const rowIdx = parseInt(e.target.getAttribute("data-row"), 10);
+            const col = e.target.getAttribute("data-col");
+            const val = getNumericValue(e.target.value);
+            storeSpendingRows[rowIdx][`col${col}`] = isNaN(val) ? null : val;
+            recalcStoreTotals();
+          });
+        });
+      }
 
       recalcStoreTotals();
+    }
 
-      // ---- Debt table ----
-      debtTableBody.innerHTML = debtRows.map((row, idx) => `
-        <tr>
-          <td>${escapeHtml(row.name)}</td>
-          <td>
-            <input
-              type="text"
-              class="debt-amount"
-              data-index="${idx}"
-              value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}"
-            />
-          </td>
-        </tr>
-      `).join("");
+    function renderUpcomingSection() {
+      const upcomingTableBody = document.getElementById("upcomingTableBody");
+      const upcomingTotalEl = document.getElementById("upcomingTotal");
+      const editBtn = document.getElementById("upcomingEditBtn");
+      const addBtn = document.getElementById("upcomingAddRowBtn");
+      if (!upcomingTableBody || !upcomingTotalEl) return;
 
-      function recalcDebtTotal() {
-        let total = 0;
-        document.querySelectorAll(".debt-amount").forEach(input => {
-          const val = getNumericValue(input.value);
-          if (!isNaN(val)) total += val;
-        });
-        debtTotalEl.textContent = formatCurrency(total);
+      if (editBtn) {
+        editBtn.textContent = upcomingEditMode ? "Done" : "Edit";
+        editBtn.onclick = () => {
+          upcomingEditMode = !upcomingEditMode;
+          renderUpcomingSection();
+        };
       }
 
-      document.querySelectorAll(".debt-amount").forEach(input => {
-        input.addEventListener("input", (e) => {
-          e.target.value = formatNumberWithCommas(e.target.value);
-          recalcDebtTotal();
-        });
-        input.addEventListener("blur", (e) => {
-          const idx = parseInt(e.target.getAttribute("data-index"), 10);
-          const val = getNumericValue(e.target.value);
-          debtRows[idx].balance = isNaN(val) ? null : val;
-          recalcDebtTotal();
-        });
-      });
-
-      recalcDebtTotal();
-
-      // ---- Investments table ----
-      investTableBody.innerHTML = investmentRows.map((row, idx) => `
-        <tr>
-          <td>${escapeHtml(row.name)}</td>
-          <td>
-            <input
-              type="text"
-              class="invest-amount"
-              data-index="${idx}"
-              value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}"
-            />
-          </td>
-        </tr>
-      `).join("");
-
-      function recalcInvestTotal() {
-        let total = 0;
-        document.querySelectorAll(".invest-amount").forEach(input => {
-          const val = getNumericValue(input.value);
-          if (!isNaN(val)) total += val;
-        });
-        investTotalEl.textContent = formatCurrency(total);
+      if (addBtn) {
+        addBtn.classList.toggle("hidden", !upcomingEditMode);
+        addBtn.onclick = () => {
+          upcomingRows.push({ category: "", amount: null });
+          renderUpcomingSection();
+        };
       }
 
-      document.querySelectorAll(".invest-amount").forEach(input => {
-        input.addEventListener("input", (e) => {
-          e.target.value = formatNumberWithCommas(e.target.value);
-          recalcInvestTotal();
-        });
-        input.addEventListener("blur", (e) => {
-          const idx = parseInt(e.target.getAttribute("data-index"), 10);
-          const val = getNumericValue(e.target.value);
-          investmentRows[idx].balance = isNaN(val) ? null : val;
-          recalcInvestTotal();
-        });
-      });
-
-      recalcInvestTotal();
-
-      // ---- Upcoming purchases table (5 blank rows) ----
-      upcomingTableBody.innerHTML = Array.from({ length: 5 }).map((_, idx) => `
+      upcomingTableBody.innerHTML = upcomingRows.map((row, idx) => upcomingEditMode ? `
         <tr>
-          <td>
-            <input
-              type="text"
-              class="upcoming-category"
-              data-index="${idx}"
-              value=""
-            />
-          </td>
-          <td>
-            <input
-              type="text"
-              class="upcoming-amount"
-              data-index="${idx}"
-              value=""
-            />
-          </td>
+          <td><input type="text" class="upcoming-category" data-index="${idx}" value="${escapeHtml(row.category)}" /></td>
+          <td><input type="text" class="upcoming-amount" data-index="${idx}" value="${row.amount != null ? formatNumberWithCommas(row.amount.toString()) : ""}" /></td>
+        </tr>
+      ` : `
+        <tr>
+          <td>${escapeHtml(row.category)}</td>
+          <td>${row.amount != null ? formatCurrency(row.amount) : ""}</td>
         </tr>
       `).join("");
 
       function recalcUpcomingTotal() {
         let total = 0;
-        document.querySelectorAll(".upcoming-amount").forEach(input => {
-          const val = getNumericValue(input.value);
+        upcomingRows.forEach(row => {
+          const val = row.amount || 0;
           if (!isNaN(val)) total += val;
         });
         upcomingTotalEl.textContent = formatCurrency(total);
       }
 
-      document.querySelectorAll(".upcoming-amount").forEach(input => {
-        input.addEventListener("input", (e) => {
-          e.target.value = formatNumberWithCommas(e.target.value);
-          recalcUpcomingTotal();
+      if (upcomingEditMode) {
+        document.querySelectorAll(".upcoming-category").forEach(input => {
+          input.addEventListener("blur", (e) => {
+            const idx = parseInt(e.target.getAttribute("data-index"), 10);
+            upcomingRows[idx].category = e.target.value;
+          });
         });
-        input.addEventListener("blur", recalcUpcomingTotal);
-      });
+
+        document.querySelectorAll(".upcoming-amount").forEach(input => {
+          input.addEventListener("input", (e) => {
+            e.target.value = formatNumberWithCommas(e.target.value);
+            const idx = parseInt(e.target.getAttribute("data-index"), 10);
+            const val = getNumericValue(e.target.value);
+            upcomingRows[idx].amount = isNaN(val) ? null : val;
+            recalcUpcomingTotal();
+          });
+          input.addEventListener("blur", (e) => {
+            const idx = parseInt(e.target.getAttribute("data-index"), 10);
+            const val = getNumericValue(e.target.value);
+            upcomingRows[idx].amount = isNaN(val) ? null : val;
+            recalcUpcomingTotal();
+          });
+        });
+      }
 
       recalcUpcomingTotal();
+    }
+
+    function renderDebtSection() {
+      const debtTableBody = document.getElementById("debtTableBody");
+      const debtTotalEl = document.getElementById("debtTotal");
+      const editBtn = document.getElementById("debtEditBtn");
+      const addBtn = document.getElementById("debtAddRowBtn");
+      if (!debtTableBody || !debtTotalEl) return;
+
+      if (editBtn) {
+        editBtn.textContent = debtEditMode ? "Done" : "Edit";
+        editBtn.onclick = () => {
+          debtEditMode = !debtEditMode;
+          renderDebtSection();
+          renderGoals();
+        };
+      }
+
+      if (addBtn) {
+        addBtn.classList.toggle("hidden", !debtEditMode);
+        addBtn.onclick = () => {
+          debtRows.push({ name: "", balance: null });
+          renderDebtSection();
+          renderGoals();
+        };
+      }
+
+      debtTableBody.innerHTML = debtRows.map((row, idx) => debtEditMode ? `
+        <tr>
+          <td><input type="text" class="debt-name" data-index="${idx}" value="${escapeHtml(row.name)}" /></td>
+          <td><input type="text" class="debt-amount" data-index="${idx}" value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}" /></td>
+        </tr>
+      ` : `
+        <tr>
+          <td>${escapeHtml(row.name)}</td>
+          <td>${row.balance != null ? formatCurrency(row.balance) : ""}</td>
+        </tr>
+      `).join("");
+
+      function recalcDebtTotal() {
+        let total = 0;
+        debtRows.forEach(row => {
+          const val = row.balance || 0;
+          if (!isNaN(val)) total += val;
+        });
+        debtTotalEl.textContent = formatCurrency(total);
+        renderGoals();
+      }
+
+      if (debtEditMode) {
+        document.querySelectorAll(".debt-name").forEach(input => {
+          input.addEventListener("blur", (e) => {
+            const idx = parseInt(e.target.getAttribute("data-index"), 10);
+            debtRows[idx].name = e.target.value;
+            renderGoals();
+          });
+        });
+
+        document.querySelectorAll(".debt-amount").forEach(input => {
+          input.addEventListener("input", (e) => {
+            e.target.value = formatNumberWithCommas(e.target.value);
+            const idx = parseInt(e.target.getAttribute("data-index"), 10);
+            const val = getNumericValue(e.target.value);
+            debtRows[idx].balance = isNaN(val) ? null : val;
+            recalcDebtTotal();
+          });
+          input.addEventListener("blur", (e) => {
+            const idx = parseInt(e.target.getAttribute("data-index"), 10);
+            const val = getNumericValue(e.target.value);
+            debtRows[idx].balance = isNaN(val) ? null : val;
+            recalcDebtTotal();
+          });
+        });
+      }
+
+      recalcDebtTotal();
+    }
+
+    function renderInvestSection() {
+      const investTableBody = document.getElementById("investTableBody");
+      const investTotalEl = document.getElementById("investTotal");
+      const editBtn = document.getElementById("investEditBtn");
+      const addBtn = document.getElementById("investAddRowBtn");
+      if (!investTableBody || !investTotalEl) return;
+
+      if (editBtn) {
+        editBtn.textContent = investEditMode ? "Done" : "Edit";
+        editBtn.onclick = () => {
+          investEditMode = !investEditMode;
+          renderInvestSection();
+        };
+      }
+
+      if (addBtn) {
+        addBtn.classList.toggle("hidden", !investEditMode);
+        addBtn.onclick = () => {
+          investmentRows.push({ name: "", balance: null });
+          renderInvestSection();
+        };
+      }
+
+      investTableBody.innerHTML = investmentRows.map((row, idx) => investEditMode ? `
+        <tr>
+          <td><input type="text" class="invest-name" data-index="${idx}" value="${escapeHtml(row.name)}" /></td>
+          <td><input type="text" class="invest-amount" data-index="${idx}" value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}" /></td>
+        </tr>
+      ` : `
+        <tr>
+          <td>${escapeHtml(row.name)}</td>
+          <td>${row.balance != null ? formatCurrency(row.balance) : ""}</td>
+        </tr>
+      `).join("");
+
+      function recalcInvestTotal() {
+        let total = 0;
+        investmentRows.forEach(row => {
+          const val = row.balance || 0;
+          if (!isNaN(val)) total += val;
+        });
+        investTotalEl.textContent = formatCurrency(total);
+      }
+
+      if (investEditMode) {
+        document.querySelectorAll(".invest-name").forEach(input => {
+          input.addEventListener("blur", (e) => {
+            const idx = parseInt(e.target.getAttribute("data-index"), 10);
+            investmentRows[idx].name = e.target.value;
+          });
+        });
+
+        document.querySelectorAll(".invest-amount").forEach(input => {
+          input.addEventListener("input", (e) => {
+            e.target.value = formatNumberWithCommas(e.target.value);
+            const idx = parseInt(e.target.getAttribute("data-index"), 10);
+            const val = getNumericValue(e.target.value);
+            investmentRows[idx].balance = isNaN(val) ? null : val;
+            recalcInvestTotal();
+          });
+          input.addEventListener("blur", (e) => {
+            const idx = parseInt(e.target.getAttribute("data-index"), 10);
+            const val = getNumericValue(e.target.value);
+            investmentRows[idx].balance = isNaN(val) ? null : val;
+            recalcInvestTotal();
+          });
+        });
+      }
+
+      recalcInvestTotal();
+    }
+
+    function renderPersonalFinance() {
+      if (!document.getElementById("budgetTableBody")) return;
+      updatePersonalIncomePills();
+      attachPf401kListeners();
+      renderBudgetSection();
+      renderStoreSection();
+      renderUpcomingSection();
+      renderDebtSection();
+      renderInvestSection();
+      renderGoals();
+    }
+
+    function renderGoals() {
+      const readingTarget = 55;
+      const readingSummaryEl = document.getElementById("readingGoalSummary");
+      const readingGoalProgressEl = document.getElementById("readingGoalProgress");
+      const readingCardProgressEl = document.getElementById("readingCardProgress");
+      const readingStatsEl = document.getElementById("readingGoalStats");
+      const readingEditBtn = document.getElementById("readingEditBtn");
+      const booksCompletedBody = document.getElementById("booksCompletedBody");
+      const booksToReadBody = document.getElementById("booksToReadBody");
+      const booksCompletedAddBtn = document.getElementById("booksCompletedAddBtn");
+      const booksToReadAddBtn = document.getElementById("booksToReadAddBtn");
+      const debtGoalSummaryEl = document.getElementById("debtGoalSummary");
+      const debtGoalProgressEl = document.getElementById("debtGoalProgress");
+      const debtGoalBody = document.getElementById("debtGoalBody");
+      const debtGoalTotalEl = document.getElementById("debtGoalTotal");
+      const debtNotesView = document.getElementById("debtNotesView");
+      const debtNotesInput = document.getElementById("debtNotesInput");
+      const debtGoalEditBtn = document.getElementById("debtGoalEditBtn");
+
+      const setProgressWidth = (el, pct) => {
+        if (el) {
+          const clamped = Math.min(Math.max(pct, 0), 100);
+          el.style.width = clamped + "%";
+        }
+      };
+
+      const refreshReadingDisplays = () => {
+        const completedCount = readingCompletedRows.filter(r => (r.title || "").trim()).length;
+        const remaining = Math.max(readingTarget - completedCount, 0);
+        const pct = readingTarget > 0 ? (completedCount / readingTarget) * 100 : 0;
+        if (readingSummaryEl) {
+          readingSummaryEl.textContent = `Completed: ${completedCount} / ${readingTarget}`;
+        }
+        setProgressWidth(readingGoalProgressEl, pct);
+        setProgressWidth(readingCardProgressEl, pct);
+        if (readingStatsEl) {
+          readingStatsEl.textContent = `Target: ${readingTarget} · Completed: ${completedCount} · Remaining: ${remaining}`;
+        }
+      };
+
+      refreshReadingDisplays();
+
+      if (readingEditBtn) {
+        readingEditBtn.textContent = readingEditMode ? "Done" : "Edit Reading List";
+        readingEditBtn.onclick = () => {
+          readingEditMode = !readingEditMode;
+          renderGoals();
+        };
+      }
+
+      if (booksCompletedAddBtn) {
+        booksCompletedAddBtn.classList.toggle("hidden", !readingEditMode);
+        booksCompletedAddBtn.onclick = () => {
+          readingCompletedRows.push({ title: "", author: "", format: "", rating: "", notes: "" });
+          renderGoals();
+        };
+      }
+
+      if (booksToReadAddBtn) {
+        booksToReadAddBtn.classList.toggle("hidden", !readingEditMode);
+        booksToReadAddBtn.onclick = () => {
+          readingToReadRows.push({ title: "", author: "" });
+          renderGoals();
+        };
+      }
+
+      if (booksCompletedBody) {
+        booksCompletedBody.innerHTML = readingCompletedRows.map((row, idx) => readingEditMode ? `
+          <tr>
+            <td><input type="text" class="completed-title" data-index="${idx}" value="${escapeHtml(row.title)}" /></td>
+            <td><input type="text" class="completed-author" data-index="${idx}" value="${escapeHtml(row.author)}" /></td>
+            <td><input type="text" class="completed-format" data-index="${idx}" value="${escapeHtml(row.format)}" /></td>
+            <td><input type="text" class="completed-rating" data-index="${idx}" value="${escapeHtml(row.rating)}" /></td>
+            <td><input type="text" class="completed-notes" data-index="${idx}" value="${escapeHtml(row.notes)}" /></td>
+          </tr>
+        ` : `
+          <tr>
+            <td>${escapeHtml(row.title)}</td>
+            <td>${escapeHtml(row.author)}</td>
+            <td>${escapeHtml(row.format)}</td>
+            <td>${escapeHtml(row.rating)}</td>
+            <td>${escapeHtml(row.notes)}</td>
+          </tr>
+        `).join("");
+
+        if (readingEditMode) {
+          const bindInput = (selector, key) => {
+            document.querySelectorAll(selector).forEach(input => {
+              input.addEventListener("input", (e) => {
+                const idx = parseInt(e.target.getAttribute("data-index"), 10);
+                readingCompletedRows[idx][key] = e.target.value;
+                refreshReadingDisplays();
+              });
+              input.addEventListener("blur", refreshReadingDisplays);
+            });
+          };
+          bindInput(".completed-title", "title");
+          bindInput(".completed-author", "author");
+          bindInput(".completed-format", "format");
+          bindInput(".completed-rating", "rating");
+          bindInput(".completed-notes", "notes");
+        }
+      }
+
+      if (booksToReadBody) {
+        booksToReadBody.innerHTML = readingToReadRows.map((row, idx) => readingEditMode ? `
+          <tr>
+            <td><input type="text" class="toread-title" data-index="${idx}" value="${escapeHtml(row.title)}" /></td>
+            <td><input type="text" class="toread-author" data-index="${idx}" value="${escapeHtml(row.author)}" /></td>
+          </tr>
+        ` : `
+          <tr>
+            <td>${escapeHtml(row.title)}</td>
+            <td>${escapeHtml(row.author)}</td>
+          </tr>
+        `).join("");
+
+        if (readingEditMode) {
+          document.querySelectorAll(".toread-title").forEach(input => {
+            input.addEventListener("input", (e) => {
+              const idx = parseInt(e.target.getAttribute("data-index"), 10);
+              readingToReadRows[idx].title = e.target.value;
+            });
+          });
+          document.querySelectorAll(".toread-author").forEach(input => {
+            input.addEventListener("input", (e) => {
+              const idx = parseInt(e.target.getAttribute("data-index"), 10);
+              readingToReadRows[idx].author = e.target.value;
+            });
+          });
+        }
+      }
+
+      const debtTotal = debtRows.reduce((sum, row) => sum + (row.balance || 0), 0);
+      if (debtGoalSummaryEl) {
+        debtGoalSummaryEl.textContent = "Total debt: " + formatCurrency(debtTotal);
+      }
+      if (debtGoalBody) {
+        debtGoalBody.innerHTML = debtRows.map(row => `
+          <tr>
+            <td>${escapeHtml(row.name)}</td>
+            <td>${row.balance != null ? formatCurrency(row.balance) : ""}</td>
+          </tr>
+        `).join("");
+      }
+      if (debtGoalTotalEl) {
+        debtGoalTotalEl.textContent = formatCurrency(debtTotal);
+      }
+      setProgressWidth(debtGoalProgressEl, debtTotal > 0 ? 100 : 0);
+
+      if (debtNotesView && debtNotesInput) {
+        debtNotesView.textContent = debtStrategyNotes || "No notes yet.";
+        debtNotesInput.value = debtStrategyNotes || "";
+        debtNotesView.classList.toggle("hidden", debtGoalEditMode);
+        debtNotesInput.classList.toggle("hidden", !debtGoalEditMode);
+      }
+
+      if (debtGoalEditBtn) {
+        debtGoalEditBtn.textContent = debtGoalEditMode ? "Done" : "Edit";
+        debtGoalEditBtn.onclick = async () => {
+          if (debtGoalEditMode && debtNotesInput) {
+            debtStrategyNotes = debtNotesInput.value;
+            await savePersonalFinanceData({ debtNotes: debtStrategyNotes });
+          }
+          debtGoalEditMode = !debtGoalEditMode;
+          renderGoals();
+        };
+      }
     }
 
     // --- Tabs logic ---
@@ -2347,9 +2916,16 @@
         if (tab === "commission") {
           commissionTab.classList.remove("hidden");
           personalTab.classList.add("hidden");
-        } else {
+          goalsTab.classList.add("hidden");
+        } else if (tab === "personal") {
           commissionTab.classList.add("hidden");
           personalTab.classList.remove("hidden");
+          goalsTab.classList.add("hidden");
+        } else {
+          commissionTab.classList.add("hidden");
+          personalTab.classList.add("hidden");
+          goalsTab.classList.remove("hidden");
+          renderGoals();
         }
       });
     });
@@ -2384,12 +2960,19 @@
         populateTerms();
         await renderHistory();
         await loadCompTracker();
+        await loadPersonalFinanceData();
         renderPersonalFinance();
       } else {
         authStatus.textContent = "Not signed in.";
         signInBtn.classList.remove("hidden");
         signOutBtn.classList.add("hidden");
         appContent.classList.add("hidden");
+        personalFinanceData = { pf401k: null, debtNotes: "" };
+        debtStrategyNotes = "";
+        if (pf401kTrackerInput) {
+          pf401kTrackerInput.value = "";
+          updatePf401kInfo();
+        }
         historyBody.innerHTML = "";
         totalsAmountEl.textContent = "$0";
         totalsPostTaxEl.textContent = "$0";
@@ -2407,6 +2990,7 @@
           compLineChart.destroy();
           compLineChart = null;
         }
+        renderGoals();
       }
     });
 
