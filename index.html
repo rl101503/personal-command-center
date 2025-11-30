@@ -578,6 +578,24 @@
 
     .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 999px; margin-right: 6px; }
 
+    .insight-card.accent-green {
+      border-color: rgba(34, 197, 94, 0.6);
+      box-shadow: 0 14px 30px rgba(34, 197, 94, 0.12);
+    }
+
+    .insight-card.accent-green .insight-metric {
+      color: #a7f3d0;
+    }
+
+    .insight-card.accent-red {
+      border-color: rgba(239, 68, 68, 0.6);
+      box-shadow: 0 14px 30px rgba(239, 68, 68, 0.12);
+    }
+
+    .insight-card.accent-red .insight-metric {
+      color: #fecdd3;
+    }
+
     .save-dashboard-btn {
       margin-left: auto;
       padding-inline: 1.1rem;
@@ -1486,20 +1504,28 @@
         <div class="insights-grid">
           <div class="insight-card">
             <div class="insight-title">401k Tracker</div>
-            <div class="insight-metric" id="insights401kTotal">$0</div>
-            <div class="insight-subtext">Total 401k Balance</div>
+            <div class="insight-subtext">YTD 401k Contributions</div>
+            <div class="insight-metric" id="insights401kContribution">$0</div>
+            <div class="progress-track"><div class="progress-bar" id="insights401kBar"></div></div>
+            <div class="insight-progress-label">Target: $23,500 · <span id="insights401kPercent">0%</span> of target</div>
           </div>
 
           <div class="insight-card">
             <div class="insight-title">Reading Goal Tracker</div>
             <div class="progress-track"><div class="progress-bar" id="insightsReadingBar"></div></div>
-            <div class="insight-progress-label" id="insightsReadingLabel">0 of 0 books completed</div>
+            <div class="insight-progress-label" id="insightsReadingLabel">0 of 55 books completed</div>
           </div>
 
-          <div class="insight-card">
+          <div class="insight-card accent-red">
             <div class="insight-title">Total Debt</div>
             <div class="insight-metric" id="insightsDebtTotal">$0</div>
             <div class="insight-subtext">Sum of all outstanding debts</div>
+          </div>
+
+          <div class="insight-card accent-green">
+            <div class="insight-title">Total Assets</div>
+            <div class="insight-metric" id="insightsAssetsTotal">$0</div>
+            <div class="insight-subtext">Sum of all assets</div>
           </div>
 
           <div class="insight-card" style="align-items:flex-start;">
@@ -1654,10 +1680,13 @@
     const insightsTab = document.getElementById("insightsTab");
 
     // Insights elements
-    const insights401kTotalEl = document.getElementById("insights401kTotal");
+    const insights401kContributionEl = document.getElementById("insights401kContribution");
+    const insights401kBar = document.getElementById("insights401kBar");
+    const insights401kPercentEl = document.getElementById("insights401kPercent");
     const insightsReadingBar = document.getElementById("insightsReadingBar");
     const insightsReadingLabel = document.getElementById("insightsReadingLabel");
     const insightsDebtTotalEl = document.getElementById("insightsDebtTotal");
+    const insightsAssetsTotalEl = document.getElementById("insightsAssetsTotal");
     const insightsCompChartEl = document.getElementById("insightsCompChart");
 
     let currentUser = null;
@@ -2272,6 +2301,16 @@
       pf401kPercentEl.textContent = pct.toFixed(1) + "%";
     }
 
+    function getPf401kContribution() {
+      if (pf401kTrackerInput) {
+        const val = getNumericValue(pf401kTrackerInput.value);
+        return isNaN(val) ? 0 : val;
+      }
+
+      const stored = personalFinanceState.pf401k;
+      return typeof stored === "number" ? stored : 0;
+    }
+
     function setProgressWidth(el, pct) {
       if (el) {
         const clamped = Math.min(Math.max(pct, 0), 100);
@@ -2288,14 +2327,11 @@
       return total;
     }
 
-    function compute401kTotal() {
+    function computeAssetsTotal() {
       return investmentRows.reduce((sum, row) => {
-        const name = (row.name || "").toLowerCase();
-        if (name.includes("401k")) {
-          const val = row.balance || 0;
-          if (!isNaN(val)) {
-            return sum + val;
-          }
+        const val = row.balance || 0;
+        if (!isNaN(val)) {
+          return sum + val;
         }
         return sum;
       }, 0);
@@ -3460,11 +3496,7 @@
       `).join("");
 
       function recalcInvestTotal() {
-        let total = 0;
-        investmentRows.forEach(row => {
-          const val = row.balance || 0;
-          if (!isNaN(val)) total += val;
-        });
+        const total = computeAssetsTotal();
         investTotalEl.textContent = formatCurrency(total);
         renderInsights();
       }
@@ -3713,25 +3745,36 @@
     }
 
     function renderInsights() {
-      if (insights401kTotalEl) {
-        const total401k = compute401kTotal();
-        insights401kTotalEl.textContent = formatCurrency(total401k);
+      if (insights401kContributionEl || insights401kBar || insights401kPercentEl) {
+        const contributed = getPf401kContribution();
+        const pct = PF_401K_TARGET > 0 ? (contributed / PF_401K_TARGET) * 100 : 0;
+
+        if (insights401kContributionEl) {
+          insights401kContributionEl.textContent = formatCurrency(contributed);
+        }
+        setProgressWidth(insights401kBar, pct);
+        if (insights401kPercentEl) {
+          insights401kPercentEl.textContent = pct.toFixed(1) + "%";
+        }
       }
 
       if (insightsReadingBar || insightsReadingLabel) {
         const completedCount = readingCompletedRows.filter(r => (r.title || "").trim()).length;
-        const toReadCount = readingToReadRows.filter(r => (r.title || "").trim()).length;
-        const totalTarget = (completedCount + toReadCount) || READING_TARGET;
-        const pct = totalTarget > 0 ? (completedCount / totalTarget) * 100 : 0;
+        const pct = READING_TARGET > 0 ? (completedCount / READING_TARGET) * 100 : 0;
         setProgressWidth(insightsReadingBar, pct);
         if (insightsReadingLabel) {
-          insightsReadingLabel.textContent = `${completedCount} of ${totalTarget} books completed`;
+          insightsReadingLabel.textContent = `${completedCount} of ${READING_TARGET} books completed`;
         }
       }
 
       if (insightsDebtTotalEl) {
         const debtTotal = computeDebtTotal();
         insightsDebtTotalEl.textContent = formatCurrency(debtTotal);
+      }
+
+      if (insightsAssetsTotalEl) {
+        const assetsTotal = computeAssetsTotal();
+        insightsAssetsTotalEl.textContent = formatCurrency(assetsTotal);
       }
 
       if (insightsCompChartEl) {
