@@ -93,6 +93,7 @@
       box-shadow: 0 14px 30px rgba(0,0,0,0.6);
       border: 1px solid #1797d7;
       margin-bottom: 1.2rem;
+      width: 100%;
     }
 
     .card h2 {
@@ -270,6 +271,15 @@
       border: 1px solid #1797d7;
       margin-top: 0.6rem;
       background: #020617;
+    }
+
+    /* Mobile-friendly table container to ensure horizontal scroll on small screens */
+    .table-scroll,
+    .totals-summary,
+    .pf-income-summary,
+    .history-wrapper {
+      overflow-x: auto;
+      width: 100%;
     }
 
     /* Larger, tighter budget table */
@@ -572,7 +582,7 @@
       color: #e5eef7;
     }
 
-    .insight-chart { width: 100%; max-width: 240px; }
+    .insight-chart { width: 100%; max-width: 100%; height: auto; }
 
     .insight-legend { font-size: 0.85rem; color: #e5eef7; display: flex; flex-direction: column; gap: 0.15rem; }
 
@@ -809,28 +819,152 @@
       margin-top: 0.3rem;
     }
 
-    @media (max-width: 800px) {
+    /* Mobile layout adjustments (max-width: 768px) */
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 0.25rem;
+      }
+      body {
+        padding: 1.5rem 0.85rem;
+      }
+      h1 {
+        font-size: 1.55rem;
+      }
       .header-row {
         flex-direction: column;
         align-items: flex-start;
+        gap: 1.25rem;
       }
       .header-right {
         align-items: center;
+        width: 100%;
+        justify-content: space-between;
       }
       .logo {
-        max-height: 40px;
-      }
-      h1 {
-        font-size: 1.5rem;
+        max-height: 38px;
       }
       .card {
-        padding: 1.2rem;
+        padding: 1.25rem;
       }
-      .singledeal-layout {
+      .tab-nav {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.75rem;
+      }
+      .tab-buttons {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+      }
+      .tab-button {
+        flex: 1 1 calc(50% - 0.6rem);
+        text-align: center;
+        padding: 0.65rem 0.9rem;
+        font-size: 0.95rem;
+      }
+      .save-dashboard-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .results-grid,
+      .kpi-row,
+      .reading-pill-row {
+        grid-template-columns: 1fr;
+      }
+      .pf-row,
+      .comp-layout,
+      .comp-tables-row,
+      .singledeal-layout,
+      .reading-tables {
         flex-direction: column;
       }
-      .singledeal-results {
+      .singledeal-inputs-row {
+        grid-template-columns: 1fr;
+      }
+      .pf-col-half,
+      .comp-settings,
+      .comp-chart-container,
+      .comp-table-wrapper,
+      .singledeal-inputs,
+      .singledeal-results,
+      .reading-table {
         max-width: 100%;
+        width: 100%;
+      }
+      .comp-chart-container,
+      .singledeal-results,
+      .comp-table-wrapper {
+        flex: 1 1 100%;
+      }
+      .comp-chart-container,
+      .singledeal-results,
+      .comp-chart-container canvas {
+        flex: 1 1 100%;
+      }
+      .tab-nav,
+      .card,
+      .history-wrapper,
+      .totals-summary,
+      .pf-income-summary,
+      .table-scroll {
+        border-radius: 0.75rem;
+      }
+      .pf-row,
+      .reading-tables,
+      .singledeal-layout,
+      .comp-layout,
+      .comp-tables-row {
+        gap: 0.9rem;
+      }
+      button {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+      }
+      .btn-small,
+      .sort-btn,
+      #signOutBtn,
+      #signInBtn {
+        padding: 0.55rem 0.9rem;
+        font-size: 0.8rem;
+      }
+      input[type="text"],
+      select,
+      textarea {
+        font-size: 0.95rem;
+        padding: 0.65rem 0.75rem;
+      }
+      label,
+      .result-label,
+      .kpi-label {
+        font-size: 0.9rem;
+      }
+      .tab-nav {
+        position: static;
+      }
+      .history-header-row,
+      .goals-sort-row,
+      .section-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .insights-grid {
+        grid-template-columns: 1fr;
+      }
+      .insight-card {
+        width: 100%;
+      }
+      .history-wrapper,
+      .budget-wrapper,
+      .table-scroll,
+      .totals-summary {
+        padding-bottom: 0.5rem;
+      }
+      /* Ensure charts stay full-width on phones */
+      .insight-chart,
+      #compLineChart {
+        width: 100% !important;
+        height: auto !important;
       }
     }
 
