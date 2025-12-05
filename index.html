@@ -582,6 +582,8 @@
       color: #e5eef7;
     }
 
+    .insight-chart-wrapper { width: 100%; display: flex; justify-content: center; padding: 0.25rem 0 0.4rem; }
+
     .insight-chart { width: 100%; max-width: 100%; height: auto; }
 
     .insight-legend { font-size: 0.85rem; color: #e5eef7; display: flex; flex-direction: column; gap: 0.15rem; }
@@ -1663,11 +1665,14 @@
           </div>
 
           <div class="insight-card" style="align-items:flex-start;">
-            <div class="insight-title">Variable Compensation Tracker</div>
-            <canvas id="insightsCompChart" class="insight-chart"></canvas>
+            <div class="insight-title">Annual Variable Compensation (Pie)</div>
+            <div class="insight-subtext">Earned vs remaining toward the annual target.</div>
+            <div class="insight-chart-wrapper">
+              <canvas id="insightsCompChart" class="insight-chart"></canvas>
+            </div>
             <div class="insight-legend">
               <span><span class="legend-dot" style="background:#22c55e;"></span>Earned</span>
-              <span><span class="legend-dot" style="background:#ef4444;"></span>Remaining to $250,000 target</span>
+              <span><span class="legend-dot" style="background:#ef4444;"></span>Remaining to <span id="insightsCompTargetLabel">$250,000</span> target</span>
             </div>
           </div>
         </div>
@@ -1822,6 +1827,7 @@
     const insightsDebtTotalEl = document.getElementById("insightsDebtTotal");
     const insightsAssetsTotalEl = document.getElementById("insightsAssetsTotal");
     const insightsCompChartEl = document.getElementById("insightsCompChart");
+    const insightsCompTargetLabel = document.getElementById("insightsCompTargetLabel");
 
     let currentUser = null;
 
@@ -2475,6 +2481,56 @@
       return fiscalMonths.reduce((total, month) => total + (compConfig.monthlyValues[month] || 0), 0);
     }
 
+    function getAnnualCompTarget() {
+      const configuredTarget = compConfig.annualTarget;
+      if (typeof configuredTarget === "number") {
+        return configuredTarget;
+      }
+      return VARIABLE_COMP_TARGET;
+    }
+
+    function getCompPieData(earnedValue, targetValue) {
+      const earned = typeof earnedValue === "number" ? earnedValue : computeCompEarned();
+      const target = typeof targetValue === "number" ? targetValue : getAnnualCompTarget();
+      const remaining = Math.max(target - earned, 0);
+      return { earned, remaining, target };
+    }
+
+    function renderCompPieChart(existingChart, ctx, pieData, { displayLegend = true, legendPosition = "bottom" } = {}) {
+      if (!ctx || !pieData) return existingChart;
+
+      const dataset = [pieData.earned, pieData.remaining];
+
+      if (!existingChart) {
+        return new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: ["Earned", "Remaining"],
+            datasets: [{
+              data: dataset,
+              backgroundColor: ["#22c55e", "#ef4444"],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            plugins: {
+              legend: {
+                display: displayLegend,
+                position: legendPosition
+              }
+            },
+            cutout: "60%"
+          }
+        });
+      }
+
+      existingChart.data.datasets[0].data = dataset;
+      existingChart.options.plugins.legend.display = displayLegend;
+      existingChart.options.plugins.legend.position = legendPosition;
+      existingChart.update();
+      return existingChart;
+    }
+
     // --- Term dropdown handling ---
     function populateTerms() {
       const type = dealTypeSelect.value;
@@ -2917,7 +2973,7 @@
     }
 
     function updateCompChartsAndSummary() {
-      const annualTarget = compConfig.annualTarget || 0;
+      const annualTarget = getAnnualCompTarget();
       let earned = 0;
       const monthlyRaw = [];
       fiscalMonths.forEach(m => {
@@ -2925,7 +2981,7 @@
         earned += v;
         monthlyRaw.push(v);
       });
-      const remaining = Math.max(annualTarget - earned, 0);
+      const pieValues = getCompPieData(earned, annualTarget);
 
       const pct = annualTarget > 0 ? (earned / annualTarget) * 100 : 0;
       const pctText = annualTarget > 0 ? pct.toFixed(1) + "%" : "—";
@@ -2937,10 +2993,10 @@
 
       // Update big labels next to pie chart
       if (compEarnedLabel) {
-        compEarnedLabel.textContent = formatCurrency(earned);
+        compEarnedLabel.textContent = formatCurrency(pieValues.earned);
       }
       if (compRemainingLabel) {
-        compRemainingLabel.textContent = formatCurrency(remaining);
+        compRemainingLabel.textContent = formatCurrency(pieValues.remaining);
       }
 
       // Average monthly take-home (post tax, 66% of monthly) based ONLY on months with data
@@ -2957,33 +3013,9 @@
       updatePersonalIncomePills();
 
       // --- Pie chart (Earned vs Remaining) ---
-      const pieCtx = document.getElementById("compPieChart").getContext("2d");
-      const pieData = [earned, remaining];
-
-      if (!compPieChart) {
-        compPieChart = new Chart(pieCtx, {
-          type: "doughnut",
-          data: {
-            labels: ["Earned", "Remaining"],
-            datasets: [{
-              data: pieData,
-              backgroundColor: ["#22c55e", "#ef4444"],
-              borderWidth: 0
-            }]
-          },
-          options: {
-            plugins: {
-              legend: {
-                position: "bottom"
-              }
-            },
-            cutout: "60%"
-          }
-        });
-      } else {
-        compPieChart.data.datasets[0].data = pieData;
-        compPieChart.update();
-      }
+      const pieCanvas = document.getElementById("compPieChart");
+      const pieCtx = pieCanvas ? pieCanvas.getContext("2d") : null;
+      compPieChart = renderCompPieChart(compPieChart, pieCtx, pieValues, { displayLegend: true, legendPosition: "bottom" });
 
       // --- Line chart (CUMULATIVE target vs actual) ---
       const lineCtx = document.getElementById("compLineChart").getContext("2d");
@@ -3912,27 +3944,16 @@
       }
 
       if (insightsCompChartEl) {
-        const earned = computeCompEarned();
-        const remaining = Math.max(VARIABLE_COMP_TARGET - earned, 0);
-        const pieData = [earned, remaining];
-
-        if (!insightsCompChart) {
-          insightsCompChart = new Chart(insightsCompChartEl.getContext("2d"), {
-            type: "doughnut",
-            data: {
-              labels: ["Earned", "Remaining"],
-              datasets: [{
-                data: pieData,
-                backgroundColor: ["#22c55e", "#ef4444"],
-                borderWidth: 0
-              }]
-            },
-            options: { cutout: "60%", plugins: { legend: { display: false } } }
-          });
-        } else {
-          insightsCompChart.data.datasets[0].data = pieData;
-          insightsCompChart.update();
+        const pieValues = getCompPieData();
+        if (insightsCompTargetLabel) {
+          insightsCompTargetLabel.textContent = formatCurrency(pieValues.target);
         }
+        insightsCompChart = renderCompPieChart(
+          insightsCompChart,
+          insightsCompChartEl.getContext("2d"),
+          pieValues,
+          { displayLegend: false }
+        );
       }
     }
 
