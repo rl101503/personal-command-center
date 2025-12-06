@@ -1664,6 +1664,12 @@
             <div class="insight-subtext">Sum of all assets</div>
           </div>
 
+          <div class="insight-card accent-green">
+            <div class="insight-title">Cash on Hand</div>
+            <div class="insight-metric" id="insightsCashOnHand">$0</div>
+            <div class="insight-subtext">BOA Balance minus Capital One and Citi Credit Card balances</div>
+          </div>
+
           <div class="insight-card" style="align-items:flex-start;">
             <div class="insight-title">Annual Variable Compensation (Pie)</div>
             <div class="insight-subtext">Earned vs remaining toward the annual target.</div>
@@ -1826,6 +1832,7 @@
     const insightsReadingLabel = document.getElementById("insightsReadingLabel");
     const insightsDebtTotalEl = document.getElementById("insightsDebtTotal");
     const insightsAssetsTotalEl = document.getElementById("insightsAssetsTotal");
+    const insightsCashOnHandEl = document.getElementById("insightsCashOnHand");
     const insightsCompChartEl = document.getElementById("insightsCompChart");
     const insightsCompTargetLabel = document.getElementById("insightsCompTargetLabel");
 
@@ -2465,6 +2472,19 @@
         if (!isNaN(val)) total += val;
       });
       return total;
+    }
+
+    function getBalanceByName(rows, targetName) {
+      const match = rows.find(row => (row.name || "").trim().toLowerCase() === targetName.toLowerCase());
+      const value = match ? match.balance : null;
+      return typeof value === "number" && !isNaN(value) ? value : 0;
+    }
+
+    function computeCashOnHand() {
+      const boaBalance = getBalanceByName(investmentRows, "BOA Balance");
+      const capitalOneBalance = getBalanceByName(debtRows, "Capital One");
+      const citiBalance = getBalanceByName(debtRows, "Citi Credit Card");
+      return boaBalance - capitalOneBalance - citiBalance;
     }
 
     function computeAssetsTotal() {
@@ -3941,6 +3961,11 @@
       if (insightsAssetsTotalEl) {
         const assetsTotal = computeAssetsTotal();
         insightsAssetsTotalEl.textContent = formatCurrency(assetsTotal);
+      }
+
+      if (insightsCashOnHandEl) {
+        const cashOnHand = computeCashOnHand();
+        insightsCashOnHandEl.textContent = formatCurrency(cashOnHand);
       }
 
       if (insightsCompChartEl) {
