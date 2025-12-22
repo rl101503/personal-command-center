@@ -232,6 +232,13 @@
       font-weight: 600;
     }
 
+    .result-footnote {
+      font-size: 0.7rem;
+      opacity: 0.75;
+      margin-top: 0.35rem;
+      color: #e5eef7;
+    }
+
     .tiny {
       font-size: 0.8rem;
       opacity: 0.8;
@@ -1256,103 +1263,6 @@
 
       <!-- PERSONAL FINANCES TAB -->
       <div id="personalTab" class="hidden">
-        <!-- Income summary pills at top -->
-        <div class="pf-income-summary">
-          <div class="results-grid">
-            <div class="result-pill">
-              <div class="result-label">Monthly Take-Home: Salary</div>
-              <div class="result-value" id="pfMonthlyNet">–</div>
-            </div>
-            <div class="result-pill">
-              <div class="result-label">Monthly Commission Post-Tax</div>
-              <div class="result-value" id="pfAvgMonthlyTakeHome">–</div>
-            </div>
-            <div class="result-pill">
-              <div class="result-label">Total Monthly Take home</div>
-              <div class="result-value" id="pfTotalMonthly">–</div>
-            </div>
-            <div class="result-pill">
-              <div class="result-label">401k tracker (USD)</div>
-              <input
-                id="pf401kTracker"
-                type="text"
-                class="pill-input"
-                placeholder="$0"
-              />
-              <div class="result-label" id="pf401kTargetText">
-                Target: $23,500 · <span id="pf401kPercent">0%</span> of target
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Income & Monthly Budget -->
-        <div class="card">
-          <div class="history-header-row">
-            <div>
-              <h2>Income & Monthly Budget</h2>
-              <p>
-                Editable monthly budget based on your spreadsheet. Numbers here are your working “source of truth”
-                for fixed + variable expenses.
-              </p>
-            </div>
-            <button type="button" id="budgetEditBtn" class="btn-secondary btn-small">Edit budget</button>
-          </div>
-
-          <div class="history-wrapper budget-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>
-                    Category
-                    <button type="button" id="budgetSortCategory" class="sort-btn">Sort A/Z</button>
-                  </th>
-                  <th>
-                    Amount (USD)
-                    <button type="button" id="budgetSortAmount" class="sort-btn">Sort ↑↓</button>
-                  </th>
-                  <th>Withdraw date</th>
-                  <th>Fixed / Variable</th>
-                  <th>Notes</th>
-                </tr>
-              </thead>
-              <tbody id="budgetTableBody">
-                <!-- populated by JS -->
-              </tbody>
-              <tfoot>
-                <tr class="budget-total-row">
-                  <td>Sum of all monthly expenses</td>
-                  <td id="budgetTotalFrozen">$0</td>
-                  <td colspan="3"></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          <div class="totals-summary">
-            <table class="totals-table">
-              <tbody>
-                <tr class="totals-row">
-                  <td>Total</td>
-                  <td id="budgetTotal">$0</td>
-                  <td colspan="3"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="totals-summary">
-            <div class="results-grid">
-              <div class="result-pill">
-                <div class="result-label">Total monthly expenses as % of total monthly take-home</div>
-                <div class="result-value" id="budgetPctOfIncome">–</div>
-              </div>
-              <div class="result-pill">
-                <div class="result-label">Monthly surplus</div>
-                <div class="result-value" id="budgetMonthlySurplus">–</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Groceries + Upcoming Purchases row -->
         <div class="pf-row">
           <!-- Groceries / Amazon / Retail -->
@@ -1489,6 +1399,9 @@
                 <button type="button" id="investEditBtn" class="btn-secondary btn-small">Edit</button>
               </div>
 
+              <div class="section-controls" style="margin-top:0.4rem;">
+                <h3 style="margin:0;">Liquid Assets</h3>
+              </div>
               <div class="history-wrapper">
                 <table>
                   <thead>
@@ -1497,7 +1410,24 @@
                       <th>Balance (USD)</th>
                     </tr>
                   </thead>
-                  <tbody id="investTableBody">
+                  <tbody id="investLiquidTableBody">
+                    <!-- populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="section-controls" style="margin-top:0.8rem;">
+                <h3 style="margin:0;">Static Assets</h3>
+              </div>
+              <div class="history-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Account</th>
+                      <th>Balance (USD)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="investStaticTableBody">
                     <!-- populated by JS -->
                   </tbody>
                 </table>
@@ -1512,6 +1442,104 @@
                     </tr>
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Income summary pills at bottom -->
+        <div class="pf-income-summary">
+          <div class="results-grid">
+            <div class="result-pill">
+              <div class="result-label">Monthly Take-Home: Salary</div>
+              <div class="result-value" id="pfMonthlyNet">–</div>
+            </div>
+            <div class="result-pill">
+              <div class="result-label">Monthly Commission Post-Tax</div>
+              <div class="result-value" id="pfAvgMonthlyTakeHome">–</div>
+            </div>
+            <div class="result-pill">
+              <div class="result-label">Total Monthly Take home</div>
+              <div class="result-value" id="pfTotalMonthly">–</div>
+            </div>
+            <div class="result-pill">
+              <div class="result-label">401k tracker (USD)</div>
+              <input
+                id="pf401kTracker"
+                type="text"
+                class="pill-input"
+                placeholder="$0"
+              />
+              <div class="result-label" id="pf401kTargetText">
+                Target: $23,500 · <span id="pf401kPercent">0%</span> of target
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Income & Monthly Budget -->
+        <div class="card">
+          <div class="history-header-row">
+            <div>
+              <h2>Income & Monthly Budget</h2>
+              <p>
+                Editable monthly budget based on your spreadsheet. Numbers here are your working “source of truth”
+                for fixed + variable expenses.
+              </p>
+            </div>
+            <button type="button" id="budgetEditBtn" class="btn-secondary btn-small">Edit budget</button>
+          </div>
+
+          <div class="history-wrapper budget-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>
+                    Category
+                    <button type="button" id="budgetSortCategory" class="sort-btn">Sort A/Z</button>
+                  </th>
+                  <th>
+                    Amount (USD)
+                    <button type="button" id="budgetSortAmount" class="sort-btn">Sort ↑↓</button>
+                  </th>
+                  <th>Withdraw date</th>
+                  <th>Fixed / Variable</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="budgetTableBody">
+                <!-- populated by JS -->
+              </tbody>
+              <tfoot>
+                <tr class="budget-total-row">
+                  <td>Sum of all monthly expenses</td>
+                  <td id="budgetTotalFrozen">$0</td>
+                  <td colspan="3"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="totals-summary">
+            <table class="totals-table">
+              <tbody>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td id="budgetTotal">$0</td>
+                  <td colspan="3"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="totals-summary">
+            <div class="results-grid">
+              <div class="result-pill">
+                <div class="result-label">Total monthly expenses as % of total monthly take-home</div>
+                <div class="result-value" id="budgetPctOfIncome">–</div>
+              </div>
+              <div class="result-pill">
+                <div class="result-label">Monthly surplus</div>
+                <div class="result-value" id="budgetMonthlySurplus">–</div>
+                <div class="result-footnote">*Surplus includes base salary AND commission.</div>
               </div>
             </div>
           </div>
@@ -3644,11 +3672,12 @@
     }
 
     function renderInvestSection() {
-      const investTableBody = document.getElementById("investTableBody");
+      const investLiquidTableBody = document.getElementById("investLiquidTableBody");
+      const investStaticTableBody = document.getElementById("investStaticTableBody");
       const investTotalEl = document.getElementById("investTotal");
       const editBtn = document.getElementById("investEditBtn");
       const addBtn = document.getElementById("investAddRowBtn");
-      if (!investTableBody || !investTotalEl) return;
+      if (!investLiquidTableBody || !investStaticTableBody || !investTotalEl) return;
 
       if (editBtn) {
         editBtn.textContent = investEditMode ? "Done" : "Edit";
@@ -3669,17 +3698,26 @@
         };
       }
 
-      investTableBody.innerHTML = investmentRows.map((row, idx) => investEditMode ? `
-        <tr>
-          <td><input type="text" class="invest-name" data-index="${idx}" value="${escapeHtml(row.name)}" /></td>
-          <td><input type="text" class="invest-amount" data-index="${idx}" value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}" /></td>
-        </tr>
-      ` : `
-        <tr>
-          <td>${renderAssetName(row.name)}</td>
-          <td>${row.balance != null ? formatCurrency(row.balance) : ""}</td>
-        </tr>
-      `).join("");
+      const liquidAssetNames = ["boa balance", "myrtle beach checking balance", "myrtle beach checking"];
+      const isLiquidAsset = (row) => liquidAssetNames.includes((row.name || "").trim().toLowerCase());
+
+      const buildRowsMarkup = (filterFn) => investmentRows
+        .map((row, idx) => ({ row, idx }))
+        .filter(({ row }) => filterFn(row))
+        .map(({ row, idx }) => investEditMode ? `
+          <tr>
+            <td><input type="text" class="invest-name" data-index="${idx}" value="${escapeHtml(row.name)}" /></td>
+            <td><input type="text" class="invest-amount" data-index="${idx}" value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}" /></td>
+          </tr>
+        ` : `
+          <tr>
+            <td>${renderAssetName(row.name)}</td>
+            <td>${row.balance != null ? formatCurrency(row.balance) : ""}</td>
+          </tr>
+        `).join("");
+
+      investLiquidTableBody.innerHTML = buildRowsMarkup(isLiquidAsset);
+      investStaticTableBody.innerHTML = buildRowsMarkup(row => !isLiquidAsset(row));
 
       function recalcInvestTotal() {
         const total = computeAssetsTotal();
