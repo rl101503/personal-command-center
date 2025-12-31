@@ -1019,8 +1019,8 @@
       <!-- TAB NAV -->
       <div class="tab-nav">
         <div class="tab-buttons">
-          <button class="tab-button active" data-tab="commission">Commission Tracker</button>
-          <button class="tab-button" data-tab="personal">Personal Finances</button>
+          <button class="tab-button active" data-tab="personal">Personal Finances</button>
+          <button class="tab-button" data-tab="commission">Commission Tracker</button>
           <button class="tab-button" data-tab="goals">Goals</button>
           <button class="tab-button" data-tab="insights">Insights</button>
         </div>
@@ -1029,7 +1029,7 @@
       </div>
 
       <!-- COMMISSION TAB -->
-      <div id="commissionTab">
+      <div id="commissionTab" class="hidden">
         <!-- SINGLE DEAL CALCULATOR -->
         <div class="card">
           <h2>Single Deal Calculator</h2>
@@ -1262,83 +1262,32 @@
       </div> <!-- end commissionTab -->
 
       <!-- PERSONAL FINANCES TAB -->
-      <div id="personalTab" class="hidden">
-        <!-- Groceries + Upcoming Purchases row -->
-        <div class="pf-row">
-          <!-- Groceries / Amazon / Retail -->
-          <div class="pf-col-half">
-            <div class="card">
-              <div class="history-header-row">
-                <div>
-                  <h2>Groceries & Retail Averages</h2>
-                  <p>
-                    Store-level monthly averages for Amazon, Teeter, Walmart, Publix, and Target.
-                    Period headers are editable so you can label any time ranges (e.g., Feb24–Jan25).
-                  </p>
-                </div>
-                <button type="button" id="storeEditBtn" class="btn-secondary btn-small">Edit</button>
-              </div>
-
-              <div class="history-wrapper">
-                <table>
-                  <thead id="storeTableHead"></thead>
-                  <tbody id="storeTableBody">
-                    <!-- populated by JS -->
-                  </tbody>
-                </table>
-              </div>
-              <button type="button" id="storeAddRowBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
-              <div class="totals-summary">
-                <table class="totals-table">
-                  <tbody>
-                    <tr class="totals-row">
-                      <td>Total (all stores)</td>
-                      <td id="storeTotalCol1">$0</td>
-                      <td id="storeTotalCol2">$0</td>
-                      <td id="storeTotalCol3">$0</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+      <div id="personalTab">
+        <!-- Income summary pills at top -->
+        <div class="pf-income-summary">
+          <div class="results-grid">
+            <div class="result-pill">
+              <div class="result-label">Monthly Take-Home: Salary</div>
+              <div class="result-value" id="pfMonthlyNet">–</div>
             </div>
-          </div>
-
-          <!-- Upcoming Purchases -->
-          <div class="pf-col-half">
-            <div class="card">
-              <div class="history-header-row">
-                <div>
-                  <h2>Upcoming Purchases</h2>
-                  <p>
-                    Free-form list of upcoming purchases. Edit categories and amounts as needed.
-                  </p>
-                </div>
-                <button type="button" id="upcomingEditBtn" class="btn-secondary btn-small">Edit</button>
-              </div>
-
-              <div class="history-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Category</th>
-                      <th>Amount (USD)</th>
-                    </tr>
-                  </thead>
-                  <tbody id="upcomingTableBody">
-                    <!-- populated by JS -->
-                  </tbody>
-                </table>
-              </div>
-              <button type="button" id="upcomingAddRowBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
-              <div class="totals-summary">
-                <table class="totals-table">
-                  <tbody>
-                    <tr class="totals-row">
-                      <td>Total</td>
-                      <td id="upcomingTotal">$0</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <div class="result-pill">
+              <div class="result-label">Monthly Commission Post-Tax</div>
+              <div class="result-value" id="pfAvgMonthlyTakeHome">–</div>
+            </div>
+            <div class="result-pill">
+              <div class="result-label">Total Monthly Take home</div>
+              <div class="result-value" id="pfTotalMonthly">–</div>
+            </div>
+            <div class="result-pill">
+              <div class="result-label">401k tracker (USD)</div>
+              <input
+                id="pf401kTracker"
+                type="text"
+                class="pill-input"
+                placeholder="$0"
+              />
+              <div class="result-label" id="pf401kTargetText">
+                Target: $23,500 · <span id="pf401kPercent">0%</span> of target
               </div>
             </div>
           </div>
@@ -1447,31 +1396,43 @@
           </div>
         </div>
 
-        <!-- Income summary pills at bottom -->
-        <div class="pf-income-summary">
-          <div class="results-grid">
-            <div class="result-pill">
-              <div class="result-label">Monthly Take-Home: Salary</div>
-              <div class="result-value" id="pfMonthlyNet">–</div>
-            </div>
-            <div class="result-pill">
-              <div class="result-label">Monthly Commission Post-Tax</div>
-              <div class="result-value" id="pfAvgMonthlyTakeHome">–</div>
-            </div>
-            <div class="result-pill">
-              <div class="result-label">Total Monthly Take home</div>
-              <div class="result-value" id="pfTotalMonthly">–</div>
-            </div>
-            <div class="result-pill">
-              <div class="result-label">401k tracker (USD)</div>
-              <input
-                id="pf401kTracker"
-                type="text"
-                class="pill-input"
-                placeholder="$0"
-              />
-              <div class="result-label" id="pf401kTargetText">
-                Target: $23,500 · <span id="pf401kPercent">0%</span> of target
+        <!-- Upcoming Purchases -->
+        <div class="pf-row">
+          <div class="pf-col-half">
+            <div class="card">
+              <div class="history-header-row">
+                <div>
+                  <h2>Upcoming Purchases</h2>
+                  <p>
+                    Free-form list of upcoming purchases. Edit categories and amounts as needed.
+                  </p>
+                </div>
+                <button type="button" id="upcomingEditBtn" class="btn-secondary btn-small">Edit</button>
+              </div>
+
+              <div class="history-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Amount (USD)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="upcomingTableBody">
+                    <!-- populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+              <button type="button" id="upcomingAddRowBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
+              <div class="totals-summary">
+                <table class="totals-table">
+                  <tbody>
+                    <tr class="totals-row">
+                      <td>Total</td>
+                      <td id="upcomingTotal">$0</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -1544,6 +1505,46 @@
               <div class="result-pill">
                 <div class="result-label">Amy’s average take home, post-tax</div>
                 <div class="result-value">$2,300</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Groceries & Retail Averages (moved to bottom) -->
+        <div class="pf-row">
+          <div class="pf-col-half">
+            <div class="card">
+              <div class="history-header-row">
+                <div>
+                  <h2>Groceries & Retail Averages</h2>
+                  <p>
+                    Store-level monthly averages for Amazon, Teeter, Walmart, Publix, and Target.
+                    Period headers are editable so you can label any time ranges (e.g., Feb24–Jan25).
+                  </p>
+                </div>
+                <button type="button" id="storeEditBtn" class="btn-secondary btn-small">Edit</button>
+              </div>
+
+              <div class="history-wrapper">
+                <table>
+                  <thead id="storeTableHead"></thead>
+                  <tbody id="storeTableBody">
+                    <!-- populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+              <button type="button" id="storeAddRowBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
+              <div class="totals-summary">
+                <table class="totals-table">
+                  <tbody>
+                    <tr class="totals-row">
+                      <td>Total (all stores)</td>
+                      <td id="storeTotalCol1">$0</td>
+                      <td id="storeTotalCol2">$0</td>
+                      <td id="storeTotalCol3">$0</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -1687,6 +1688,7 @@
           <div class="insight-card accent-red">
             <div class="insight-title">Total Debt</div>
             <div class="insight-metric" id="insightsDebtTotal">$0</div>
+            <div class="tiny" id="insightsCreditCardDebt">Credit Card debt: $0</div>
             <div class="insight-subtext">Sum of all outstanding debts</div>
           </div>
 
@@ -1867,6 +1869,7 @@
     const insightsCashOnHandEl = document.getElementById("insightsCashOnHand");
     const insightsCompChartEl = document.getElementById("insightsCompChart");
     const insightsCompTargetLabel = document.getElementById("insightsCompTargetLabel");
+    const insightsCreditCardDebtEl = document.getElementById("insightsCreditCardDebt");
 
     let currentUser = null;
 
@@ -2519,6 +2522,12 @@
       return boaBalance - capitalOneBalance - citiBalance;
     }
 
+    function computeCreditCardDebtTotal() {
+      const capitalOneBalance = getBalanceByName(debtRows, "Capital One");
+      const citiBalance = getBalanceByName(debtRows, "Citi Credit Card");
+      return capitalOneBalance + citiBalance;
+    }
+
     function computeAssetsTotal() {
       return investmentRows.reduce((sum, row) => {
         const val = row.balance || 0;
@@ -2548,7 +2557,49 @@
       return { earned, remaining, target };
     }
 
-    function renderCompPieChart(existingChart, ctx, pieData, { displayLegend = true, legendPosition = "bottom" } = {}) {
+    const pieLabelPlugin = {
+      id: "pieLabelPlugin",
+      afterDraw(chart, args, opts) {
+        if (!opts || !opts.showLabels) return;
+        const meta = chart.getDatasetMeta(0);
+        if (!meta || !meta.data || !meta.data.length) return;
+
+        const dataset = chart.data.datasets[0];
+        const labels = chart.data.labels || [];
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#f9fafb";
+        meta.data.forEach((arc, index) => {
+          const value = dataset.data[index];
+          if (!value) return;
+
+          const { x, y, startAngle, endAngle, innerRadius, outerRadius } = arc.getProps(
+            ["x", "y", "startAngle", "endAngle", "innerRadius", "outerRadius"],
+            true
+          );
+          const angle = (startAngle + endAngle) / 2;
+          const radius = innerRadius + (outerRadius - innerRadius) / 2;
+          const posX = x + Math.cos(angle) * radius;
+          const posY = y + Math.sin(angle) * radius;
+          const lineItems = labels[index] ? [labels[index], formatCurrency(value)] : [formatCurrency(value)];
+
+          lineItems.forEach((line, lineIndex) => {
+            ctx.font = lineIndex === 0 && lineItems.length > 1
+              ? "600 12px 'Inter Tight', sans-serif"
+              : "600 11px 'Inter Tight', sans-serif";
+            const yOffset = (lineIndex - (lineItems.length - 1) / 2) * 14;
+            ctx.fillText(line, posX, posY + yOffset);
+          });
+        });
+        ctx.restore();
+      }
+    };
+
+    Chart.register(pieLabelPlugin);
+
+    function renderCompPieChart(existingChart, ctx, pieData, { displayLegend = true, legendPosition = "bottom", showLabels = false } = {}) {
       if (!ctx || !pieData) return existingChart;
 
       const dataset = [pieData.earned, pieData.remaining];
@@ -2569,7 +2620,8 @@
               legend: {
                 display: displayLegend,
                 position: legendPosition
-              }
+              },
+              pieLabelPlugin: { showLabels }
             },
             cutout: "60%"
           }
@@ -2579,6 +2631,7 @@
       existingChart.data.datasets[0].data = dataset;
       existingChart.options.plugins.legend.display = displayLegend;
       existingChart.options.plugins.legend.position = legendPosition;
+      existingChart.options.plugins.pieLabelPlugin = { showLabels };
       existingChart.update();
       return existingChart;
     }
@@ -3995,9 +4048,13 @@
         }
       }
 
+      const debtTotal = computeDebtTotal();
       if (insightsDebtTotalEl) {
-        const debtTotal = computeDebtTotal();
         insightsDebtTotalEl.textContent = formatCurrency(debtTotal);
+      }
+      if (insightsCreditCardDebtEl) {
+        const creditCardDebt = computeCreditCardDebtTotal();
+        insightsCreditCardDebtEl.textContent = `Credit Card debt: ${formatCurrency(creditCardDebt)}`;
       }
 
       if (insightsAssetsTotalEl) {
@@ -4019,7 +4076,7 @@
           insightsCompChart,
           insightsCompChartEl.getContext("2d"),
           pieValues,
-          { displayLegend: false }
+          { displayLegend: false, showLabels: true }
         );
       }
     }
