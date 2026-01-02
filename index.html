@@ -1333,6 +1333,43 @@
                 </table>
               </div>
             </div>
+
+            <div class="card">
+              <div class="history-header-row">
+                <div>
+                  <h2>Upcoming Purchases</h2>
+                  <p>
+                    Free-form list of upcoming purchases. Edit categories and amounts as needed.
+                  </p>
+                </div>
+                <button type="button" id="upcomingEditBtn" class="btn-secondary btn-small">Edit</button>
+              </div>
+
+              <div class="history-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Amount (USD)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="upcomingTableBody">
+                    <!-- populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+              <button type="button" id="upcomingAddRowBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
+              <div class="totals-summary">
+                <table class="totals-table">
+                  <tbody>
+                    <tr class="totals-row">
+                      <td>Total</td>
+                      <td id="upcomingTotal">$0</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           <!-- Investments -->
@@ -1388,48 +1425,6 @@
                     <tr class="totals-row">
                       <td>Total</td>
                       <td id="investTotal">$0</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Upcoming Purchases -->
-        <div class="pf-row">
-          <div class="pf-col-half">
-            <div class="card">
-              <div class="history-header-row">
-                <div>
-                  <h2>Upcoming Purchases</h2>
-                  <p>
-                    Free-form list of upcoming purchases. Edit categories and amounts as needed.
-                  </p>
-                </div>
-                <button type="button" id="upcomingEditBtn" class="btn-secondary btn-small">Edit</button>
-              </div>
-
-              <div class="history-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Category</th>
-                      <th>Amount (USD)</th>
-                    </tr>
-                  </thead>
-                  <tbody id="upcomingTableBody">
-                    <!-- populated by JS -->
-                  </tbody>
-                </table>
-              </div>
-              <button type="button" id="upcomingAddRowBtn" class="btn-secondary btn-small hidden">+ Add Row</button>
-              <div class="totals-summary">
-                <table class="totals-table">
-                  <tbody>
-                    <tr class="totals-row">
-                      <td>Total</td>
-                      <td id="upcomingTotal">$0</td>
                     </tr>
                   </tbody>
                 </table>
