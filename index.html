@@ -760,8 +760,8 @@
 
     .reading-tables {
       display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
+      flex-direction: column;
+      gap: 1.2rem;
       margin-top: 1rem;
     }
 
@@ -776,6 +776,68 @@
 
     .reading-table .history-wrapper {
       margin-top: 0.4rem;
+    }
+
+    .sort-btn { padding: 0.35rem 0.9rem; font-size: 0.75rem; }
+
+    .star-rating {
+      display: inline-flex;
+      gap: 0.1rem;
+      color: #334155;
+    }
+
+    .star-rating .star {
+      cursor: pointer;
+      font-size: 1rem;
+      color: #64748b;
+      transition: color 0.1s ease;
+    }
+
+    .star-rating .star.filled {
+      color: #ffc532;
+    }
+
+    .progress-track {
+      position: relative;
+    }
+
+    .progress-target {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #ffc532;
+      opacity: 0.9;
+      transform: translateX(-1px);
+      pointer-events: none;
+    }
+
+    .target-pace {
+      margin-top: 0.35rem;
+      padding: 0.35rem 0.55rem;
+      border-radius: 0.6rem;
+      border: 1px solid rgba(255, 197, 50, 0.6);
+      background: #0a1c2f;
+      display: inline-flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-weight: 600;
+      color: #e5eef7;
+    }
+
+    .target-pace-status {
+      padding: 0.2rem 0.45rem;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.15);
+      color: #86efac;
+      font-size: 0.8rem;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+    .target-pace-status.behind {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fecdd3;
+      border-color: rgba(239, 68, 68, 0.4);
     }
 
     .table-link {
@@ -1552,7 +1614,10 @@
           <div class="result-pill">
             <div class="result-label">Reading Goal – 55 Books</div>
             <div class="result-value" id="readingGoalSummary">Completed: 0 / 55</div>
-            <div class="progress-track"><div class="progress-bar" id="readingGoalProgress"></div></div>
+            <div class="progress-track">
+              <div class="progress-bar" id="readingGoalProgress"></div>
+              <div class="progress-target" id="readingGoalTargetMarker"></div>
+            </div>
           </div>
           <div class="result-pill">
             <div class="result-label">Debt Payoff</div>
@@ -1567,7 +1632,11 @@
               <h2>Reading Goal – 55 Books</h2>
               <p>Track completed books and plan your next reads. Toggle edit mode to update lists.</p>
               <p class="tiny" id="readingGoalStats">Target: 55 · Completed: 0 · Remaining: 55</p>
-              <div class="progress-track"><div class="progress-bar" id="readingCardProgress"></div></div>
+              <p class="tiny target-pace" id="readingGoalPace">On-track target by today: 0 / 55 <span class="target-pace-status behind">Behind</span></p>
+              <div class="progress-track">
+                <div class="progress-bar" id="readingCardProgress"></div>
+                <div class="progress-target" id="readingCardTargetMarker"></div>
+              </div>
             </div>
             <button type="button" id="readingEditBtn" class="btn-secondary btn-small">Edit Reading List</button>
           </div>
@@ -1604,6 +1673,10 @@
             <div class="reading-table">
               <div class="section-controls">
                 <h3 style="margin:0;">Books To Read</h3>
+                <div class="goals-sort-actions">
+                  <button type="button" id="booksToReadSortTitle" class="btn-secondary btn-small">Sort by Title (A–Z)</button>
+                  <button type="button" id="booksToReadSortAuthor" class="btn-secondary btn-small">Sort by Author (A–Z)</button>
+                </div>
               </div>
               <div class="history-wrapper">
                 <table>
@@ -2493,6 +2566,15 @@
         const clamped = Math.min(Math.max(pct, 0), 100);
         el.style.width = clamped + "%";
       }
+    }
+
+    function getDayOfYearInfo() {
+      const today = new Date();
+      const start = new Date(today.getFullYear(), 0, 1);
+      const isLeap = new Date(today.getFullYear(), 1, 29).getMonth() === 1;
+      const daysInYear = isLeap ? 366 : 365;
+      const dayOfYear = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
+      return { dayOfYear, daysInYear };
     }
 
     function computeDebtTotal() {
@@ -3822,11 +3904,16 @@
       const readingGoalProgressEl = document.getElementById("readingGoalProgress");
       const readingCardProgressEl = document.getElementById("readingCardProgress");
       const readingStatsEl = document.getElementById("readingGoalStats");
+      const readingPaceEl = document.getElementById("readingGoalPace");
+      const readingGoalTargetMarker = document.getElementById("readingGoalTargetMarker");
+      const readingCardTargetMarker = document.getElementById("readingCardTargetMarker");
       const readingEditBtn = document.getElementById("readingEditBtn");
       const booksCompletedBody = document.getElementById("booksCompletedBody");
       const booksToReadBody = document.getElementById("booksToReadBody");
       const booksCompletedAddBtn = document.getElementById("booksCompletedAddBtn");
       const booksToReadAddBtn = document.getElementById("booksToReadAddBtn");
+      const booksToReadSortTitleBtn = document.getElementById("booksToReadSortTitle");
+      const booksToReadSortAuthorBtn = document.getElementById("booksToReadSortAuthor");
       const debtGoalSummaryEl = document.getElementById("debtGoalSummary");
       const debtGoalProgressEl = document.getElementById("debtGoalProgress");
       const debtGoalBody = document.getElementById("debtGoalBody");
@@ -3839,6 +3926,9 @@
         const completedCount = readingCompletedRows.filter(r => (r.title || "").trim()).length;
         const remaining = Math.max(READING_TARGET - completedCount, 0);
         const pct = READING_TARGET > 0 ? (completedCount / READING_TARGET) * 100 : 0;
+        const { dayOfYear, daysInYear } = getDayOfYearInfo();
+        const expectedCompleted = Math.round((dayOfYear / daysInYear) * READING_TARGET);
+        const targetPct = READING_TARGET > 0 ? (expectedCompleted / READING_TARGET) * 100 : 0;
         if (readingSummaryEl) {
           readingSummaryEl.textContent = `Completed: ${completedCount} / ${READING_TARGET}`;
         }
@@ -3847,10 +3937,48 @@
         if (readingStatsEl) {
           readingStatsEl.textContent = `Target: ${READING_TARGET} · Completed: ${completedCount} · Remaining: ${remaining}`;
         }
+        if (readingPaceEl) {
+          const onTrack = completedCount >= expectedCompleted;
+          const statusClass = onTrack ? "" : "behind";
+          const statusText = onTrack ? "On track" : "Behind";
+          readingPaceEl.innerHTML = `On-track target by today: ${expectedCompleted} / ${READING_TARGET} <span class="target-pace-status ${statusClass}">${statusText}</span>`;
+        }
+        const setTargetMarker = (el) => {
+          if (el) {
+            const clamped = Math.min(Math.max(targetPct, 0), 100);
+            el.style.left = clamped + "%";
+          }
+        };
+        setTargetMarker(readingGoalTargetMarker);
+        setTargetMarker(readingCardTargetMarker);
         renderInsights();
       };
 
       refreshReadingDisplays();
+
+      const sortBooksToRead = (key) => {
+        const hasContent = (row) => (row.title || "").trim() !== "" || (row.author || "").trim() !== "";
+        const filled = readingToReadRows.filter(hasContent);
+        const blanks = readingToReadRows.filter(row => !hasContent(row));
+        filled.sort((a, b) => {
+          const aVal = (a[key] || "").toLowerCase();
+          const bVal = (b[key] || "").toLowerCase();
+          if (!aVal && !bVal) return 0;
+          if (!aVal) return 1;
+          if (!bVal) return -1;
+          return aVal.localeCompare(bVal);
+        });
+        readingToReadRows = [...filled, ...blanks];
+        renderGoals();
+      };
+
+      if (booksToReadSortTitleBtn) {
+        booksToReadSortTitleBtn.onclick = () => sortBooksToRead("title");
+      }
+
+      if (booksToReadSortAuthorBtn) {
+        booksToReadSortAuthorBtn.onclick = () => sortBooksToRead("author");
+      }
 
       if (goalsSortReadingBtn) {
         goalsSortReadingBtn.textContent = readingSortAsc ? "Sort reading A/Z" : "Sort reading Z/A";
@@ -3913,13 +4041,23 @@
         };
       }
 
+      const renderStarRating = (rating, idx) => {
+        const current = Math.max(0, Math.min(parseInt(rating, 10) || 0, 5));
+        const stars = Array.from({ length: 5 }).map((_, starIdx) => {
+          const starValue = starIdx + 1;
+          const filled = starValue <= current ? "filled" : "";
+          return `<span class="star ${filled}" data-index="${idx}" data-value="${starValue}">&#9733;</span>`;
+        }).join("");
+        return `<div class="star-rating" data-index="${idx}">${stars}</div>`;
+      };
+
       if (booksCompletedBody) {
         booksCompletedBody.innerHTML = readingCompletedRows.map((row, idx) => readingEditMode ? `
           <tr>
             <td><input type="text" class="completed-title" data-index="${idx}" value="${escapeHtml(row.title)}" /></td>
             <td><input type="text" class="completed-author" data-index="${idx}" value="${escapeHtml(row.author)}" /></td>
             <td><input type="text" class="completed-format" data-index="${idx}" value="${escapeHtml(row.format)}" /></td>
-            <td><input type="text" class="completed-rating" data-index="${idx}" value="${escapeHtml(row.rating)}" /></td>
+            <td>${renderStarRating(row.rating, idx)}</td>
             <td><input type="text" class="completed-month" data-index="${idx}" value="${escapeHtml(row.monthFinished || "")}" /></td>
             <td><input type="text" class="completed-notes" data-index="${idx}" value="${escapeHtml(row.notes)}" /></td>
           </tr>
@@ -3928,7 +4066,7 @@
             <td>${escapeHtml(row.title)}</td>
             <td>${escapeHtml(row.author)}</td>
             <td>${escapeHtml(row.format)}</td>
-            <td>${escapeHtml(row.rating)}</td>
+            <td>${renderStarRating(row.rating, idx)}</td>
             <td>${escapeHtml(row.monthFinished || "")}</td>
             <td>${escapeHtml(row.notes)}</td>
           </tr>
@@ -3948,10 +4086,19 @@
           bindInput(".completed-title", "title");
           bindInput(".completed-author", "author");
           bindInput(".completed-format", "format");
-          bindInput(".completed-rating", "rating");
           bindInput(".completed-month", "monthFinished");
           bindInput(".completed-notes", "notes");
         }
+
+        document.querySelectorAll(".star-rating .star").forEach(star => {
+          star.addEventListener("click", () => {
+            if (!readingEditMode) return;
+            const idx = parseInt(star.getAttribute("data-index"), 10);
+            const value = parseInt(star.getAttribute("data-value"), 10);
+            readingCompletedRows[idx].rating = value;
+            renderGoals();
+          });
+        });
       }
 
       if (booksToReadBody) {
