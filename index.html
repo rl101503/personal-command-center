@@ -758,6 +758,84 @@
       min-width: 160px;
     }
 
+    .retirement-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: flex-end;
+      margin-top: 0.8rem;
+    }
+
+    .retirement-control {
+      flex: 1 1 220px;
+      min-width: 180px;
+    }
+
+    .retirement-age-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .retirement-age-row input[type="range"] {
+      flex: 1;
+    }
+
+    .value-badge {
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: #111827;
+      border: 1px solid rgba(23,151,215,0.6);
+      font-size: 0.75rem;
+      color: #ffc532;
+      min-width: 48px;
+      text-align: center;
+    }
+
+    .retirement-section {
+      margin-top: 1.1rem;
+    }
+
+    .retirement-contrib-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .retirement-contrib-card {
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      background: #020617;
+      border: 1px solid rgba(23,151,215,0.6);
+    }
+
+    .retirement-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      margin-top: 0.35rem;
+    }
+
+    .retirement-line span {
+      white-space: nowrap;
+    }
+
+    .retirement-line .retirement-label {
+      opacity: 0.8;
+    }
+
+    .retirement-view {
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+      opacity: 0.9;
+    }
+
+    .retirement-benchmarks {
+      margin-top: 0.6rem;
+    }
+
     .reading-tables {
       display: flex;
       flex-direction: column;
@@ -1624,6 +1702,12 @@
             <div class="result-value" id="debtGoalSummary">Total debt: $0</div>
             <div class="progress-track"><div class="progress-bar" id="debtGoalProgress"></div></div>
           </div>
+          <div class="result-pill">
+            <div class="result-label">Retirement Snapshot</div>
+            <div class="result-value" id="retirementSnapshotValue">Projected @ Age 65: $0</div>
+            <div class="result-footnote" id="retirementSnapshotScenario">Scenario: Base</div>
+            <div class="result-footnote" id="retirementSnapshotTarget">Target: $0</div>
+          </div>
         </div>
 
         <div class="card">
@@ -1734,6 +1818,154 @@
           <div id="debtNotesView" class="tiny" style="white-space:pre-wrap;"></div>
           <textarea id="debtNotesInput" class="hidden" placeholder="Notes on payoff strategy"></textarea>
         </div>
+
+        <div class="card">
+          <div class="history-header-row">
+            <div>
+              <h2>Retirement Calculator</h2>
+              <p>Scenario-based projection for Ryan + Amy’s combined retirement portfolio.</p>
+            </div>
+            <button type="button" id="retirementEditBtn" class="btn-secondary btn-small">Edit</button>
+          </div>
+
+          <div class="retirement-controls">
+            <div class="retirement-control">
+              <label for="retirementScenarioSelect">Scenario</label>
+              <div class="retirement-view" id="retirementScenarioView">Base (7%)</div>
+              <select id="retirementScenarioSelect" class="retirement-edit hidden">
+                <option value="conservative">Conservative (5%)</option>
+                <option value="base">Base (7%)</option>
+                <option value="aggressive">Aggressive (10%)</option>
+              </select>
+            </div>
+            <div class="retirement-control">
+              <label for="retirementAgeRange">Retirement age</label>
+              <div class="retirement-view" id="retirementAgeView">Age 65</div>
+              <div class="retirement-age-row retirement-edit hidden">
+                <input type="range" id="retirementAgeRange" min="50" max="70" step="1" />
+                <span class="value-badge" id="retirementAgeBadge">65</span>
+                <input type="text" id="retirementAgeInput" inputmode="numeric" placeholder="65" />
+              </div>
+            </div>
+          </div>
+
+          <div class="retirement-section">
+            <label for="retirementTargetInput">Target portfolio</label>
+            <div class="retirement-view" id="retirementTargetView">Target: $0</div>
+            <input type="text" id="retirementTargetInput" class="retirement-edit hidden" placeholder="$3,000,000" />
+          </div>
+
+          <div class="retirement-section">
+            <h3 style="margin:0;">Starting balances (from Assets)</h3>
+            <div class="results-grid" style="margin-top:0.6rem;">
+              <div class="result-pill">
+                <div class="result-label">401k</div>
+                <div class="result-value" id="retirementStart401k">$0</div>
+              </div>
+              <div class="result-pill">
+                <div class="result-label">Brokerage</div>
+                <div class="result-value" id="retirementStartBrokerage">$0</div>
+              </div>
+              <div class="result-pill">
+                <div class="result-label">Amy IRA</div>
+                <div class="result-value" id="retirementStartAmyIra">$0</div>
+              </div>
+              <div class="result-pill highlight">
+                <div class="result-label">Starting total</div>
+                <div class="result-value" id="retirementStartTotal">$0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="retirement-section">
+            <h3 style="margin:0;">Contribution assumptions</h3>
+            <div class="retirement-contrib-grid">
+              <div class="retirement-contrib-card">
+                <strong>Your 401k</strong>
+                <div class="retirement-line">
+                  <span class="retirement-label">Employee contribution (annual max)</span>
+                  <span id="retirementEmployeeMaxView" class="retirement-view">$0</span>
+                  <input type="text" id="retirementEmployeeMaxInput" class="retirement-edit hidden" />
+                </div>
+                <div class="retirement-line">
+                  <span class="retirement-label">Employer contribution</span>
+                  <span>$13,000/yr</span>
+                </div>
+                <div class="retirement-line">
+                  <span class="retirement-label">Annual increase rate</span>
+                  <span>1% YoY</span>
+                </div>
+              </div>
+              <div class="retirement-contrib-card">
+                <strong>Amy IRA</strong>
+                <div class="retirement-line">
+                  <span class="retirement-label">Annual contribution (starting)</span>
+                  <span id="retirementAmyIraView" class="retirement-view">$0</span>
+                  <input type="text" id="retirementAmyIraInput" class="retirement-edit hidden" />
+                </div>
+                <div class="retirement-line">
+                  <span class="retirement-label">Annual increase rate</span>
+                  <span>1% YoY</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="retirement-section">
+            <label for="retirementInflationMode">Inflation handling</label>
+            <div class="retirement-view" id="retirementInflationView">Nominal dollars</div>
+            <select id="retirementInflationMode" class="retirement-edit hidden">
+              <option value="nominal">Nominal dollars</option>
+              <option value="today">Today’s dollars</option>
+            </select>
+            <div class="retirement-view" id="retirementInflationRateView">Inflation rate: 2.5%</div>
+            <div class="retirement-edit hidden" id="retirementInflationRateRow">
+              <label for="retirementInflationRate">Inflation rate (%)</label>
+              <input type="text" id="retirementInflationRate" inputmode="decimal" placeholder="2.5" />
+            </div>
+          </div>
+
+          <div class="results">
+            <div class="results-grid">
+              <div class="result-pill highlight">
+                <div class="result-label">Projected portfolio at age <span id="retirementProjectedAge">65</span></div>
+                <div class="result-value" id="retirementProjectedValue">$0</div>
+              </div>
+              <div class="result-pill">
+                <div class="result-label">Target status</div>
+                <div class="result-value" id="retirementTargetStatus">–</div>
+              </div>
+            </div>
+
+            <div class="retirement-benchmarks">
+              <h3 style="margin:0;">Benchmark projections</h3>
+              <div class="history-wrapper" style="max-height:none;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Age</th>
+                      <th>Projected balance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>55</td>
+                      <td id="retirementBenchmark55">$0</td>
+                    </tr>
+                    <tr>
+                      <td>60</td>
+                      <td id="retirementBenchmark60">$0</td>
+                    </tr>
+                    <tr>
+                      <td>65</td>
+                      <td id="retirementBenchmark65">$0</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div> <!-- end goalsTab -->
 
       <!-- INSIGHTS TAB -->
@@ -1833,9 +2065,18 @@
     const PF_401K_TARGET = 23500;
     const READING_TARGET = 55;
     const VARIABLE_COMP_TARGET = 250000;
+    const RETIREMENT_START_AGE = 40;
+    const RETIREMENT_EMPLOYER_CONTRIBUTION = 13000;
+    const RETIREMENT_ANNUAL_INCREASE = 0.01;
     let globalAvgMonthlyTakeHome = 0; // from comp tracker
     let globalTotalMonthlyTakeHome = 0;
     let globalMonthlyExpensesTotal = 0;
+
+    const retirementScenarioMap = {
+      conservative: { label: "Conservative", rate: 0.05 },
+      base: { label: "Base", rate: 0.07 },
+      aggressive: { label: "Aggressive", rate: 0.10 }
+    };
 
     // ---- RATE TABLE ----
     const rateTable = {
@@ -2044,6 +2285,7 @@
       { name: "401k", balance: null },
       { name: "529s", balance: null },
       { name: "Brokerage", balance: null },
+      { name: "Amy IRA", balance: null },
       { name: "BOA Balance", balance: null },
       { name: "FCB Balance", balance: null },
       { name: "Myrtle Beach Checking Balance", balance: null },
@@ -2095,6 +2337,19 @@
       debtRows: [],
       debtNotes: ""
     };
+
+    const defaultRetirementSettings = {
+      scenarioKey: "base",
+      retirementAge: 65,
+      targetPortfolio: 3000000,
+      employee401kMax: 23000,
+      amyIraAnnualContribution: 6000,
+      inflationMode: "nominal",
+      inflationRate: 0.025
+    };
+
+    let retirementSettings = { ...defaultRetirementSettings };
+    let retirementEditMode = false;
 
     let personalFinanceState = {
       pf401k: null,
@@ -2335,6 +2590,14 @@
           : "";
       }
 
+      const amyIraAdded = ensureInvestmentRowExists("Amy IRA");
+      if (amyIraAdded) {
+        personalFinanceState.investmentRows = investmentRows;
+        if (currentUser) {
+          savePersonalFinanceData({ investmentRows });
+        }
+      }
+
       renderPersonalFinance();
       renderGoals();
       updatePf401kInfo();
@@ -2469,6 +2732,78 @@
       await setDoc(ref, { goals: goalsState }, { merge: true });
     }
 
+    function clampRetirementAge(age) {
+      const parsed = parseInt(age, 10);
+      if (isNaN(parsed)) return defaultRetirementSettings.retirementAge;
+      return Math.min(Math.max(parsed, 50), 70);
+    }
+
+    function normalizeRetirementSettings(settings) {
+      const safe = settings || {};
+      const scenarioKey = retirementScenarioMap[safe.scenarioKey] ? safe.scenarioKey : defaultRetirementSettings.scenarioKey;
+      const retirementAge = clampRetirementAge(safe.retirementAge);
+      const targetPortfolio = typeof safe.targetPortfolio === "number"
+        ? safe.targetPortfolio
+        : parseFloat(safe.targetPortfolio);
+      const employee401kMax = typeof safe.employee401kMax === "number"
+        ? safe.employee401kMax
+        : parseFloat(safe.employee401kMax);
+      const amyIraAnnualContribution = typeof safe.amyIraAnnualContribution === "number"
+        ? safe.amyIraAnnualContribution
+        : parseFloat(safe.amyIraAnnualContribution);
+      const inflationRate = typeof safe.inflationRate === "number"
+        ? safe.inflationRate
+        : parseFloat(safe.inflationRate);
+      const inflationMode = safe.inflationMode === "today" ? "today" : "nominal";
+
+      return {
+        scenarioKey,
+        retirementAge,
+        targetPortfolio: isNaN(targetPortfolio) ? defaultRetirementSettings.targetPortfolio : targetPortfolio,
+        employee401kMax: isNaN(employee401kMax) ? defaultRetirementSettings.employee401kMax : employee401kMax,
+        amyIraAnnualContribution: isNaN(amyIraAnnualContribution)
+          ? defaultRetirementSettings.amyIraAnnualContribution
+          : amyIraAnnualContribution,
+        inflationMode,
+        inflationRate: isNaN(inflationRate) ? defaultRetirementSettings.inflationRate : inflationRate
+      };
+    }
+
+    async function loadRetirementSettings(uid) {
+      try {
+        const ref = doc(db, "goals", uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.retirement) {
+            retirementSettings = normalizeRetirementSettings(data.retirement);
+          } else {
+            retirementSettings = { ...defaultRetirementSettings };
+            await setDoc(ref, { retirement: retirementSettings }, { merge: true });
+          }
+        } else {
+          retirementSettings = { ...defaultRetirementSettings };
+          await setDoc(ref, { retirement: retirementSettings });
+        }
+        renderGoals();
+      } catch (err) {
+        console.error("Error loading retirement settings", err);
+        alert("There was a problem loading your retirement settings. Please refresh and try again.");
+      }
+    }
+
+    async function saveRetirementSettings() {
+      if (!currentUser) return;
+      retirementSettings = normalizeRetirementSettings(retirementSettings);
+      try {
+        const ref = doc(db, "goals", currentUser.uid);
+        await setDoc(ref, { retirement: retirementSettings }, { merge: true });
+      } catch (err) {
+        console.error("Error saving retirement settings", err);
+        alert("There was a problem saving your retirement settings. Please try again.");
+      }
+    }
+
     // --- Helpers ---
     function formatSaveTimestamp(date) {
       const options = { hour: "numeric", minute: "2-digit" };
@@ -2590,6 +2925,15 @@
       const match = rows.find(row => (row.name || "").trim().toLowerCase() === targetName.toLowerCase());
       const value = match ? match.balance : null;
       return typeof value === "number" && !isNaN(value) ? value : 0;
+    }
+
+    function ensureInvestmentRowExists(name) {
+      const exists = investmentRows.some(row => (row.name || "").trim().toLowerCase() === name.toLowerCase());
+      if (!exists) {
+        investmentRows.push({ name, balance: null });
+        return true;
+      }
+      return false;
     }
 
     function computeCashOnHand() {
@@ -3856,6 +4200,7 @@
       function recalcInvestTotal() {
         const total = computeAssetsTotal();
         investTotalEl.textContent = formatCurrency(total);
+        renderGoals();
         renderInsights();
       }
 
@@ -3897,6 +4242,53 @@
       renderDebtSection();
       renderInvestSection();
       renderGoals();
+    }
+
+    function getRetirementScenario() {
+      return retirementScenarioMap[retirementSettings.scenarioKey] || retirementScenarioMap.base;
+    }
+
+    function getRetirementStartingBalances() {
+      const k401 = getBalanceByName(investmentRows, "401k");
+      const brokerage = getBalanceByName(investmentRows, "Brokerage");
+      const amyIra = getBalanceByName(investmentRows, "Amy IRA");
+      return {
+        k401,
+        brokerage,
+        amyIra,
+        total: k401 + brokerage + amyIra
+      };
+    }
+
+    function projectRetirementBalance(years, returnRate, employeeMax, amyIraContribution, startingBalance) {
+      let balance = startingBalance;
+      for (let i = 0; i < years; i += 1) {
+        const growthFactor = Math.pow(1 + RETIREMENT_ANNUAL_INCREASE, i);
+        const annualContribution = ((employeeMax + RETIREMENT_EMPLOYER_CONTRIBUTION) * growthFactor)
+          + (amyIraContribution * growthFactor);
+        balance = (balance * (1 + returnRate)) + annualContribution;
+      }
+      return balance;
+    }
+
+    function getRetirementProjectionForAge(targetAge) {
+      const scenario = getRetirementScenario();
+      const starting = getRetirementStartingBalances();
+      const years = Math.max(targetAge - RETIREMENT_START_AGE, 0);
+      const employeeMax = typeof retirementSettings.employee401kMax === "number"
+        ? retirementSettings.employee401kMax
+        : 0;
+      const amyIra = typeof retirementSettings.amyIraAnnualContribution === "number"
+        ? retirementSettings.amyIraAnnualContribution
+        : 0;
+      const nominal = projectRetirementBalance(years, scenario.rate, employeeMax, amyIra, starting.total);
+      const inflationRate = typeof retirementSettings.inflationRate === "number"
+        ? retirementSettings.inflationRate
+        : 0;
+      const value = retirementSettings.inflationMode === "today"
+        ? nominal / Math.pow(1 + inflationRate, years)
+        : nominal;
+      return { value, years, nominal };
     }
 
     function renderGoals() {
@@ -4165,6 +4557,238 @@
           renderGoals();
         };
       }
+
+      renderRetirementCalculator();
+    }
+
+    function renderRetirementCalculator() {
+      const scenarioSelect = document.getElementById("retirementScenarioSelect");
+      const scenarioView = document.getElementById("retirementScenarioView");
+      const ageRange = document.getElementById("retirementAgeRange");
+      const ageBadge = document.getElementById("retirementAgeBadge");
+      const ageInput = document.getElementById("retirementAgeInput");
+      const ageView = document.getElementById("retirementAgeView");
+      const targetInput = document.getElementById("retirementTargetInput");
+      const targetView = document.getElementById("retirementTargetView");
+      const employeeMaxInput = document.getElementById("retirementEmployeeMaxInput");
+      const employeeMaxView = document.getElementById("retirementEmployeeMaxView");
+      const amyIraInput = document.getElementById("retirementAmyIraInput");
+      const amyIraView = document.getElementById("retirementAmyIraView");
+      const inflationModeSelect = document.getElementById("retirementInflationMode");
+      const inflationView = document.getElementById("retirementInflationView");
+      const inflationRateView = document.getElementById("retirementInflationRateView");
+      const inflationRateRow = document.getElementById("retirementInflationRateRow");
+      const inflationRateInput = document.getElementById("retirementInflationRate");
+      const projectedAgeEl = document.getElementById("retirementProjectedAge");
+      const projectedValueEl = document.getElementById("retirementProjectedValue");
+      const targetStatusEl = document.getElementById("retirementTargetStatus");
+      const benchmark55El = document.getElementById("retirementBenchmark55");
+      const benchmark60El = document.getElementById("retirementBenchmark60");
+      const benchmark65El = document.getElementById("retirementBenchmark65");
+      const start401kEl = document.getElementById("retirementStart401k");
+      const startBrokerageEl = document.getElementById("retirementStartBrokerage");
+      const startAmyIraEl = document.getElementById("retirementStartAmyIra");
+      const startTotalEl = document.getElementById("retirementStartTotal");
+      const snapshotValueEl = document.getElementById("retirementSnapshotValue");
+      const snapshotScenarioEl = document.getElementById("retirementSnapshotScenario");
+      const snapshotTargetEl = document.getElementById("retirementSnapshotTarget");
+      const editBtn = document.getElementById("retirementEditBtn");
+
+      if (!scenarioSelect || !ageRange || !ageInput) return;
+
+      const formatPercent = (value) => {
+        const formatted = (value * 100).toFixed(2);
+        return formatted.replace(/\.?0+$/, "");
+      };
+
+      const setEditVisibility = () => {
+        document.querySelectorAll(".retirement-edit").forEach(el => {
+          el.classList.toggle("hidden", !retirementEditMode);
+        });
+        document.querySelectorAll(".retirement-view").forEach(el => {
+          el.classList.toggle("hidden", retirementEditMode);
+        });
+      };
+
+      const updateInflationVisibility = () => {
+        const isToday = retirementSettings.inflationMode === "today";
+        if (inflationRateRow) {
+          inflationRateRow.classList.toggle("hidden", !retirementEditMode || !isToday);
+        }
+        if (inflationRateView) {
+          inflationRateView.classList.toggle("hidden", retirementEditMode || !isToday);
+        }
+      };
+
+      const updateRetirementDisplays = () => {
+        const scenario = getRetirementScenario();
+        const age = clampRetirementAge(retirementSettings.retirementAge);
+        retirementSettings.retirementAge = age;
+        const targetPortfolio = typeof retirementSettings.targetPortfolio === "number"
+          ? retirementSettings.targetPortfolio
+          : 0;
+
+        const starting = getRetirementStartingBalances();
+        if (start401kEl) start401kEl.textContent = formatCurrency(starting.k401);
+        if (startBrokerageEl) startBrokerageEl.textContent = formatCurrency(starting.brokerage);
+        if (startAmyIraEl) startAmyIraEl.textContent = formatCurrency(starting.amyIra);
+        if (startTotalEl) startTotalEl.textContent = formatCurrency(starting.total);
+
+        const projection = getRetirementProjectionForAge(age).value;
+        const shortfall = Math.max(targetPortfolio - projection, 0);
+
+        if (projectedAgeEl) projectedAgeEl.textContent = age;
+        if (projectedValueEl) projectedValueEl.textContent = formatCurrency(projection);
+        if (targetStatusEl) {
+          targetStatusEl.textContent = shortfall <= 0 ? "Met" : `Short by ${formatCurrency(shortfall)}`;
+        }
+
+        if (snapshotValueEl) {
+          snapshotValueEl.textContent = `Projected @ Age ${age}: ${formatCurrency(projection)}`;
+        }
+        if (snapshotScenarioEl) {
+          snapshotScenarioEl.textContent = `Scenario: ${scenario.label}`;
+        }
+        if (snapshotTargetEl) {
+          snapshotTargetEl.textContent = `Target: ${formatCurrency(targetPortfolio)}`;
+        }
+
+        const benchmarks = [
+          { age: 55, el: benchmark55El },
+          { age: 60, el: benchmark60El },
+          { age: 65, el: benchmark65El }
+        ];
+        benchmarks.forEach(({ age: benchAge, el }) => {
+          if (!el) return;
+          const value = getRetirementProjectionForAge(benchAge).value;
+          el.textContent = formatCurrency(value);
+        });
+
+        if (scenarioView) {
+          scenarioView.textContent = `${scenario.label} (${(scenario.rate * 100).toFixed(0)}%)`;
+        }
+        if (ageView) {
+          ageView.textContent = `Age ${age}`;
+        }
+        if (targetView) {
+          targetView.textContent = `Target: ${formatCurrency(targetPortfolio)}`;
+        }
+        if (employeeMaxView) {
+          employeeMaxView.textContent = formatCurrency(retirementSettings.employee401kMax || 0);
+        }
+        if (amyIraView) {
+          amyIraView.textContent = formatCurrency(retirementSettings.amyIraAnnualContribution || 0);
+        }
+        if (inflationView) {
+          inflationView.textContent = retirementSettings.inflationMode === "today"
+            ? "Today’s dollars (inflation-adjusted)"
+            : "Nominal dollars";
+        }
+        if (inflationRateView) {
+          inflationRateView.textContent = `Inflation rate: ${formatPercent(retirementSettings.inflationRate || 0)}%`;
+        }
+
+        if (scenarioSelect) scenarioSelect.value = retirementSettings.scenarioKey;
+        if (ageRange) ageRange.value = age;
+        if (ageBadge) ageBadge.textContent = age;
+        if (ageInput) ageInput.value = age;
+        if (targetInput) {
+          targetInput.value = targetPortfolio ? formatNumberWithCommas(targetPortfolio.toString()) : "";
+        }
+        if (employeeMaxInput) {
+          employeeMaxInput.value = formatNumberWithCommas((retirementSettings.employee401kMax || 0).toString());
+        }
+        if (amyIraInput) {
+          amyIraInput.value = formatNumberWithCommas((retirementSettings.amyIraAnnualContribution || 0).toString());
+        }
+        if (inflationModeSelect) inflationModeSelect.value = retirementSettings.inflationMode;
+        if (inflationRateInput) {
+          inflationRateInput.value = formatPercent(retirementSettings.inflationRate || 0);
+        }
+
+        updateInflationVisibility();
+      };
+
+      if (editBtn) {
+        editBtn.textContent = retirementEditMode ? "Done" : "Edit";
+        editBtn.onclick = async () => {
+          if (retirementEditMode) {
+            await saveRetirementSettings();
+          }
+          retirementEditMode = !retirementEditMode;
+          renderGoals();
+        };
+      }
+
+      scenarioSelect.onchange = () => {
+        retirementSettings.scenarioKey = scenarioSelect.value;
+        updateRetirementDisplays();
+        saveRetirementSettings();
+      };
+
+      ageRange.oninput = (e) => {
+        const nextAge = clampRetirementAge(e.target.value);
+        retirementSettings.retirementAge = nextAge;
+        updateRetirementDisplays();
+      };
+      ageRange.onchange = () => saveRetirementSettings();
+
+      ageInput.oninput = (e) => {
+        const nextAge = clampRetirementAge(e.target.value);
+        retirementSettings.retirementAge = nextAge;
+        updateRetirementDisplays();
+      };
+      ageInput.onblur = () => saveRetirementSettings();
+
+      if (targetInput) {
+        targetInput.oninput = (e) => {
+          e.target.value = formatNumberWithCommas(e.target.value);
+          const val = getNumericValue(e.target.value);
+          retirementSettings.targetPortfolio = isNaN(val) ? 0 : val;
+          updateRetirementDisplays();
+        };
+        targetInput.onblur = () => saveRetirementSettings();
+      }
+
+      if (employeeMaxInput) {
+        employeeMaxInput.oninput = (e) => {
+          e.target.value = formatNumberWithCommas(e.target.value);
+          const val = getNumericValue(e.target.value);
+          retirementSettings.employee401kMax = isNaN(val) ? 0 : val;
+          updateRetirementDisplays();
+        };
+        employeeMaxInput.onblur = () => saveRetirementSettings();
+      }
+
+      if (amyIraInput) {
+        amyIraInput.oninput = (e) => {
+          e.target.value = formatNumberWithCommas(e.target.value);
+          const val = getNumericValue(e.target.value);
+          retirementSettings.amyIraAnnualContribution = isNaN(val) ? 0 : val;
+          updateRetirementDisplays();
+        };
+        amyIraInput.onblur = () => saveRetirementSettings();
+      }
+
+      if (inflationModeSelect) {
+        inflationModeSelect.onchange = () => {
+          retirementSettings.inflationMode = inflationModeSelect.value === "today" ? "today" : "nominal";
+          updateRetirementDisplays();
+          saveRetirementSettings();
+        };
+      }
+
+      if (inflationRateInput) {
+        inflationRateInput.oninput = (e) => {
+          const val = getNumericValue(e.target.value);
+          retirementSettings.inflationRate = isNaN(val) ? 0 : val / 100;
+          updateRetirementDisplays();
+        };
+        inflationRateInput.onblur = () => saveRetirementSettings();
+      }
+
+      setEditVisibility();
+      updateRetirementDisplays();
     }
 
     function renderInsights() {
@@ -4329,6 +4953,7 @@
         await loadCompTracker();
         await loadPersonalFinanceData();
         await loadGoalsDataForUser(user.uid);
+        await loadRetirementSettings(user.uid);
         renderPersonalFinance();
 
         const statusEl = document.getElementById("saveStatus");
@@ -4358,6 +4983,8 @@
           compLineChart.destroy();
           compLineChart = null;
         }
+        retirementSettings = { ...defaultRetirementSettings };
+        retirementEditMode = false;
         renderGoals();
       }
     });
