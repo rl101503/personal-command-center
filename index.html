@@ -858,21 +858,9 @@
 
     .sort-btn { padding: 0.35rem 0.9rem; font-size: 0.75rem; }
 
-    .star-rating {
-      display: inline-flex;
-      gap: 0.1rem;
-      color: #334155;
-    }
-
-    .star-rating .star {
-      cursor: pointer;
-      font-size: 1rem;
-      color: #64748b;
-      transition: color 0.1s ease;
-    }
-
-    .star-rating .star.filled {
-      color: #ffc532;
+    .rating-select {
+      min-width: 92px;
+      margin-bottom: 0;
     }
 
     .progress-track {
@@ -1743,9 +1731,8 @@
                       <th>Title</th>
                       <th>Author</th>
                       <th>Format (Text/Audio)</th>
-                      <th>Rating</th>
+                      <th>Rating (1–10)</th>
                       <th>Month Finished</th>
-                      <th>Notes</th>
                     </tr>
                   </thead>
                   <tbody id="booksCompletedBody"></tbody>
@@ -2312,8 +2299,7 @@
       author: "",
       format: "",
       rating: "",
-      monthFinished: "",
-      notes: ""
+      monthFinished: ""
     }));
 
     let readingToReadRows = Array.from({ length: 5 }).map(() => ({ title: "", author: "" }));
@@ -2382,6 +2368,15 @@
       debtRows: JSON.parse(JSON.stringify(defaultDebtRows)),
       debtNotes: ""
     };
+
+    function normalizeBookRating(value, shouldMigrateLegacyScale = false) {
+      const parsed = parseInt(value, 10);
+      if (!Number.isInteger(parsed) || parsed < 1) return "";
+      if (shouldMigrateLegacyScale) {
+        return Math.max(1, Math.min(10, Math.round(parsed * 2)));
+      }
+      return Math.max(1, Math.min(10, parsed));
+    }
 
     function resetPersonalFinanceState() {
       personalFinanceState = {
@@ -2491,9 +2486,8 @@
           title: row.title || "",
           author: row.author || "",
           format: row.format || "",
-          rating: row.rating || "",
-          monthFinished: row.monthFinished || "",
-          notes: row.notes || ""
+          rating: normalizeBookRating(row.rating),
+          monthFinished: row.monthFinished || ""
         })),
         readingToReadRows: readingToReadRows.map(row => ({
           title: row.title || "",
@@ -2542,9 +2536,11 @@
               title: row.title || "",
               author: row.author || "",
               format: row.format || "",
-              rating: row.rating || "",
-              monthFinished: row.monthFinished || "",
-              notes: row.notes || ""
+              rating: normalizeBookRating(
+                row.rating,
+                Object.prototype.hasOwnProperty.call(row, "notes")
+              ),
+              monthFinished: row.monthFinished || ""
             }))
           : JSON.parse(JSON.stringify(defaultReadingCompletedRows)),
         readingToReadRows: Array.isArray(safeState.readingToReadRows) && safeState.readingToReadRows.length
@@ -2643,9 +2639,8 @@
           title: row.title || "",
           author: row.author || "",
           format: row.format || "",
-          rating: row.rating || "",
-          monthFinished: row.monthFinished || "",
-          notes: row.notes || ""
+          rating: normalizeBookRating(row.rating),
+          monthFinished: row.monthFinished || ""
         })),
         readingToReadRows: readingToReadRows.map(row => ({
           title: row.title || "",
@@ -2667,9 +2662,11 @@
               title: row.title || "",
               author: row.author || "",
               format: row.format || "",
-              rating: row.rating || "",
-              monthFinished: row.monthFinished || "",
-              notes: row.notes || ""
+              rating: normalizeBookRating(
+                row.rating,
+                Object.prototype.hasOwnProperty.call(row, "notes")
+              ),
+              monthFinished: row.monthFinished || ""
             }))
           : JSON.parse(JSON.stringify(defaultGoalsState.readingCompletedRows)),
         readingToReadRows: Array.isArray(safeState.readingToReadRows) && safeState.readingToReadRows.length
@@ -4424,7 +4421,7 @@
       if (booksCompletedAddBtn) {
         booksCompletedAddBtn.classList.toggle("hidden", !readingEditMode);
         booksCompletedAddBtn.onclick = () => {
-          readingCompletedRows.push({ title: "", author: "", format: "", rating: "", monthFinished: "", notes: "" });
+          readingCompletedRows.push({ title: "", author: "", format: "", rating: "", monthFinished: "" });
           renderGoals();
         };
       }
@@ -4437,14 +4434,19 @@
         };
       }
 
-      const renderStarRating = (rating, idx) => {
-        const current = Math.max(0, Math.min(parseInt(rating, 10) || 0, 5));
-        const stars = Array.from({ length: 5 }).map((_, starIdx) => {
-          const starValue = starIdx + 1;
-          const filled = starValue <= current ? "filled" : "";
-          return `<span class="star ${filled}" data-index="${idx}" data-value="${starValue}">&#9733;</span>`;
-        }).join("");
-        return `<div class="star-rating" data-index="${idx}">${stars}</div>`;
+      const renderRatingControl = (rating, idx) => {
+        const current = normalizeBookRating(rating);
+        if (!readingEditMode) {
+          return current ? `${current}/10` : "";
+        }
+        const options = [`<option value="">Select</option>`].concat(
+          Array.from({ length: 10 }, (_, optionIdx) => {
+            const value = optionIdx + 1;
+            const selected = value === current ? "selected" : "";
+            return `<option value="${value}" ${selected}>${value}</option>`;
+          })
+        ).join("");
+        return `<select class="rating-select completed-rating" data-index="${idx}" aria-label="Rating (1-10)">${options}</select>`;
       };
 
       if (booksCompletedBody) {
@@ -4453,18 +4455,16 @@
             <td><input type="text" class="completed-title" data-index="${idx}" value="${escapeHtml(row.title)}" /></td>
             <td><input type="text" class="completed-author" data-index="${idx}" value="${escapeHtml(row.author)}" /></td>
             <td><input type="text" class="completed-format" data-index="${idx}" value="${escapeHtml(row.format)}" /></td>
-            <td>${renderStarRating(row.rating, idx)}</td>
+            <td>${renderRatingControl(row.rating, idx)}</td>
             <td><input type="text" class="completed-month" data-index="${idx}" value="${escapeHtml(row.monthFinished || "")}" /></td>
-            <td><input type="text" class="completed-notes" data-index="${idx}" value="${escapeHtml(row.notes)}" /></td>
           </tr>
         ` : `
           <tr>
             <td>${escapeHtml(row.title)}</td>
             <td>${escapeHtml(row.author)}</td>
             <td>${escapeHtml(row.format)}</td>
-            <td>${renderStarRating(row.rating, idx)}</td>
+            <td>${renderRatingControl(row.rating, idx)}</td>
             <td>${escapeHtml(row.monthFinished || "")}</td>
-            <td>${escapeHtml(row.notes)}</td>
           </tr>
         `).join("");
 
@@ -4483,16 +4483,12 @@
           bindInput(".completed-author", "author");
           bindInput(".completed-format", "format");
           bindInput(".completed-month", "monthFinished");
-          bindInput(".completed-notes", "notes");
         }
 
-        document.querySelectorAll(".star-rating .star").forEach(star => {
-          star.addEventListener("click", () => {
-            if (!readingEditMode) return;
-            const idx = parseInt(star.getAttribute("data-index"), 10);
-            const value = parseInt(star.getAttribute("data-value"), 10);
-            readingCompletedRows[idx].rating = value;
-            renderGoals();
+        document.querySelectorAll(".completed-rating").forEach(select => {
+          select.addEventListener("input", (e) => {
+            const idx = parseInt(e.target.getAttribute("data-index"), 10);
+            readingCompletedRows[idx].rating = normalizeBookRating(e.target.value);
           });
         });
       }
