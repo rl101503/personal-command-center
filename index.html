@@ -1150,7 +1150,6 @@
           <button class="tab-button active" data-tab="personal">Personal Finances</button>
           <button class="tab-button" data-tab="commission">Commission Tracker</button>
           <button class="tab-button" data-tab="goals">Goals</button>
-          <button class="tab-button" data-tab="discipline">Discipline</button>
           <button class="tab-button" data-tab="insights">Insights</button>
         </div>
         <button type="button" class="save-dashboard-btn" onclick="onSaveDashboardClick()">Save Dashboard</button>
@@ -1960,108 +1959,6 @@
         </div>
       </div> <!-- end goalsTab -->
 
-      <!-- DISCIPLINE TAB -->
-      <div id="disciplineTab" class="hidden">
-        <div class="card">
-          <h2>Discipline</h2>
-          <p>A private 75-day accountability dashboard to track daily inputs, trends, and consistency.</p>
-        </div>
-
-        <div class="results-grid" style="margin-bottom:1rem;">
-          <div class="result-pill"><div class="result-label">Plan Progress</div><div class="result-value" id="disciplineDayProgress">Day 0 of 75</div></div>
-          <div class="result-pill"><div class="result-label">Current weight</div><div class="result-value" id="disciplineCurrentWeight">–</div></div>
-          <div class="result-pill"><div class="result-label">Change since Day 1</div><div class="result-value" id="disciplineWeightDelta">–</div></div>
-          <div class="result-pill"><div class="result-label">7-day avg weight</div><div class="result-value" id="disciplineWeightAvg">–</div></div>
-          <div class="result-pill"><div class="result-label">Steps goal met (7d)</div><div class="result-value" id="disciplineStepsGoal7">0 / 7</div></div>
-          <div class="result-pill"><div class="result-label">Workout streak</div><div class="result-value" id="disciplineWorkoutStreak">0 days</div></div>
-          <div class="result-pill"><div class="result-label">Alcohol-free days (7d)</div><div class="result-value" id="disciplineAlcoholFree7">0 / 7</div></div>
-        </div>
-
-        <div class="card">
-          <div class="history-header-row">
-            <div>
-              <h2>Daily Log Entry</h2>
-              <p>One entry per date. Saving updates the existing day if it already exists.</p>
-            </div>
-          </div>
-          <div class="singledeal-inputs-row">
-            <div><label for="disciplineDate">Date</label><input id="disciplineDate" type="date" required /></div>
-            <div><label for="disciplineWeight">Weight (lbs)</label><input id="disciplineWeight" type="number" step="0.1" /></div>
-            <div><label for="disciplineSteps">Steps</label><input id="disciplineSteps" type="number" step="1" min="0" /></div>
-          </div>
-          <div class="singledeal-inputs-row" style="margin-top:0.6rem;">
-            <div><label><input id="disciplineWorkedOut" type="checkbox" /> Worked Out</label></div>
-            <div><label><input id="disciplineCardio" type="checkbox" /> Cardio</label></div>
-            <div><label><input id="disciplineSauna" type="checkbox" /> Sauna</label></div>
-            <div><label><input id="disciplineAlcohol" type="checkbox" /> Alcohol</label></div>
-          </div>
-          <div id="disciplineAlcoholFields" class="singledeal-inputs-row hidden" style="margin-top:0.6rem;">
-            <div><label for="disciplineAlcoholType">Alcohol Type</label><input id="disciplineAlcoholType" type="text" placeholder="Wine, Beer, Bourbon..." /></div>
-            <div><label for="disciplineAlcoholDrinks"># Drinks</label><input id="disciplineAlcoholDrinks" type="number" min="1" step="1" /></div>
-          </div>
-          <div style="margin-top:0.6rem;">
-            <label for="disciplineNotes">Day Notes</label>
-            <textarea id="disciplineNotes" placeholder="Diet, travel, context..."></textarea>
-          </div>
-          <div style="margin-top:0.8rem; display:flex; gap:0.5rem; align-items:center;">
-            <button type="button" id="disciplineSaveLogBtn">Save Daily Log</button>
-            <button type="button" id="disciplineClearLogBtn" class="btn-secondary btn-small">New Day</button>
-            <span id="disciplineLogStatus" class="tiny"></span>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>Manage Workouts</h2>
-          <p class="tiny" id="disciplineWorkoutDayLabel">Select or save a day first.</p>
-          <div class="singledeal-inputs-row">
-            <div><label for="disciplineWorkoutType">Workout Type</label><input id="disciplineWorkoutType" type="text" placeholder="Lift, Zone 2, HIIT..." /></div>
-            <div><label for="disciplineWorkoutDuration">Duration (min)</label><input id="disciplineWorkoutDuration" type="number" min="0" step="1" /></div>
-            <div><label for="disciplineWorkoutCalories">Calories</label><input id="disciplineWorkoutCalories" type="number" min="0" step="1" /></div>
-            <div><label for="disciplineWorkoutLocation">Location</label><input id="disciplineWorkoutLocation" type="text" placeholder="Home, Gym, Hotel..." /></div>
-          </div>
-          <div style="margin-top:0.6rem;"><label for="disciplineWorkoutNotes">Workout Notes</label><textarea id="disciplineWorkoutNotes"></textarea></div>
-          <div style="margin-top:0.6rem; display:flex; gap:0.5rem;">
-            <button type="button" id="disciplineAddWorkoutBtn">Add Workout</button>
-            <button type="button" id="disciplineCancelWorkoutEditBtn" class="btn-secondary btn-small hidden">Cancel Edit</button>
-          </div>
-          <div class="history-wrapper" style="margin-top:0.8rem;">
-            <table>
-              <thead><tr><th>Type</th><th>Duration</th><th>Calories</th><th>Location</th><th>Notes</th><th>Actions</th></tr></thead>
-              <tbody id="disciplineWorkoutsBody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>Trends</h2>
-          <canvas id="disciplineWeightChart"></canvas>
-          <canvas id="disciplineStepsChart" style="margin-top:1rem;"></canvas>
-          <div style="margin-top:1rem; display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
-            <label for="disciplineHeatMetric">Heatmap Metric</label>
-            <select id="disciplineHeatMetric">
-              <option value="workedOut">Worked out</option>
-              <option value="stepsGoalMet">Steps goal met</option>
-              <option value="alcohol">Alcohol</option>
-              <option value="cardio">Cardio</option>
-              <option value="sauna">Sauna</option>
-            </select>
-            <label for="disciplineHeatMonth">Month</label>
-            <input id="disciplineHeatMonth" type="month" />
-          </div>
-          <div id="disciplineHeatmap" class="history-wrapper" style="margin-top:0.6rem; max-height:none;"></div>
-        </div>
-
-        <div class="card">
-          <h2>Daily Log History</h2>
-          <div class="history-wrapper" style="max-height:420px;">
-            <table>
-              <thead><tr><th>Date</th><th>Weight</th><th>Steps</th><th>Goal Met</th><th>Worked Out</th><th>Cardio</th><th>Sauna</th><th>Alcohol</th><th>Alcohol Type</th><th>Drinks</th><th>Notes</th></tr></thead>
-              <tbody id="disciplineHistoryBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div> <!-- end disciplineTab -->
-
       <!-- INSIGHTS TAB -->
       <div id="insightsTab" class="hidden">
         <div class="insights-grid">
@@ -2259,37 +2156,7 @@
     const commissionTab = document.getElementById("commissionTab");
     const personalTab = document.getElementById("personalTab");
     const goalsTab = document.getElementById("goalsTab");
-    const disciplineTab = document.getElementById("disciplineTab");
     const insightsTab = document.getElementById("insightsTab");
-
-    // Discipline elements
-    const disciplineDateInput = document.getElementById("disciplineDate");
-    const disciplineWeightInput = document.getElementById("disciplineWeight");
-    const disciplineStepsInput = document.getElementById("disciplineSteps");
-    const disciplineWorkedOutInput = document.getElementById("disciplineWorkedOut");
-    const disciplineCardioInput = document.getElementById("disciplineCardio");
-    const disciplineSaunaInput = document.getElementById("disciplineSauna");
-    const disciplineAlcoholInput = document.getElementById("disciplineAlcohol");
-    const disciplineAlcoholFields = document.getElementById("disciplineAlcoholFields");
-    const disciplineAlcoholTypeInput = document.getElementById("disciplineAlcoholType");
-    const disciplineAlcoholDrinksInput = document.getElementById("disciplineAlcoholDrinks");
-    const disciplineNotesInput = document.getElementById("disciplineNotes");
-    const disciplineSaveLogBtn = document.getElementById("disciplineSaveLogBtn");
-    const disciplineClearLogBtn = document.getElementById("disciplineClearLogBtn");
-    const disciplineLogStatus = document.getElementById("disciplineLogStatus");
-    const disciplineHistoryBody = document.getElementById("disciplineHistoryBody");
-    const disciplineWorkoutsBody = document.getElementById("disciplineWorkoutsBody");
-    const disciplineWorkoutDayLabel = document.getElementById("disciplineWorkoutDayLabel");
-    const disciplineWorkoutTypeInput = document.getElementById("disciplineWorkoutType");
-    const disciplineWorkoutDurationInput = document.getElementById("disciplineWorkoutDuration");
-    const disciplineWorkoutCaloriesInput = document.getElementById("disciplineWorkoutCalories");
-    const disciplineWorkoutLocationInput = document.getElementById("disciplineWorkoutLocation");
-    const disciplineWorkoutNotesInput = document.getElementById("disciplineWorkoutNotes");
-    const disciplineAddWorkoutBtn = document.getElementById("disciplineAddWorkoutBtn");
-    const disciplineCancelWorkoutEditBtn = document.getElementById("disciplineCancelWorkoutEditBtn");
-    const disciplineHeatMetricSelect = document.getElementById("disciplineHeatMetric");
-    const disciplineHeatMonthInput = document.getElementById("disciplineHeatMonth");
-    const disciplineHeatmapEl = document.getElementById("disciplineHeatmap");
 
     // Insights elements
     const insights401kContributionEl = document.getElementById("insights401kContribution");
@@ -2335,23 +2202,6 @@
     let compPieChart = null;
     let compLineChart = null;
     let insightsCompChart = null;
-    let disciplineWeightChart = null;
-    let disciplineStepsChart = null;
-
-    const disciplinePlan = {
-      planName: "75 Day Plan",
-      planStartDate: new Date().toISOString().slice(0, 10),
-      planLengthDays: 75
-    };
-
-    let disciplineState = {
-      dailyLogs: [],
-      workouts: []
-    };
-
-    let disciplineSelectedDate = "";
-    let disciplineEditingWorkoutId = null;
-
     let commissionTrackerState = {
       annualTarget: compConfig.annualTarget || 0,
       monthlyValues: { ...compConfig.monthlyValues }
@@ -2996,6 +2846,10 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+    }
+
+    function confirmDeleteRow(sectionLabel) {
+      return window.confirm(`Delete this row from ${sectionLabel}?`);
     }
 
     function renderAssetName(name) {
@@ -4091,7 +3945,7 @@
 
       storeTableBody.innerHTML = storeSpendingRows.map((row, idx) => storeEditMode ? `
         <tr>
-          <td><input type="text" class="store-name" data-index="${idx}" value="${escapeHtml(row.store)}" /></td>
+          <td><button type="button" class="delete-btn store-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="store-name" data-index="${idx}" value="${escapeHtml(row.store)}" /></td>
           <td><input type="text" class="store-amount" data-row="${idx}" data-col="1" value="${row.col1 != null ? formatNumberWithCommas(row.col1.toString()) : ""}" /></td>
           <td><input type="text" class="store-amount" data-row="${idx}" data-col="2" value="${row.col2 != null ? formatNumberWithCommas(row.col2.toString()) : ""}" /></td>
           <td><input type="text" class="store-amount" data-row="${idx}" data-col="3" value="${row.col3 != null ? formatNumberWithCommas(row.col3.toString()) : ""}" /></td>
@@ -4149,6 +4003,15 @@
             recalcStoreTotals();
           });
         });
+
+        document.querySelectorAll(".store-delete-row").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const idx = parseInt(btn.getAttribute("data-index"), 10);
+            if (!confirmDeleteRow("Store Spending")) return;
+            storeSpendingRows.splice(idx, 1);
+            renderStoreSection();
+          });
+        });
       }
 
       recalcStoreTotals();
@@ -4179,7 +4042,7 @@
 
       upcomingTableBody.innerHTML = upcomingRows.map((row, idx) => upcomingEditMode ? `
         <tr>
-          <td><input type="text" class="upcoming-category" data-index="${idx}" value="${escapeHtml(row.category)}" /></td>
+          <td><button type="button" class="delete-btn upcoming-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="upcoming-category" data-index="${idx}" value="${escapeHtml(row.category)}" /></td>
           <td><input type="text" class="upcoming-amount" data-index="${idx}" value="${row.amount != null ? formatNumberWithCommas(row.amount.toString()) : ""}" /></td>
         </tr>
       ` : `
@@ -4221,6 +4084,15 @@
             recalcUpcomingTotal();
           });
         });
+
+        document.querySelectorAll(".upcoming-delete-row").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const idx = parseInt(btn.getAttribute("data-index"), 10);
+            if (!confirmDeleteRow("Upcoming Costs")) return;
+            upcomingRows.splice(idx, 1);
+            renderUpcomingSection();
+          });
+        });
       }
 
       recalcUpcomingTotal();
@@ -4253,7 +4125,7 @@
 
       debtTableBody.innerHTML = debtRows.map((row, idx) => debtEditMode ? `
         <tr>
-          <td><input type="text" class="debt-name" data-index="${idx}" value="${escapeHtml(row.name)}" /></td>
+          <td><button type="button" class="delete-btn debt-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="debt-name" data-index="${idx}" value="${escapeHtml(row.name)}" /></td>
           <td><input type="text" class="debt-amount" data-index="${idx}" value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}" /></td>
         </tr>
       ` : `
@@ -4292,6 +4164,16 @@
             const val = getNumericValue(e.target.value);
             debtRows[idx].balance = isNaN(val) ? null : val;
             recalcDebtTotal();
+          });
+        });
+
+        document.querySelectorAll(".debt-delete-row").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const idx = parseInt(btn.getAttribute("data-index"), 10);
+            if (!confirmDeleteRow("Debt")) return;
+            debtRows.splice(idx, 1);
+            renderDebtSection();
+            renderGoals();
           });
         });
       }
@@ -4334,7 +4216,7 @@
         .filter(({ row }) => filterFn(row))
         .map(({ row, idx }) => investEditMode ? `
           <tr>
-            <td><input type="text" class="invest-name" data-index="${idx}" value="${escapeHtml(row.name)}" /></td>
+            <td><button type="button" class="delete-btn invest-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="invest-name" data-index="${idx}" value="${escapeHtml(row.name)}" /></td>
             <td><input type="text" class="invest-amount" data-index="${idx}" value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}" /></td>
           </tr>
         ` : `
@@ -4375,6 +4257,15 @@
             const val = getNumericValue(e.target.value);
             investmentRows[idx].balance = isNaN(val) ? null : val;
             recalcInvestTotal();
+          });
+        });
+
+        document.querySelectorAll(".invest-delete-row").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const idx = parseInt(btn.getAttribute("data-index"), 10);
+            if (!confirmDeleteRow("Investments")) return;
+            investmentRows.splice(idx, 1);
+            renderInvestSection();
           });
         });
       }
@@ -4601,7 +4492,7 @@
       if (booksCompletedBody) {
         booksCompletedBody.innerHTML = readingCompletedRows.map((row, idx) => readingEditMode ? `
           <tr>
-            <td><input type="text" class="completed-title" data-index="${idx}" value="${escapeHtml(row.title)}" /></td>
+            <td><button type="button" class="delete-btn completed-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="completed-title" data-index="${idx}" value="${escapeHtml(row.title)}" /></td>
             <td><input type="text" class="completed-author" data-index="${idx}" value="${escapeHtml(row.author)}" /></td>
             <td><input type="text" class="completed-format" data-index="${idx}" value="${escapeHtml(row.format)}" /></td>
             <td>${renderRatingControl(row.rating, idx)}</td>
@@ -4632,6 +4523,15 @@
           bindInput(".completed-author", "author");
           bindInput(".completed-format", "format");
           bindInput(".completed-month", "monthFinished");
+
+          document.querySelectorAll(".completed-delete-row").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const idx = parseInt(btn.getAttribute("data-index"), 10);
+              if (!confirmDeleteRow("Books Completed")) return;
+              readingCompletedRows.splice(idx, 1);
+              renderGoals();
+            });
+          });
         }
 
         document.querySelectorAll(".completed-rating").forEach(select => {
@@ -4645,7 +4545,7 @@
       if (booksToReadBody) {
         booksToReadBody.innerHTML = readingToReadRows.map((row, idx) => readingEditMode ? `
           <tr>
-            <td><input type="text" class="toread-title" data-index="${idx}" value="${escapeHtml(row.title)}" /></td>
+            <td><button type="button" class="delete-btn toread-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="toread-title" data-index="${idx}" value="${escapeHtml(row.title)}" /></td>
             <td><input type="text" class="toread-author" data-index="${idx}" value="${escapeHtml(row.author)}" /></td>
           </tr>
         ` : `
@@ -4666,6 +4566,15 @@
             input.addEventListener("input", (e) => {
               const idx = parseInt(e.target.getAttribute("data-index"), 10);
               readingToReadRows[idx].author = e.target.value;
+            });
+          });
+
+          document.querySelectorAll(".toread-delete-row").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const idx = parseInt(btn.getAttribute("data-index"), 10);
+              if (!confirmDeleteRow("Books To Read")) return;
+              readingToReadRows.splice(idx, 1);
+              renderGoals();
             });
           });
         }
@@ -4996,341 +4905,6 @@
       }
     }
 
-
-    function normalizeDisciplineState(state) {
-      const safe = state || {};
-      const logs = Array.isArray(safe.dailyLogs) ? safe.dailyLogs : [];
-      const workouts = Array.isArray(safe.workouts) ? safe.workouts : [];
-      return {
-        dailyLogs: logs
-          .filter(log => log && /^\d{4}-\d{2}-\d{2}$/.test(log.date || ""))
-          .map(log => ({
-            date: log.date,
-            weight_lbs: typeof log.weight_lbs === "number" ? log.weight_lbs : null,
-            steps: Number.isInteger(log.steps) ? log.steps : null,
-            workedOut: !!log.workedOut,
-            cardio: !!log.cardio,
-            sauna: !!log.sauna,
-            alcohol: !!log.alcohol,
-            alcoholType: (log.alcoholType || "").trim(),
-            alcoholDrinks: Number.isInteger(log.alcoholDrinks) ? log.alcoholDrinks : null,
-            dayNotes: log.dayNotes || "",
-            stepsGoalMet: !!log.stepsGoalMet
-          })),
-        workouts: workouts
-          .filter(w => w && /^\d{4}-\d{2}-\d{2}$/.test(w.date || "") && (w.workoutType || "").trim())
-          .map(w => ({
-            id: w.id || `${w.date}-${Math.random().toString(36).slice(2, 9)}`,
-            date: w.date,
-            workoutType: w.workoutType,
-            durationMinutes: Number.isInteger(w.durationMinutes) ? w.durationMinutes : null,
-            calories: Number.isInteger(w.calories) ? w.calories : null,
-            location: w.location || "",
-            workoutNotes: w.workoutNotes || ""
-          }))
-      };
-    }
-
-    async function loadDisciplineDataForUser(uid) {
-      try {
-        const ref = doc(db, "dashboards", uid);
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          const data = snap.data();
-          disciplineState = normalizeDisciplineState(data.discipline);
-          if (!data.discipline) {
-            await setDoc(ref, { discipline: disciplineState }, { merge: true });
-          }
-        } else {
-          disciplineState = normalizeDisciplineState(null);
-          await setDoc(ref, { discipline: disciplineState });
-        }
-      } catch (err) {
-        console.error("Error loading discipline data", err);
-        disciplineState = normalizeDisciplineState(null);
-      }
-      renderDiscipline();
-    }
-
-    async function saveDisciplineDataForUser(uid) {
-      const ref = doc(db, "dashboards", uid);
-      disciplineState = normalizeDisciplineState(disciplineState);
-      await setDoc(ref, { discipline: disciplineState }, { merge: true });
-    }
-
-    function getSortedDisciplineLogs() {
-      return [...disciplineState.dailyLogs].sort((a, b) => a.date.localeCompare(b.date));
-    }
-
-    function formatWeight(weight) {
-      return typeof weight === "number" ? `${weight.toFixed(1)} lbs` : "–";
-    }
-
-    function renderDisciplineKpis(logs) {
-      const today = new Date().toISOString().slice(0, 10);
-      const start = new Date(`${disciplinePlan.planStartDate}T00:00:00`);
-      const todayDate = new Date(`${today}T00:00:00`);
-      const dayDiff = Math.floor((todayDate - start) / 86400000) + 1;
-      const inRange = dayDiff >= 1 && dayDiff <= disciplinePlan.planLengthDays;
-      const lastLoggedDay = logs.length
-        ? Math.max(1, Math.floor((new Date(`${logs[logs.length - 1].date}T00:00:00`) - start) / 86400000) + 1)
-        : 0;
-      const dayNumber = inRange ? dayDiff : lastLoggedDay;
-      document.getElementById("disciplineDayProgress").textContent = `Day ${dayNumber} of ${disciplinePlan.planLengthDays}`;
-
-      const logsWithWeight = logs.filter(l => typeof l.weight_lbs === "number");
-      const latestWeight = logsWithWeight.length ? logsWithWeight[logsWithWeight.length - 1].weight_lbs : null;
-      const firstWeight = logsWithWeight.length ? logsWithWeight[0].weight_lbs : null;
-      document.getElementById("disciplineCurrentWeight").textContent = formatWeight(latestWeight);
-      document.getElementById("disciplineWeightDelta").textContent = (typeof latestWeight === "number" && typeof firstWeight === "number")
-        ? `${(latestWeight - firstWeight).toFixed(1)} lbs`
-        : "–";
-
-      const last7Weights = logsWithWeight.slice(-7).map(l => l.weight_lbs);
-      const avg7 = last7Weights.length ? (last7Weights.reduce((a, b) => a + b, 0) / last7Weights.length) : null;
-      document.getElementById("disciplineWeightAvg").textContent = typeof avg7 === "number" ? `${avg7.toFixed(1)} lbs` : "–";
-
-      const last7Logs = logs.slice(-7);
-      const stepsMet = last7Logs.filter(l => l.stepsGoalMet).length;
-      const alcoholFree = last7Logs.filter(l => !l.alcohol).length;
-      document.getElementById("disciplineStepsGoal7").textContent = `${stepsMet} / 7`;
-      document.getElementById("disciplineAlcoholFree7").textContent = `${alcoholFree} / 7`;
-
-      let streak = 0;
-      for (let i = logs.length - 1; i >= 0; i -= 1) {
-        if (logs[i].workedOut) streak += 1;
-        else break;
-      }
-      document.getElementById("disciplineWorkoutStreak").textContent = `${streak} day${streak === 1 ? "" : "s"}`;
-    }
-
-    function renderDisciplineHistory(logs) {
-      disciplineHistoryBody.innerHTML = "";
-      [...logs].reverse().forEach(log => {
-        const tr = document.createElement("tr");
-        const notes = (log.dayNotes || "").trim();
-        tr.innerHTML = `
-          <td>${log.date}</td>
-          <td>${typeof log.weight_lbs === "number" ? log.weight_lbs.toFixed(1) : ""}</td>
-          <td>${Number.isInteger(log.steps) ? log.steps.toLocaleString("en-US") : ""}</td>
-          <td>${log.stepsGoalMet ? "Yes" : "No"}</td>
-          <td>${log.workedOut ? "Yes" : "No"}</td>
-          <td>${log.cardio ? "Yes" : "No"}</td>
-          <td>${log.sauna ? "Yes" : "No"}</td>
-          <td>${log.alcohol ? "Yes" : "No"}</td>
-          <td>${escapeHtml(log.alcoholType || "")}</td>
-          <td>${Number.isInteger(log.alcoholDrinks) ? log.alcoholDrinks : ""}</td>
-          <td title="${escapeHtml(notes)}">${escapeHtml(notes.slice(0, 60))}${notes.length > 60 ? "..." : ""}</td>
-        `;
-        tr.style.cursor = "pointer";
-        tr.onclick = () => loadDisciplineLogIntoForm(log.date);
-        disciplineHistoryBody.appendChild(tr);
-      });
-    }
-
-    function renderDisciplineWorkouts() {
-      disciplineWorkoutsBody.innerHTML = "";
-      if (!disciplineSelectedDate) {
-        disciplineWorkoutDayLabel.textContent = "Select or save a day first.";
-        return;
-      }
-      disciplineWorkoutDayLabel.textContent = `Workouts for ${disciplineSelectedDate}`;
-      const rows = disciplineState.workouts
-        .filter(w => w.date === disciplineSelectedDate)
-        .sort((a, b) => (a.id || "").localeCompare(b.id || ""));
-      rows.forEach(w => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${escapeHtml(w.workoutType)}</td><td>${w.durationMinutes ?? ""}</td><td>${w.calories ?? ""}</td><td>${escapeHtml(w.location || "")}</td><td>${escapeHtml(w.workoutNotes || "")}</td><td><button type="button" class="btn-secondary btn-small" data-action="edit">Edit</button> <button type="button" class="btn-secondary btn-small" data-action="delete">Delete</button></td>`;
-        tr.querySelector('[data-action="edit"]').onclick = () => startEditingWorkout(w.id);
-        tr.querySelector('[data-action="delete"]').onclick = () => deleteWorkout(w.id);
-        disciplineWorkoutsBody.appendChild(tr);
-      });
-    }
-
-    function renderDisciplineCharts(logs) {
-      const weightPoints = logs.filter(l => typeof l.weight_lbs === "number");
-      const wCtx = document.getElementById("disciplineWeightChart").getContext("2d");
-      if (disciplineWeightChart) disciplineWeightChart.destroy();
-      disciplineWeightChart = new Chart(wCtx, {
-        type: "line",
-        data: { labels: weightPoints.map(l => l.date), datasets: [{ label: "Weight (lbs)", data: weightPoints.map(l => l.weight_lbs), borderColor: "#2563eb", backgroundColor: "transparent", tension: 0.2 }] },
-        options: { responsive: true }
-      });
-
-      const sCtx = document.getElementById("disciplineStepsChart").getContext("2d");
-      if (disciplineStepsChart) disciplineStepsChart.destroy();
-      disciplineStepsChart = new Chart(sCtx, {
-        type: "line",
-        data: { labels: logs.map(l => l.date), datasets: [{ label: "Steps", data: logs.map(l => l.steps ?? null), borderColor: "#16a34a", backgroundColor: "transparent", tension: 0.2 }, { label: "Goal (10,000)", data: logs.map(() => 10000), borderColor: "#ef4444", borderDash: [5, 5], pointRadius: 0 }] },
-        options: { responsive: true }
-      });
-    }
-
-    function renderDisciplineHeatmap(logs) {
-      const metric = disciplineHeatMetricSelect.value || "workedOut";
-      const monthValue = disciplineHeatMonthInput.value || new Date().toISOString().slice(0, 7);
-      const [year, month] = monthValue.split("-").map(n => parseInt(n, 10));
-      if (!year || !month) return;
-      const firstDay = new Date(year, month - 1, 1);
-      const daysInMonth = new Date(year, month, 0).getDate();
-      const startWeekday = firstDay.getDay();
-      const map = new Map(logs.map(l => [l.date, l]));
-
-      let html = '<table><thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead><tbody><tr>';
-      for (let i = 0; i < startWeekday; i += 1) html += '<td></td>';
-      for (let d = 1; d <= daysInMonth; d += 1) {
-        const date = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-        const log = map.get(date);
-        const val = log ? !!log[metric] : false;
-        const bg = !log ? "transparent" : (metric === "alcohol" ? (val ? "#fecaca" : "#bbf7d0") : (val ? "#bbf7d0" : "#fee2e2"));
-        const tip = log
-          ? `${date} | wt:${log.weight_lbs ?? "-"} | steps:${log.steps ?? "-"} | wo:${log.workedOut ? "Y" : "N"} cardio:${log.cardio ? "Y" : "N"} sauna:${log.sauna ? "Y" : "N"} alcohol:${log.alcohol ? "Y" : "N"} ${log.alcoholType || ""} ${log.alcoholDrinks || ""}`
-          : date;
-        html += `<td title="${escapeHtml(tip)}" style="background:${bg}; text-align:center;">${d}</td>`;
-        if ((startWeekday + d) % 7 === 0 && d !== daysInMonth) html += '</tr><tr>';
-      }
-      const tail = (startWeekday + daysInMonth) % 7;
-      if (tail !== 0) for (let i = tail; i < 7; i += 1) html += '<td></td>';
-      html += '</tr></tbody></table>';
-      disciplineHeatmapEl.innerHTML = html;
-    }
-
-    function loadDisciplineLogIntoForm(date) {
-      const log = disciplineState.dailyLogs.find(l => l.date === date);
-      if (!log) return;
-      disciplineSelectedDate = date;
-      disciplineDateInput.value = log.date;
-      disciplineWeightInput.value = typeof log.weight_lbs === "number" ? log.weight_lbs : "";
-      disciplineStepsInput.value = Number.isInteger(log.steps) ? log.steps : "";
-      disciplineWorkedOutInput.checked = !!log.workedOut;
-      disciplineCardioInput.checked = !!log.cardio;
-      disciplineSaunaInput.checked = !!log.sauna;
-      disciplineAlcoholInput.checked = !!log.alcohol;
-      disciplineAlcoholTypeInput.value = log.alcoholType || "";
-      disciplineAlcoholDrinksInput.value = Number.isInteger(log.alcoholDrinks) ? log.alcoholDrinks : "";
-      disciplineNotesInput.value = log.dayNotes || "";
-      toggleAlcoholInputs();
-      renderDisciplineWorkouts();
-    }
-
-    function clearDisciplineForm() {
-      disciplineSelectedDate = "";
-      disciplineDateInput.value = new Date().toISOString().slice(0, 10);
-      disciplineWeightInput.value = "";
-      disciplineStepsInput.value = "";
-      disciplineWorkedOutInput.checked = false;
-      disciplineCardioInput.checked = false;
-      disciplineSaunaInput.checked = false;
-      disciplineAlcoholInput.checked = false;
-      disciplineAlcoholTypeInput.value = "";
-      disciplineAlcoholDrinksInput.value = "";
-      disciplineNotesInput.value = "";
-      toggleAlcoholInputs();
-      clearWorkoutForm();
-      renderDisciplineWorkouts();
-    }
-
-    function toggleAlcoholInputs() {
-      const show = disciplineAlcoholInput.checked;
-      disciplineAlcoholFields.classList.toggle("hidden", !show);
-    }
-
-    function saveDisciplineLogFromForm() {
-      const date = disciplineDateInput.value;
-      if (!date) return alert("Date is required.");
-      const alcohol = disciplineAlcoholInput.checked;
-      const drinks = parseInt(disciplineAlcoholDrinksInput.value, 10);
-      if (alcohol) {
-        if (!disciplineAlcoholTypeInput.value.trim()) return alert("Alcohol type is required when alcohol is checked.");
-        if (!Number.isInteger(drinks) || drinks < 1) return alert("Alcohol drinks must be at least 1.");
-      }
-
-      const stepsRaw = parseInt(disciplineStepsInput.value, 10);
-      const log = {
-        date,
-        weight_lbs: disciplineWeightInput.value === "" ? null : parseFloat(disciplineWeightInput.value),
-        steps: Number.isInteger(stepsRaw) ? stepsRaw : null,
-        workedOut: disciplineWorkedOutInput.checked,
-        cardio: disciplineCardioInput.checked,
-        sauna: disciplineSaunaInput.checked,
-        alcohol,
-        alcoholType: alcohol ? disciplineAlcoholTypeInput.value.trim() : "",
-        alcoholDrinks: alcohol ? drinks : null,
-        dayNotes: disciplineNotesInput.value.trim(),
-        stepsGoalMet: Number.isInteger(stepsRaw) && stepsRaw >= 10000
-      };
-
-      const idx = disciplineState.dailyLogs.findIndex(l => l.date === date);
-      if (idx >= 0) disciplineState.dailyLogs[idx] = log;
-      else disciplineState.dailyLogs.push(log);
-      disciplineSelectedDate = date;
-      disciplineLogStatus.textContent = `Saved ${date}`;
-      renderDiscipline();
-      if (currentUser) saveDisciplineDataForUser(currentUser.uid).catch(err => console.error("Error saving discipline log", err));
-    }
-
-    function clearWorkoutForm() {
-      disciplineEditingWorkoutId = null;
-      disciplineWorkoutTypeInput.value = "";
-      disciplineWorkoutDurationInput.value = "";
-      disciplineWorkoutCaloriesInput.value = "";
-      disciplineWorkoutLocationInput.value = "";
-      disciplineWorkoutNotesInput.value = "";
-      disciplineAddWorkoutBtn.textContent = "Add Workout";
-      disciplineCancelWorkoutEditBtn.classList.add("hidden");
-    }
-
-    function upsertWorkoutFromForm() {
-      const date = disciplineDateInput.value || disciplineSelectedDate;
-      if (!date) return alert("Select a day before adding workouts.");
-      const workoutType = disciplineWorkoutTypeInput.value.trim();
-      if (!workoutType) return alert("Workout type is required.");
-      const payload = {
-        id: disciplineEditingWorkoutId || `${date}-${Date.now()}`,
-        date,
-        workoutType,
-        durationMinutes: disciplineWorkoutDurationInput.value === "" ? null : parseInt(disciplineWorkoutDurationInput.value, 10),
-        calories: disciplineWorkoutCaloriesInput.value === "" ? null : parseInt(disciplineWorkoutCaloriesInput.value, 10),
-        location: disciplineWorkoutLocationInput.value.trim(),
-        workoutNotes: disciplineWorkoutNotesInput.value.trim()
-      };
-      const idx = disciplineState.workouts.findIndex(w => w.id === payload.id);
-      if (idx >= 0) disciplineState.workouts[idx] = payload;
-      else disciplineState.workouts.push(payload);
-      disciplineSelectedDate = date;
-      clearWorkoutForm();
-      renderDiscipline();
-      if (currentUser) saveDisciplineDataForUser(currentUser.uid).catch(err => console.error("Error saving workout", err));
-    }
-
-    function startEditingWorkout(id) {
-      const w = disciplineState.workouts.find(row => row.id === id);
-      if (!w) return;
-      disciplineEditingWorkoutId = id;
-      disciplineWorkoutTypeInput.value = w.workoutType || "";
-      disciplineWorkoutDurationInput.value = w.durationMinutes ?? "";
-      disciplineWorkoutCaloriesInput.value = w.calories ?? "";
-      disciplineWorkoutLocationInput.value = w.location || "";
-      disciplineWorkoutNotesInput.value = w.workoutNotes || "";
-      disciplineAddWorkoutBtn.textContent = "Save Workout";
-      disciplineCancelWorkoutEditBtn.classList.remove("hidden");
-    }
-
-    function deleteWorkout(id) {
-      disciplineState.workouts = disciplineState.workouts.filter(w => w.id !== id);
-      renderDiscipline();
-      if (currentUser) saveDisciplineDataForUser(currentUser.uid).catch(err => console.error("Error deleting workout", err));
-    }
-
-    function renderDiscipline() {
-      const logs = getSortedDisciplineLogs();
-      renderDisciplineKpis(logs);
-      renderDisciplineHistory(logs);
-      renderDisciplineWorkouts();
-      renderDisciplineCharts(logs);
-      renderDisciplineHeatmap(logs);
-    }
-
     async function onSaveDashboardClick() {
       console.log("onSaveDashboardClick called");
 
@@ -5353,7 +4927,6 @@
         await savePersonalFinanceDataForUser(user.uid);
         await saveCommissionTrackerDataForUser(user.uid);
         await saveGoalsDataForUser(user.uid);
-        await saveDisciplineDataForUser(user.uid);
 
         const now = new Date();
         if (statusEl) {
@@ -5384,33 +4957,22 @@
           commissionTab.classList.remove("hidden");
           personalTab.classList.add("hidden");
           goalsTab.classList.add("hidden");
-          disciplineTab.classList.add("hidden");
           insightsTab.classList.add("hidden");
         } else if (tab === "personal") {
           commissionTab.classList.add("hidden");
           personalTab.classList.remove("hidden");
           goalsTab.classList.add("hidden");
-          disciplineTab.classList.add("hidden");
           insightsTab.classList.add("hidden");
         } else if (tab === "goals") {
           commissionTab.classList.add("hidden");
           personalTab.classList.add("hidden");
           goalsTab.classList.remove("hidden");
-          disciplineTab.classList.add("hidden");
           renderGoals();
           insightsTab.classList.add("hidden");
-        } else if (tab === "discipline") {
-          commissionTab.classList.add("hidden");
-          personalTab.classList.add("hidden");
-          goalsTab.classList.add("hidden");
-          disciplineTab.classList.remove("hidden");
-          insightsTab.classList.add("hidden");
-          renderDiscipline();
         } else {
           commissionTab.classList.add("hidden");
           personalTab.classList.add("hidden");
           goalsTab.classList.add("hidden");
-          disciplineTab.classList.add("hidden");
           insightsTab.classList.remove("hidden");
           renderInsights();
         }
@@ -5437,19 +4999,6 @@
       }
     });
 
-    // Discipline handlers
-    disciplineAlcoholInput.addEventListener("change", toggleAlcoholInputs);
-    disciplineSaveLogBtn.addEventListener("click", saveDisciplineLogFromForm);
-    disciplineClearLogBtn.addEventListener("click", clearDisciplineForm);
-    disciplineAddWorkoutBtn.addEventListener("click", upsertWorkoutFromForm);
-    disciplineCancelWorkoutEditBtn.addEventListener("click", clearWorkoutForm);
-    disciplineHeatMetricSelect.addEventListener("change", () => renderDisciplineHeatmap(getSortedDisciplineLogs()));
-    disciplineHeatMonthInput.addEventListener("change", () => renderDisciplineHeatmap(getSortedDisciplineLogs()));
-
-    disciplineDateInput.value = new Date().toISOString().slice(0, 10);
-    disciplineHeatMonthInput.value = new Date().toISOString().slice(0, 7);
-    toggleAlcoholInputs();
-
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
       if (user) {
@@ -5463,7 +5012,6 @@
         await loadPersonalFinanceData();
         await loadGoalsDataForUser(user.uid);
         await loadRetirementSettings(user.uid);
-        await loadDisciplineDataForUser(user.uid);
         renderPersonalFinance();
 
         const statusEl = document.getElementById("saveStatus");
@@ -5493,18 +5041,6 @@
           compLineChart.destroy();
           compLineChart = null;
         }
-        if (disciplineWeightChart) {
-          disciplineWeightChart.destroy();
-          disciplineWeightChart = null;
-        }
-        if (disciplineStepsChart) {
-          disciplineStepsChart.destroy();
-          disciplineStepsChart = null;
-        }
-        disciplineState = { dailyLogs: [], workouts: [] };
-        clearDisciplineForm();
-        disciplineHistoryBody.innerHTML = "";
-        disciplineWorkoutsBody.innerHTML = "";
         retirementSettings = { ...defaultRetirementSettings };
         retirementEditMode = false;
         renderGoals();
