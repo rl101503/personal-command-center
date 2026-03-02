@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Personal Command Center</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Inter Tight font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -287,6 +287,12 @@
     .history-wrapper {
       overflow-x: auto;
       width: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
     }
 
     /* Larger, tighter budget table */
@@ -1076,9 +1082,6 @@
       .kpi-label {
         font-size: 0.9rem;
       }
-      .tab-nav {
-        position: static;
-      }
       .history-header-row,
       .goals-sort-row,
       .section-controls {
@@ -1102,6 +1105,40 @@
       #compLineChart {
         width: 100% !important;
         height: auto !important;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 1rem;
+      }
+      .tab-nav {
+        top: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .tab-buttons {
+        min-width: max-content;
+        flex-wrap: nowrap;
+      }
+      .tab-button {
+        flex: 0 0 auto;
+      }
+      .reading-pill-row,
+      .results-grid,
+      .kpi-row {
+        grid-template-columns: 1fr;
+      }
+      button,
+      input[type="text"],
+      select,
+      textarea {
+        min-height: 38px;
+      }
+      th,
+      td {
+        padding: 0.18rem 0.28rem;
+        font-size: 0.74rem;
       }
     }
 
@@ -1755,6 +1792,7 @@
                     <tr>
                       <th>Title</th>
                       <th>Author</th>
+                      <th id="booksToReadActionHeader" class="hidden">Action</th>
                     </tr>
                   </thead>
                   <tbody id="booksToReadBody"></tbody>
@@ -2311,6 +2349,7 @@
     let budgetEditMode = false;
 
     let readingSortAsc = true;
+    let booksToReadActiveSortKey = "";
     let debtSortDesc = true;
 
     let storeEditMode = false;
@@ -4347,6 +4386,7 @@
       const booksToReadAddBtn = document.getElementById("booksToReadAddBtn");
       const booksToReadSortTitleBtn = document.getElementById("booksToReadSortTitle");
       const booksToReadSortAuthorBtn = document.getElementById("booksToReadSortAuthor");
+      const booksToReadActionHeader = document.getElementById("booksToReadActionHeader");
       const debtGoalSummaryEl = document.getElementById("debtGoalSummary");
       const debtGoalProgressEl = document.getElementById("debtGoalProgress");
       const debtGoalBody = document.getElementById("debtGoalBody");
@@ -4389,7 +4429,8 @@
 
       refreshReadingDisplays();
 
-      const sortBooksToRead = (key) => {
+      const sortBooksToRead = (key, shouldRerender = true) => {
+        if (!key) return;
         const hasContent = (row) => (row.title || "").trim() !== "" || (row.author || "").trim() !== "";
         const filled = readingToReadRows.filter(hasContent);
         const blanks = readingToReadRows.filter(row => !hasContent(row));
@@ -4402,15 +4443,35 @@
           return aVal.localeCompare(bVal);
         });
         readingToReadRows = [...filled, ...blanks];
-        renderGoals();
+        if (shouldRerender) {
+          renderGoals();
+        }
+      };
+
+      const ensureBooksToReadBlankRows = () => {
+        const blankCount = readingToReadRows.filter(row => !(row.title || "").trim() && !(row.author || "").trim()).length;
+        const rowsNeeded = Math.max(5 - blankCount, 0);
+        for (let i = 0; i < rowsNeeded; i += 1) {
+          readingToReadRows.push({ title: "", author: "" });
+        }
       };
 
       if (booksToReadSortTitleBtn) {
-        booksToReadSortTitleBtn.onclick = () => sortBooksToRead("title");
+        booksToReadSortTitleBtn.onclick = () => {
+          booksToReadActiveSortKey = "title";
+          sortBooksToRead("title");
+        };
       }
 
       if (booksToReadSortAuthorBtn) {
-        booksToReadSortAuthorBtn.onclick = () => sortBooksToRead("author");
+        booksToReadSortAuthorBtn.onclick = () => {
+          booksToReadActiveSortKey = "author";
+          sortBooksToRead("author");
+        };
+      }
+
+      if (booksToReadActionHeader) {
+        booksToReadActionHeader.classList.toggle("hidden", !readingEditMode);
       }
 
       if (goalsSortReadingBtn) {
@@ -4543,17 +4604,21 @@
       }
 
       if (booksToReadBody) {
-        booksToReadBody.innerHTML = readingToReadRows.map((row, idx) => readingEditMode ? `
+        booksToReadBody.innerHTML = readingToReadRows.map((row, idx) => {
+          const hasContent = (row.title || "").trim() || (row.author || "").trim();
+          return readingEditMode ? `
           <tr>
             <td><button type="button" class="delete-btn toread-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="toread-title" data-index="${idx}" value="${escapeHtml(row.title)}" /></td>
             <td><input type="text" class="toread-author" data-index="${idx}" value="${escapeHtml(row.author)}" /></td>
+            <td>${hasContent ? `<button type="button" class="btn-secondary btn-small toread-complete-row" data-index="${idx}">✓ Complete</button>` : ""}</td>
           </tr>
         ` : `
           <tr>
             <td>${escapeHtml(row.title)}</td>
             <td>${escapeHtml(row.author)}</td>
           </tr>
-        `).join("");
+        `;
+        }).join("");
 
         if (readingEditMode) {
           document.querySelectorAll(".toread-title").forEach(input => {
@@ -4574,6 +4639,27 @@
               const idx = parseInt(btn.getAttribute("data-index"), 10);
               if (!confirmDeleteRow("Books To Read")) return;
               readingToReadRows.splice(idx, 1);
+              ensureBooksToReadBlankRows();
+              if (booksToReadActiveSortKey) sortBooksToRead(booksToReadActiveSortKey, false);
+              renderGoals();
+            });
+          });
+
+          document.querySelectorAll(".toread-complete-row").forEach(btn => {
+            btn.addEventListener("click", async () => {
+              const idx = parseInt(btn.getAttribute("data-index"), 10);
+              const row = readingToReadRows[idx] || { title: "", author: "" };
+              const title = (row.title || "").trim();
+              const author = (row.author || "").trim();
+              if (!title && !author) return;
+              readingCompletedRows.push({ title, author, format: "", rating: "", notes: "", monthFinished: "" });
+              readingToReadRows.splice(idx, 1);
+              ensureBooksToReadBlankRows();
+              if (booksToReadActiveSortKey) sortBooksToRead(booksToReadActiveSortKey, false);
+              await savePersonalFinanceData({
+                readingCompletedRows,
+                readingToReadRows
+              });
               renderGoals();
             });
           });
