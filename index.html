@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Personal Command Center</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <!-- Inter Tight font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -1152,6 +1152,231 @@
       .comp-chart-container {
         flex: 1 1 100%;
         max-width: 100%;
+      }
+    }
+
+    /* ===============================
+       MOBILE PORTRAIT OPTIMIZATION
+       (Landscape intentionally ignored)
+       =============================== */
+
+    @media (max-width: 600px) and (orientation: portrait) {
+
+      :root {
+        --mobile-pad: 12px;
+        --mobile-gap: 12px;
+        --tap-height: 44px;
+        --radius: 12px;
+        --shadow: 0 6px 18px rgba(0,0,0,0.08);
+      }
+
+      html, body {
+        width: 100%;
+        overflow-x: hidden;
+      }
+
+      body {
+        padding: var(--mobile-pad);
+        font-size: 16px;
+        line-height: 1.4;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      /* Safer defaults for common layout wrappers */
+      .container,
+      .page,
+      .content,
+      .main,
+      .wrapper {
+        width: 100%;
+        max-width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      /* Convert common multi-column layouts to single column */
+      .row,
+      .grid,
+      .columns,
+      .two-col,
+      .three-col,
+      .layout,
+      .flex-row {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: var(--mobile-gap) !important;
+        width: 100% !important;
+      }
+
+      /* Generic cards/widgets/panels */
+      .card,
+      .panel,
+      .widget,
+      .section,
+      .tile,
+      .box {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+
+      /* Headings spacing */
+      h1, h2, h3 {
+        line-height: 1.25;
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+
+      /* Forms: make inputs tap-friendly */
+      input,
+      select,
+      textarea {
+        width: 100%;
+        min-height: var(--tap-height);
+        font-size: 16px; /* prevents iOS zoom */
+        padding: 10px 12px;
+        border-radius: 10px;
+      }
+
+      /* Buttons/CTAs: full width */
+      button,
+      .btn,
+      [role="button"],
+      input[type="button"],
+      input[type="submit"] {
+        width: 100%;
+        min-height: var(--tap-height);
+        padding: 12px 14px;
+        border-radius: 12px;
+        touch-action: manipulation;
+      }
+
+      /* Improve hit targets for icon buttons */
+      .icon-btn,
+      .btn-icon,
+      .delete-btn,
+      .remove-btn {
+        min-height: var(--tap-height);
+        min-width: var(--tap-height);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Avoid fixed headers eating the screen on mobile */
+      .sticky,
+      .sticky-header,
+      header.sticky {
+        position: static !important;
+      }
+
+      /* Dashboard grid: force single column */
+      .dashboard,
+      .dashboard-grid,
+      .dashboardContainer {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 16px !important;
+        width: 100% !important;
+      }
+
+      /* -------------------------------
+         TABLE UX (mobile portrait)
+         - horizontal scroll
+         - sticky header row
+         - larger row height
+         - better spacing
+         -------------------------------- */
+
+      .table-wrap,
+      .table-container,
+      .data-table-wrap,
+      .datatable-wrap {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        display: block;             /* enables horizontal scroll */
+        overflow-x: auto;
+        white-space: nowrap;        /* prevent columns wrapping weirdly */
+        -webkit-overflow-scrolling: touch;
+      }
+
+      thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: inherit;        /* keep existing theme */
+      }
+
+      th, td {
+        padding: 12px 10px;
+        font-size: 14px;
+        vertical-align: middle;
+      }
+
+      tr {
+        min-height: var(--tap-height);
+      }
+
+      /* If your tables are very wide, ensure minimum column width */
+      th, td {
+        min-width: 110px;
+      }
+
+      /* Make first column slightly wider (often labels) */
+      th:first-child, td:first-child {
+        min-width: 140px;
+      }
+
+      /* -------------------------------
+         KPI / metric cards (if present)
+         -------------------------------- */
+      .kpi,
+      .kpi-card,
+      .metric,
+      .metric-card {
+        width: 100% !important;
+      }
+
+      /* -------------------------------
+         Modal / drawer sizing
+         -------------------------------- */
+      .modal,
+      .dialog,
+      .drawer {
+        width: calc(100% - 2 * var(--mobile-pad)) !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        border-radius: var(--radius) !important;
+      }
+
+      /* -------------------------------
+         Optional: "mobile app" feel
+         - reduce dense padding on sections
+         - consistent spacing
+         -------------------------------- */
+      .section,
+      .panel,
+      .card {
+        padding: 12px !important;
+      }
+
+    }
+
+    /* END MOBILE PORTRAIT OPTIMIZATION */
+
+    @media (max-width: 600px) and (orientation: portrait) {
+      thead th {
+        background: #fff;
       }
     }
   </style>
