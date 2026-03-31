@@ -621,6 +621,35 @@
       color: #fecdd3;
     }
 
+    .cash-on-hand-pill {
+      justify-content: space-between;
+    }
+
+    .pill-divider {
+      width: 100%;
+      height: 1px;
+      background: rgba(255,255,255,0.18);
+      margin: 0.2rem 0;
+    }
+
+    .pill-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .pill-sub-label {
+      font-size: 0.75rem;
+      color: #e5eef7;
+      opacity: 0.8;
+    }
+
+    .pill-sub-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #f9fafb;
+    }
+
     .save-dashboard-btn {
       margin-left: auto;
       padding-inline: 1.1rem;
@@ -721,6 +750,49 @@
 
     .budget-total-row td {
       padding: 0.35rem 0.45rem;
+    }
+
+    .pay-period-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 96px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      border: 2px solid transparent;
+    }
+
+    .pay-period-badge.first-half {
+      color: #166534;
+      background: rgba(34, 197, 94, 0.14);
+      border-color: rgba(34, 197, 94, 0.45);
+    }
+
+    .pay-period-badge.second-half {
+      color: #1d4ed8;
+      background: rgba(59, 130, 246, 0.14);
+      border-color: rgba(59, 130, 246, 0.45);
+    }
+
+    .pay-period-badge.unassigned {
+      color: #4b5563;
+      background: rgba(107, 114, 128, 0.14);
+      border-color: rgba(107, 114, 128, 0.35);
+    }
+
+    .budget-row.first-half td {
+      box-shadow: inset 3px 0 0 rgba(34, 197, 94, 0.7);
+    }
+
+    .budget-row.second-half td {
+      box-shadow: inset 3px 0 0 rgba(59, 130, 246, 0.7);
+    }
+
+    .budget-row.unassigned td {
+      box-shadow: inset 3px 0 0 rgba(107, 114, 128, 0.45);
     }
 
     .goals-sort-row {
@@ -1849,6 +1921,7 @@
                     <button type="button" id="budgetSortAmount" class="sort-btn">Sort ↑↓</button>
                   </th>
                   <th>Withdraw date</th>
+                  <th>Pay Period</th>
                   <th>Fixed / Variable</th>
                   <th>Notes</th>
                 </tr>
@@ -1860,7 +1933,7 @@
                 <tr class="budget-total-row">
                   <td>Sum of all monthly expenses</td>
                   <td id="budgetTotalFrozen">$0</td>
-                  <td colspan="3"></td>
+                  <td colspan="4"></td>
                 </tr>
               </tfoot>
             </table>
@@ -1871,7 +1944,7 @@
                 <tr class="totals-row">
                   <td>Total</td>
                   <td id="budgetTotal">$0</td>
-                  <td colspan="3"></td>
+                  <td colspan="4"></td>
                 </tr>
               </tbody>
             </table>
@@ -2252,10 +2325,17 @@
             <div class="insight-subtext">Sum of all assets</div>
           </div>
 
-          <div class="insight-card accent-green">
-            <div class="insight-title">Cash on Hand</div>
-            <div class="insight-metric" id="insightsCashOnHand">$0</div>
-            <div class="insight-subtext">BOA Balance minus Capital One and Citi Credit Card balances</div>
+          <div class="insight-card accent-green cash-on-hand-pill">
+            <div class="pill-top">
+              <div class="insight-title">Cash on Hand</div>
+              <div class="insight-metric" id="insightsCashOnHand">$0</div>
+              <div class="insight-subtext">BOA Balance minus Capital One and Citi Credit Card balances</div>
+            </div>
+            <div class="pill-divider"></div>
+            <div class="pill-bottom">
+              <div class="pill-sub-label">Upcoming Purchases Total</div>
+              <div class="pill-sub-value" id="insightsUpcomingPurchasesTotal">$0</div>
+            </div>
           </div>
 
           <div class="insight-card" style="align-items:flex-start;">
@@ -2430,6 +2510,7 @@
     const insightsDebtTotalEl = document.getElementById("insightsDebtTotal");
     const insightsAssetsTotalEl = document.getElementById("insightsAssetsTotal");
     const insightsCashOnHandEl = document.getElementById("insightsCashOnHand");
+    const insightsUpcomingPurchasesTotalEl = document.getElementById("insightsUpcomingPurchasesTotal");
     const insightsCompChartEl = document.getElementById("insightsCompChart");
     const insightsCompTargetLabel = document.getElementById("insightsCompTargetLabel");
     const insightsCreditCardDebtEl = document.getElementById("insightsCreditCardDebt");
@@ -2564,7 +2645,7 @@
       monthFinished: ""
     }));
 
-    let readingToReadRows = Array.from({ length: 5 }).map(() => ({ title: "", author: "" }));
+    let readingToReadRows = Array.from({ length: 5 }).map(() => createBookToReadRow());
 
     let debtStrategyNotes = "";
 
@@ -2639,6 +2720,25 @@
         return Math.max(1, Math.min(10, Math.round(parsed * 2)));
       }
       return Math.max(1, Math.min(10, parsed));
+    }
+
+    function createStableRowId(prefix = "row") {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return `${prefix}-${window.crypto.randomUUID()}`;
+      }
+      return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function createBookToReadRow() {
+      return { id: createStableRowId("book"), title: "", author: "" };
+    }
+
+    function normalizeBooksToReadRows(rows = []) {
+      return rows.map((row, index) => ({
+        id: row && row.id ? row.id : createStableRowId(`book-${index}`),
+        title: row && row.title ? row.title : "",
+        author: row && row.author ? row.author : ""
+      }));
     }
 
     function resetPersonalFinanceState() {
@@ -2753,6 +2853,7 @@
           monthFinished: row.monthFinished || ""
         })),
         readingToReadRows: readingToReadRows.map(row => ({
+          id: row.id || createStableRowId("book"),
           title: row.title || "",
           author: row.author || ""
         })),
@@ -2807,10 +2908,7 @@
             }))
           : JSON.parse(JSON.stringify(defaultReadingCompletedRows)),
         readingToReadRows: Array.isArray(safeState.readingToReadRows) && safeState.readingToReadRows.length
-          ? safeState.readingToReadRows.map(row => ({
-              title: row.title || "",
-              author: row.author || ""
-            }))
+          ? normalizeBooksToReadRows(safeState.readingToReadRows)
           : JSON.parse(JSON.stringify(defaultReadingToReadRows)),
         storePeriodHeaders: Array.isArray(safeState.storePeriodHeaders) && safeState.storePeriodHeaders.length
           ? [...safeState.storePeriodHeaders]
@@ -2906,6 +3004,7 @@
           monthFinished: row.monthFinished || ""
         })),
         readingToReadRows: readingToReadRows.map(row => ({
+          id: row.id || createStableRowId("book"),
           title: row.title || "",
           author: row.author || ""
         })),
@@ -2933,10 +3032,7 @@
             }))
           : JSON.parse(JSON.stringify(defaultGoalsState.readingCompletedRows)),
         readingToReadRows: Array.isArray(safeState.readingToReadRows) && safeState.readingToReadRows.length
-          ? safeState.readingToReadRows.map(row => ({
-              title: row.title || "",
-              author: row.author || ""
-            }))
+          ? normalizeBooksToReadRows(safeState.readingToReadRows)
           : JSON.parse(JSON.stringify(defaultGoalsState.readingToReadRows)),
         debtRows: Array.isArray(safeState.debtRows) && safeState.debtRows.length
           ? safeState.debtRows.map(row => ({
@@ -3100,6 +3196,29 @@
       if (isNaN(amount)) return "$0";
       const rounded = Math.round(amount);
       return "$" + rounded.toLocaleString("en-US");
+    }
+
+    function parseCurrencyNumber(value) {
+      if (value === null || value === undefined) return 0;
+      const cleaned = String(value).replace(/[^0-9.-]/g, "").trim();
+      const num = Number(cleaned);
+      return Number.isFinite(num) ? num : 0;
+    }
+
+    function parseWithdrawDay(value) {
+      if (value === null || value === undefined) return null;
+      const cleaned = String(value).replace(/[^0-9]/g, "").trim();
+      if (!cleaned) return null;
+      const day = Number(cleaned);
+      if (!Number.isInteger(day) || day < 1 || day > 31) return null;
+      return day;
+    }
+
+    function getPayPeriod(withdrawDate) {
+      const day = parseWithdrawDay(withdrawDate);
+      if (day === null) return { label: "Unassigned", key: "unassigned" };
+      if (day <= 15) return { label: "First Half", key: "first-half" };
+      return { label: "Second Half", key: "second-half" };
     }
 
     function escapeHtml(str) {
@@ -4025,18 +4144,24 @@
 
       function renderBudgetTable() {
         if (!budgetEditMode) {
-          budgetTableBody.innerHTML = personalBudgetRows.map(row => `
-            <tr>
+          budgetTableBody.innerHTML = personalBudgetRows.map(row => {
+            const payPeriod = getPayPeriod(row.withdraw);
+            return `
+            <tr class="budget-row ${payPeriod.key}">
               <td>${escapeHtml(row.category)}</td>
               <td>${row.amount != null ? formatCurrency(row.amount) : ""}</td>
               <td>${escapeHtml(row.withdraw || "")}</td>
+              <td><span class="pay-period-badge ${payPeriod.key}">${payPeriod.label}</span></td>
               <td>${escapeHtml(row.type || "")}</td>
               <td>${escapeHtml(row.notes || "")}</td>
             </tr>
-          `).join("");
+          `;
+          }).join("");
         } else {
-          budgetTableBody.innerHTML = personalBudgetRows.map((row, idx) => `
-            <tr>
+          budgetTableBody.innerHTML = personalBudgetRows.map((row, idx) => {
+            const payPeriod = getPayPeriod(row.withdraw);
+            return `
+            <tr class="budget-row ${payPeriod.key}">
               <td>
                 <input
                   type="text"
@@ -4060,6 +4185,7 @@
                   data-index="${idx}"
                   value="${escapeHtml(row.withdraw || "")}" />
               </td>
+              <td><span class="pay-period-badge ${payPeriod.key}">${payPeriod.label}</span></td>
               <td>
                 <input
                   type="text"
@@ -4075,7 +4201,8 @@
                   value="${escapeHtml(row.notes || "")}" />
               </td>
             </tr>
-          `).join("");
+          `;
+          }).join("");
 
           document.querySelectorAll(".budget-category").forEach(input => {
             input.addEventListener("blur", (e) => {
@@ -4101,6 +4228,20 @@
           });
 
           document.querySelectorAll(".budget-withdraw").forEach(input => {
+            input.addEventListener("input", (e) => {
+              const idx = parseInt(e.target.getAttribute("data-index"), 10);
+              personalBudgetRows[idx].withdraw = e.target.value;
+              const rowEl = e.target.closest("tr");
+              const badgeEl = rowEl ? rowEl.querySelector(".pay-period-badge") : null;
+              if (badgeEl) {
+                const payPeriod = getPayPeriod(e.target.value);
+                badgeEl.className = `pay-period-badge ${payPeriod.key}`;
+                badgeEl.textContent = payPeriod.label;
+                if (rowEl) {
+                  rowEl.className = `budget-row ${payPeriod.key}`;
+                }
+              }
+            });
             input.addEventListener("blur", (e) => {
               const idx = parseInt(e.target.getAttribute("data-index"), 10);
               personalBudgetRows[idx].withdraw = e.target.value;
@@ -4323,6 +4464,7 @@
           if (!isNaN(val)) total += val;
         });
         upcomingTotalEl.textContent = formatCurrency(total);
+        renderInsights();
       }
 
       if (upcomingEditMode) {
@@ -4673,14 +4815,6 @@
         }
       };
 
-      const ensureBooksToReadBlankRows = () => {
-        const blankCount = readingToReadRows.filter(row => !(row.title || "").trim() && !(row.author || "").trim()).length;
-        const rowsNeeded = Math.max(5 - blankCount, 0);
-        for (let i = 0; i < rowsNeeded; i += 1) {
-          readingToReadRows.push({ title: "", author: "" });
-        }
-      };
-
       if (booksToReadSortTitleBtn) {
         booksToReadSortTitleBtn.onclick = () => {
           booksToReadActiveSortKey = "title";
@@ -4755,7 +4889,7 @@
       if (booksToReadAddBtn) {
         booksToReadAddBtn.classList.toggle("hidden", !readingEditMode);
         booksToReadAddBtn.onclick = () => {
-          readingToReadRows.push({ title: "", author: "" });
+          readingToReadRows.push(createBookToReadRow());
           renderGoals();
         };
       }
@@ -4831,11 +4965,12 @@
       if (booksToReadBody) {
         booksToReadBody.innerHTML = readingToReadRows.map((row, idx) => {
           const hasContent = (row.title || "").trim() || (row.author || "").trim();
+          const rowId = row.id || `book-index-${idx}`;
           return readingEditMode ? `
           <tr>
-            <td><button type="button" class="delete-btn toread-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="toread-title" data-index="${idx}" value="${escapeHtml(row.title)}" /></td>
-            <td><input type="text" class="toread-author" data-index="${idx}" value="${escapeHtml(row.author)}" /></td>
-            <td>${hasContent ? `<button type="button" class="btn-secondary btn-small toread-complete-row" data-index="${idx}">✓ Complete</button>` : ""}</td>
+            <td><button type="button" class="delete-btn toread-delete-row" data-row-id="${escapeHtml(rowId)}" title="Delete row">−</button> <input type="text" class="toread-title" data-row-id="${escapeHtml(rowId)}" value="${escapeHtml(row.title)}" /></td>
+            <td><input type="text" class="toread-author" data-row-id="${escapeHtml(rowId)}" value="${escapeHtml(row.author)}" /></td>
+            <td>${hasContent ? `<button type="button" class="btn-secondary btn-small toread-complete-row" data-row-id="${escapeHtml(rowId)}">✓ Complete</button>` : ""}</td>
           </tr>
         ` : `
           <tr>
@@ -4848,38 +4983,39 @@
         if (readingEditMode) {
           document.querySelectorAll(".toread-title").forEach(input => {
             input.addEventListener("input", (e) => {
-              const idx = parseInt(e.target.getAttribute("data-index"), 10);
-              readingToReadRows[idx].title = e.target.value;
+              const rowId = e.target.getAttribute("data-row-id");
+              const row = readingToReadRows.find(item => item.id === rowId);
+              if (row) row.title = e.target.value;
             });
           });
           document.querySelectorAll(".toread-author").forEach(input => {
             input.addEventListener("input", (e) => {
-              const idx = parseInt(e.target.getAttribute("data-index"), 10);
-              readingToReadRows[idx].author = e.target.value;
+              const rowId = e.target.getAttribute("data-row-id");
+              const row = readingToReadRows.find(item => item.id === rowId);
+              if (row) row.author = e.target.value;
             });
           });
 
           document.querySelectorAll(".toread-delete-row").forEach(btn => {
             btn.addEventListener("click", () => {
-              const idx = parseInt(btn.getAttribute("data-index"), 10);
+              const rowId = btn.getAttribute("data-row-id");
               if (!confirmDeleteRow("Books To Read")) return;
-              readingToReadRows.splice(idx, 1);
-              ensureBooksToReadBlankRows();
+              readingToReadRows = readingToReadRows.filter(row => row.id !== rowId);
               if (booksToReadActiveSortKey) sortBooksToRead(booksToReadActiveSortKey, false);
+              savePersonalFinanceData({ readingToReadRows });
               renderGoals();
             });
           });
 
           document.querySelectorAll(".toread-complete-row").forEach(btn => {
             btn.addEventListener("click", async () => {
-              const idx = parseInt(btn.getAttribute("data-index"), 10);
-              const row = readingToReadRows[idx] || { title: "", author: "" };
+              const rowId = btn.getAttribute("data-row-id");
+              const row = readingToReadRows.find(item => item.id === rowId) || { title: "", author: "" };
               const title = (row.title || "").trim();
               const author = (row.author || "").trim();
               if (!title && !author) return;
               readingCompletedRows.push({ title, author, format: "", rating: "", notes: "", monthFinished: "" });
-              readingToReadRows.splice(idx, 1);
-              ensureBooksToReadBlankRows();
+              readingToReadRows = readingToReadRows.filter(item => item.id !== rowId);
               if (booksToReadActiveSortKey) sortBooksToRead(booksToReadActiveSortKey, false);
               await savePersonalFinanceData({
                 readingCompletedRows,
@@ -5200,6 +5336,13 @@
       if (insightsCashOnHandEl) {
         const cashOnHand = computeCashOnHand();
         insightsCashOnHandEl.textContent = formatCurrency(cashOnHand);
+      }
+
+      if (insightsUpcomingPurchasesTotalEl) {
+        const upcomingPurchasesTotal = (upcomingRows || []).reduce((sum, row) => {
+          return sum + parseCurrencyNumber(row.amount);
+        }, 0);
+        insightsUpcomingPurchasesTotalEl.textContent = formatCurrency(upcomingPurchasesTotal);
       }
 
       if (insightsCompChartEl) {
