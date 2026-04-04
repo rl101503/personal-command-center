@@ -1510,6 +1510,10 @@
                   <input
                     id="dealAmount"
                     type="text"
+                    inputmode="decimal"
+                    pattern="[0-9]*[.,]?[0-9]*"
+                    enterkeyhint="done"
+                    autocomplete="off"
                     placeholder="e.g., 250,000"
                   />
                 </div>
@@ -1586,7 +1590,7 @@
           <div class="comp-layout">
             <div class="comp-settings">
               <label for="annualTarget">Annual variable target (USD)</label>
-              <input id="annualTarget" type="text" />
+              <input id="annualTarget" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" enterkeyhint="done" autocomplete="off" />
 
               <div class="results-grid" style="margin-top:0.4rem;">
                 <div class="result-pill">
@@ -1745,6 +1749,10 @@
               <input
                 id="pf401kTracker"
                 type="text"
+                inputmode="decimal"
+                pattern="[0-9]*[.,]?[0-9]*"
+                enterkeyhint="done"
+                autocomplete="off"
                 class="pill-input"
                 placeholder="$0"
               />
@@ -2175,7 +2183,7 @@
           <div class="retirement-section">
             <label for="retirementTargetInput">Target portfolio</label>
             <div class="retirement-view" id="retirementTargetView">Target: $0</div>
-            <input type="text" id="retirementTargetInput" class="retirement-edit hidden" placeholder="$3,000,000" />
+            <input type="text" id="retirementTargetInput" class="retirement-edit hidden" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" enterkeyhint="done" autocomplete="off" placeholder="$3,000,000" />
           </div>
 
           <div class="retirement-section">
@@ -2208,7 +2216,7 @@
                 <div class="retirement-line">
                   <span class="retirement-label">Employee contribution (annual max)</span>
                   <span id="retirementEmployeeMaxView" class="retirement-view">$0</span>
-                  <input type="text" id="retirementEmployeeMaxInput" class="retirement-edit hidden" />
+                  <input type="text" id="retirementEmployeeMaxInput" class="retirement-edit hidden" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" enterkeyhint="done" autocomplete="off" />
                 </div>
                 <div class="retirement-line">
                   <span class="retirement-label">Employer contribution</span>
@@ -2224,7 +2232,7 @@
                 <div class="retirement-line">
                   <span class="retirement-label">Annual contribution (starting)</span>
                   <span id="retirementAmyIraView" class="retirement-view">$0</span>
-                  <input type="text" id="retirementAmyIraInput" class="retirement-edit hidden" />
+                  <input type="text" id="retirementAmyIraInput" class="retirement-edit hidden" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" enterkeyhint="done" autocomplete="off" />
                 </div>
                 <div class="retirement-line">
                   <span class="retirement-label">Annual increase rate</span>
@@ -2402,6 +2410,31 @@
     const RETIREMENT_START_AGE = 40;
     const RETIREMENT_EMPLOYER_CONTRIBUTION = 13000;
     const RETIREMENT_ANNUAL_INCREASE = 0.01;
+    const currencyInputProps = {
+      type: "text",
+      inputMode: "decimal",
+      pattern: "[0-9]*[.,]?[0-9]*",
+      enterKeyHint: "done",
+      autoComplete: "off"
+    };
+    const wholeDollarInputProps = {
+      type: "text",
+      inputMode: "numeric",
+      pattern: "[0-9]*",
+      enterKeyHint: "done",
+      autoComplete: "off"
+    };
+    const serializeInputProps = (props) => {
+      const attrNameMap = {
+        inputMode: "inputmode",
+        enterKeyHint: "enterkeyhint",
+        autoComplete: "autocomplete"
+      };
+      return Object.entries(props)
+        .map(([key, value]) => `${attrNameMap[key] || key}="${value}"`)
+        .join(" ");
+    };
+    const currencyInputAttrString = serializeInputProps(currencyInputProps);
     let globalAvgMonthlyTakeHome = 0; // from comp tracker
     let globalTotalMonthlyTakeHome = 0;
     let globalMonthlyExpensesTotal = 0;
@@ -3792,7 +3825,7 @@
             <td>${monthName}</td>
             <td>
               <input
-                type="text"
+                ${currencyInputAttrString}
                 class="${inputClasses}"
                 data-month="${monthName}"
                 ${disabledAttr}
@@ -4172,7 +4205,7 @@
               </td>
               <td>
                 <input
-                  type="text"
+                  ${currencyInputAttrString}
                   class="budget-input budget-amount"
                   data-index="${idx}"
                   value="${row.amount != null ? formatNumberWithCommas(row.amount.toString()) : ""}"
@@ -4351,9 +4384,9 @@
       storeTableBody.innerHTML = storeSpendingRows.map((row, idx) => storeEditMode ? `
         <tr>
           <td><button type="button" class="delete-btn store-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="store-name" data-index="${idx}" value="${escapeHtml(row.store)}" /></td>
-          <td><input type="text" class="store-amount" data-row="${idx}" data-col="1" value="${row.col1 != null ? formatNumberWithCommas(row.col1.toString()) : ""}" /></td>
-          <td><input type="text" class="store-amount" data-row="${idx}" data-col="2" value="${row.col2 != null ? formatNumberWithCommas(row.col2.toString()) : ""}" /></td>
-          <td><input type="text" class="store-amount" data-row="${idx}" data-col="3" value="${row.col3 != null ? formatNumberWithCommas(row.col3.toString()) : ""}" /></td>
+          <td><input ${currencyInputAttrString} class="store-amount" data-row="${idx}" data-col="1" value="${row.col1 != null ? formatNumberWithCommas(row.col1.toString()) : ""}" /></td>
+          <td><input ${currencyInputAttrString} class="store-amount" data-row="${idx}" data-col="2" value="${row.col2 != null ? formatNumberWithCommas(row.col2.toString()) : ""}" /></td>
+          <td><input ${currencyInputAttrString} class="store-amount" data-row="${idx}" data-col="3" value="${row.col3 != null ? formatNumberWithCommas(row.col3.toString()) : ""}" /></td>
         </tr>
       ` : `
         <tr>
@@ -4448,7 +4481,7 @@
       upcomingTableBody.innerHTML = upcomingRows.map((row, idx) => upcomingEditMode ? `
         <tr>
           <td><button type="button" class="delete-btn upcoming-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="upcoming-category" data-index="${idx}" value="${escapeHtml(row.category)}" /></td>
-          <td><input type="text" class="upcoming-amount" data-index="${idx}" value="${row.amount != null ? formatNumberWithCommas(row.amount.toString()) : ""}" /></td>
+          <td><input ${currencyInputAttrString} class="upcoming-amount" data-index="${idx}" value="${row.amount != null ? formatNumberWithCommas(row.amount.toString()) : ""}" /></td>
         </tr>
       ` : `
         <tr>
@@ -4532,7 +4565,7 @@
       debtTableBody.innerHTML = debtRows.map((row, idx) => debtEditMode ? `
         <tr>
           <td><button type="button" class="delete-btn debt-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="debt-name" data-index="${idx}" value="${escapeHtml(row.name)}" /></td>
-          <td><input type="text" class="debt-amount" data-index="${idx}" value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}" /></td>
+          <td><input ${currencyInputAttrString} class="debt-amount" data-index="${idx}" value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}" /></td>
         </tr>
       ` : `
         <tr>
@@ -4623,7 +4656,7 @@
         .map(({ row, idx }) => investEditMode ? `
           <tr>
             <td><button type="button" class="delete-btn invest-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="invest-name" data-index="${idx}" value="${escapeHtml(row.name)}" /></td>
-            <td><input type="text" class="invest-amount" data-index="${idx}" value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}" /></td>
+            <td><input ${currencyInputAttrString} class="invest-amount" data-index="${idx}" value="${row.balance != null ? formatNumberWithCommas(row.balance.toString()) : ""}" /></td>
           </tr>
         ` : `
           <tr>
