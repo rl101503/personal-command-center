@@ -771,6 +771,104 @@
       margin: 0.25rem 0;
     }
 
+
+    .cockpit-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      width: fit-content;
+      padding: 0.22rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(15, 23, 42, 0.72);
+      color: #cbd5e1;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .cockpit-status::before {
+      content: "";
+      width: 0.45rem;
+      height: 0.45rem;
+      border-radius: 999px;
+      background: currentColor;
+      box-shadow: 0 0 12px currentColor;
+    }
+
+    .cockpit-status.good {
+      color: #86efac;
+      border-color: rgba(34, 197, 94, 0.36);
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    .cockpit-status.watch {
+      color: #fde68a;
+      border-color: rgba(245, 158, 11, 0.38);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .cockpit-status.danger {
+      color: #fecdd3;
+      border-color: rgba(248, 113, 113, 0.42);
+      background: rgba(248, 113, 113, 0.09);
+    }
+
+    .cockpit-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cockpit-card::after,
+    .cockpit-kpi::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.06), transparent 34%);
+    }
+
+    .cockpit-kpi {
+      position: relative;
+      overflow: hidden;
+      border-color: rgba(148, 163, 184, 0.22);
+      background:
+        radial-gradient(circle at top right, rgba(23,151,215,0.12), transparent 38%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98));
+    }
+
+    .cockpit-kpi-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+
+    .cockpit-kpi .cockpit-value,
+    .cockpit-kpi .cockpit-helper,
+    .cockpit-kpi .cockpit-label,
+    .cockpit-kpi .cockpit-status,
+    .cockpit-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cockpit-card-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .cockpit-card-action {
+      color: #cbd5e1;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      margin-top: 0.35rem;
+    }
+
     .cash-on-hand-pill {
       justify-content: space-between;
     }
@@ -3460,6 +3558,7 @@
         if (budgetMonthlySurplusEl) {
           budgetMonthlySurplusEl.textContent = formatCurrency(-globalMonthlyExpensesTotal);
         }
+        renderCockpit();
         return;
       }
       const pct = (globalMonthlyExpensesTotal / globalTotalMonthlyTakeHome) * 100;
@@ -3515,18 +3614,47 @@
       const pct = READING_TARGET > 0 ? (completed / READING_TARGET) * 100 : 0;
       const { dayOfYear, daysInYear } = getDayOfYearInfo();
       const expected = Math.round((dayOfYear / daysInYear) * READING_TARGET);
-      const projected = dayOfYear > 0 ? Math.round((completed / dayOfYear) * daysInYear) : 0;
-      return { completed, target: READING_TARGET, pct, expected, projected };
+      const elapsedPct = daysInYear > 0 ? dayOfYear / daysInYear : 0;
+      const projected = elapsedPct > 0 && completed > 0 ? Math.round(completed / elapsedPct) : 0;
+      return { completed, target: READING_TARGET, pct, expected, projected, elapsedPct };
+    }
+
+    function getFiscalYearElapsedInfo() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const fiscalStartYear = today.getMonth() >= 6 ? year : year - 1;
+      const start = new Date(fiscalStartYear, 6, 1);
+      const end = new Date(fiscalStartYear + 1, 6, 1);
+      const elapsedMs = Math.min(Math.max(today - start, 0), end - start);
+      const totalMs = end - start;
+      const elapsedPct = totalMs > 0 ? elapsedMs / totalMs : 0;
+      return { elapsedPct, start, end };
+    }
+
+    function getCalendarYearElapsedPct() {
+      const { dayOfYear, daysInYear } = getDayOfYearInfo();
+      return daysInYear > 0 ? dayOfYear / daysInYear : 0;
     }
 
     function getCompPaceSummary() {
       const annualTarget = getAnnualCompTarget();
       const earned = computeCompEarned();
-      const monthsWithData = fiscalMonths.filter(month => (compConfig.monthlyValues[month] || 0) > 0).length;
-      const expectedByEnteredMonths = annualTarget > 0 ? (annualTarget / 12) * Math.max(monthsWithData, 1) : 0;
-      const pacePct = expectedByEnteredMonths > 0 ? (earned / expectedByEnteredMonths) * 100 : 0;
-      const projectedAnnual = monthsWithData > 0 ? (earned / monthsWithData) * 12 : 0;
-      return { annualTarget, earned, monthsWithData, expectedByEnteredMonths, pacePct, projectedAnnual };
+      const fiscal = getFiscalYearElapsedInfo();
+      const targetPct = annualTarget > 0 ? (earned / annualTarget) * 100 : 0;
+      const expectedByToday = annualTarget * fiscal.elapsedPct;
+      const pacePct = expectedByToday > 0 ? (earned / expectedByToday) * 100 : 0;
+      const projectedAnnual = fiscal.elapsedPct > 0 && earned > 0 ? earned / fiscal.elapsedPct : 0;
+      const hasData = earned > 0 || annualTarget > 0;
+      return {
+        annualTarget,
+        earned,
+        targetPct,
+        fiscalElapsedPct: fiscal.elapsedPct,
+        expectedByToday,
+        pacePct,
+        projectedAnnual,
+        hasData
+      };
     }
 
     function getCockpitMetrics() {
@@ -3535,9 +3663,10 @@
       const netWorth = assetsTotal - debtTotal;
       const monthlySurplus = globalTotalMonthlyTakeHome - globalMonthlyExpensesTotal;
       const k401Contribution = getPf401kContribution();
+      const calendarElapsedPct = getCalendarYearElapsedPct();
       const k401Pct = PF_401K_TARGET > 0 ? (k401Contribution / PF_401K_TARGET) * 100 : 0;
-      const { dayOfYear, daysInYear } = getDayOfYearInfo();
-      const annualPacePct = (dayOfYear / daysInYear) * 100;
+      const k401Expected = PF_401K_TARGET * calendarElapsedPct;
+      const k401Projected = calendarElapsedPct > 0 && k401Contribution > 0 ? k401Contribution / calendarElapsedPct : 0;
       const comp = getCompPaceSummary();
       const reading = getReadingProgress();
       return {
@@ -3547,24 +3676,65 @@
         monthlySurplus,
         k401Contribution,
         k401Pct,
-        annualPacePct,
+        k401Expected,
+        k401Projected,
+        calendarElapsedPct,
         comp,
-        reading,
-        projectedYearEndSavings: monthlySurplus > 0 ? monthlySurplus * 12 : 0
+        reading
       };
     }
 
-    function cockpitCard(title, value, helper = "", extraClass = "") {
+    function getStatusClass(isGood, isDanger = false) {
+      if (isDanger) return "danger";
+      return isGood ? "good" : "watch";
+    }
+
+    function cockpitStatus(label, statusClass) {
+      return `<span class="cockpit-status ${escapeHtml(statusClass)}">${escapeHtml(label)}</span>`;
+    }
+
+    function cockpitKpiCard({ label, value, helper, statusLabel, statusClass }) {
+      return `
+        <div class="cockpit-kpi">
+          <div class="cockpit-kpi-top">
+            <div class="cockpit-label">${escapeHtml(label)}</div>
+            ${statusLabel ? cockpitStatus(statusLabel, statusClass || "watch") : ""}
+          </div>
+          <div class="cockpit-value">${value}</div>
+          <div class="cockpit-helper">${helper}</div>
+        </div>
+      `;
+    }
+
+    function cockpitCard(title, value, helper = "", extraClass = "", statusLabel = "", statusClass = "") {
       return `
         <div class="cockpit-card ${extraClass}">
-          <div class="cockpit-card-title">${escapeHtml(title)}</div>
+          <div class="cockpit-card-title-row">
+            <div class="cockpit-card-title">${escapeHtml(title)}</div>
+            ${statusLabel ? cockpitStatus(statusLabel, statusClass || "watch") : ""}
+          </div>
           ${value ? `<div class="cockpit-forecast-value">${value}</div>` : ""}
           <div class="cockpit-helper">${helper}</div>
         </div>
       `;
     }
 
-    function cockpitProgressCard(title, pct, value, helper) {
+    function cockpitAttentionCard(title, helper, action, severity = "warning") {
+      const statusLabel = severity === "positive" ? "Clear" : severity === "critical" ? "Act" : "Watch";
+      const statusClass = severity === "positive" ? "good" : severity === "critical" ? "danger" : "watch";
+      return `
+        <div class="cockpit-card ${severity}">
+          <div class="cockpit-card-title-row">
+            <div class="cockpit-card-title">${escapeHtml(title)}</div>
+            ${cockpitStatus(statusLabel, statusClass)}
+          </div>
+          <div class="cockpit-helper">${helper}</div>
+          <div class="cockpit-card-action">${action}</div>
+        </div>
+      `;
+    }
+
+    function cockpitProgressCard(title, pct, value, helper, statusLabel = "", statusClass = "") {
       const clamped = Math.min(Math.max(pct || 0, 0), 100);
       return `
         <div class="cockpit-card">
@@ -3574,6 +3744,7 @@
           </div>
           <div class="cockpit-progress-track"><div class="cockpit-progress-bar" style="width:${clamped}%"></div></div>
           <div class="cockpit-helper">${helper}</div>
+          ${statusLabel ? cockpitStatus(statusLabel, statusClass || "watch") : ""}
         </div>
       `;
     }
@@ -3586,58 +3757,171 @@
       if (!kpiGrid || !attentionGrid || !momentumGrid || !forecastGrid) return;
 
       const metrics = getCockpitMetrics();
-      const compPct = metrics.comp.annualTarget > 0 ? (metrics.comp.earned / metrics.comp.annualTarget) * 100 : 0;
-      const debtBaseline = Math.max(metrics.debtTotal, 600000);
-      const debtReductionPct = debtBaseline > 0 ? ((debtBaseline - metrics.debtTotal) / debtBaseline) * 100 : 0;
+      const compPct = metrics.comp.targetPct;
       const surplusPct = globalTotalMonthlyTakeHome > 0 ? (metrics.monthlySurplus / globalTotalMonthlyTakeHome) * 100 : 0;
+      const debtSharePct = (metrics.assetsTotal + metrics.debtTotal) > 0
+        ? (metrics.debtTotal / (metrics.assetsTotal + metrics.debtTotal)) * 100
+        : 0;
+      const readingOnPace = metrics.reading.completed >= metrics.reading.expected;
+      const compOnPace = !metrics.comp.annualTarget || metrics.comp.earned >= metrics.comp.expectedByToday;
+      const k401OnPace = metrics.k401Contribution >= metrics.k401Expected;
 
       kpiGrid.innerHTML = [
-        { label: "Net Worth", value: formatCurrency(metrics.netWorth), helper: `${formatCurrency(metrics.assetsTotal)} assets · ${formatCurrency(metrics.debtTotal)} debt` },
-        { label: "Monthly Surplus", value: formatCurrency(metrics.monthlySurplus), helper: `${formatCurrency(globalTotalMonthlyTakeHome)} income · ${formatCurrency(globalMonthlyExpensesTotal)} expenses` },
-        { label: "Debt Remaining", value: formatCurrency(metrics.debtTotal), helper: `${formatCurrency(computeCreditCardDebtTotal())} credit card debt` },
-        { label: "Commission Pace", value: `${compPct.toFixed(1)}%`, helper: `${formatCurrency(metrics.comp.earned)} of ${formatCurrency(metrics.comp.annualTarget)}` },
-        { label: "401k Progress", value: `${metrics.k401Pct.toFixed(1)}%`, helper: `${formatCurrency(metrics.k401Contribution)} of ${formatCurrency(PF_401K_TARGET)}` },
-        { label: "Reading Goal", value: `${metrics.reading.completed}/${metrics.reading.target}`, helper: `${metrics.reading.expected} expected by today` }
-      ].map(item => `
-        <div class="cockpit-kpi">
-          <div class="cockpit-label">${escapeHtml(item.label)}</div>
-          <div class="cockpit-value">${item.value}</div>
-          <div class="cockpit-helper">${item.helper}</div>
-        </div>
-      `).join("");
-
-      const alerts = [];
-      if (metrics.comp.monthsWithData > 0 && metrics.comp.pacePct < 90) {
-        alerts.push(cockpitCard("Commission pace is behind", "", `${formatCurrency(metrics.comp.earned)} earned vs ${formatCurrency(metrics.comp.expectedByEnteredMonths)} expected for entered months.`, "warning"));
-      }
-      if (metrics.monthlySurplus < 0) {
-        alerts.push(cockpitCard("Monthly surplus is negative", "", `${formatCurrency(Math.abs(metrics.monthlySurplus))} gap based on current income and budget.`, "critical"));
-      } else if (metrics.monthlySurplus < 1000) {
-        alerts.push(cockpitCard("Monthly surplus is tight", "", `${formatCurrency(metrics.monthlySurplus)} projected surplus leaves a thin buffer.`, "warning"));
-      }
-      if (metrics.k401Pct + 5 < metrics.annualPacePct) {
-        alerts.push(cockpitCard("401k progress is behind pace", "", `${metrics.k401Pct.toFixed(1)}% contributed vs ${metrics.annualPacePct.toFixed(1)}% calendar-year pace.`, "warning"));
-      }
-      if (metrics.reading.completed < metrics.reading.expected) {
-        alerts.push(cockpitCard("Reading goal is behind pace", "", `${metrics.reading.completed} completed vs ${metrics.reading.expected} expected by today.`, "warning"));
-      }
-      attentionGrid.innerHTML = alerts.length ? alerts.join("") : cockpitCard("No major issues detected.", "", "Your command center is currently on track across the core metrics.", "positive");
-
-      momentumGrid.innerHTML = [
-        cockpitProgressCard("Commission trend / pace", compPct, `${compPct.toFixed(1)}%`, `${formatCurrency(metrics.comp.projectedAnnual)} projected annual commission.`),
-        cockpitProgressCard("Debt reduction", debtReductionPct, `${Math.max(debtReductionPct, 0).toFixed(1)}%`, `${formatCurrency(metrics.debtTotal)} remaining.`),
-        cockpitProgressCard("Savings / surplus", surplusPct, `${surplusPct.toFixed(1)}%`, `${formatCurrency(metrics.monthlySurplus)} monthly surplus.`),
-        cockpitProgressCard("Reading progress", metrics.reading.pct, `${metrics.reading.pct.toFixed(1)}%`, `${metrics.reading.completed} of ${metrics.reading.target} books completed.`)
+        cockpitKpiCard({
+          label: "Net Worth",
+          value: formatCurrency(metrics.netWorth),
+          helper: `${formatCurrency(metrics.assetsTotal)} assets · ${formatCurrency(metrics.debtTotal)} debt`,
+          statusLabel: metrics.netWorth >= 0 ? "Positive" : "Negative",
+          statusClass: getStatusClass(metrics.netWorth >= 0, metrics.netWorth < 0)
+        }),
+        cockpitKpiCard({
+          label: "Monthly Surplus",
+          value: formatCurrency(metrics.monthlySurplus),
+          helper: `${formatCurrency(globalTotalMonthlyTakeHome)} income · ${formatCurrency(globalMonthlyExpensesTotal)} expenses`,
+          statusLabel: metrics.monthlySurplus >= 0 ? "Healthy" : "Deficit",
+          statusClass: getStatusClass(metrics.monthlySurplus >= 0, metrics.monthlySurplus < 0)
+        }),
+        cockpitKpiCard({
+          label: "Total Debt",
+          value: formatCurrency(metrics.debtTotal),
+          helper: `${formatCurrency(computeCreditCardDebtTotal())} credit cards · ${debtRows.length} tracked debts`,
+          statusLabel: metrics.debtTotal > 0 ? "Focus" : "Clear",
+          statusClass: metrics.debtTotal > 0 ? "watch" : "good"
+        }),
+        cockpitKpiCard({
+          label: "Commission Pace",
+          value: `${compPct.toFixed(1)}%`,
+          helper: `${formatCurrency(metrics.comp.earned)} earned vs ${formatCurrency(metrics.comp.annualTarget)} target`,
+          statusLabel: compOnPace ? "On pace" : "Behind",
+          statusClass: compOnPace ? "good" : "watch"
+        }),
+        cockpitKpiCard({
+          label: "401k Progress",
+          value: `${metrics.k401Pct.toFixed(1)}%`,
+          helper: `${formatCurrency(metrics.k401Contribution)} of ${formatCurrency(PF_401K_TARGET)} · ${formatCurrency(metrics.k401Expected)} pace`,
+          statusLabel: k401OnPace ? "On pace" : "Behind",
+          statusClass: k401OnPace ? "good" : "watch"
+        }),
+        cockpitKpiCard({
+          label: "Reading Goal",
+          value: `${metrics.reading.completed}/${metrics.reading.target}`,
+          helper: `${metrics.reading.expected} expected by today · ${metrics.reading.target - metrics.reading.completed} remaining`,
+          statusLabel: readingOnPace ? "On pace" : "Behind",
+          statusClass: readingOnPace ? "good" : "watch"
+        })
       ].join("");
 
-      const debtFreeText = metrics.monthlySurplus > 0
-        ? `${Math.ceil(metrics.debtTotal / metrics.monthlySurplus)} months at current surplus`
-        : "Add more data to forecast.";
+      const alerts = [];
+      if (metrics.monthlySurplus < 0) {
+        alerts.push(cockpitAttentionCard(
+          "Monthly surplus is negative",
+          `${formatCurrency(Math.abs(metrics.monthlySurplus))} gap based on current income and monthly budget.`,
+          "Reduce variable spend or update income assumptions before the next budget review.",
+          "critical"
+        ));
+      }
+      if (metrics.comp.annualTarget > 0 && metrics.comp.earned < metrics.comp.expectedByToday) {
+        alerts.push(cockpitAttentionCard(
+          "Commission pacing behind target",
+          `${formatCurrency(metrics.comp.earned)} earned vs ${formatCurrency(metrics.comp.expectedByToday)} fiscal-year pace.`,
+          "Prioritize late-stage deals and refresh monthly commission entries.",
+          "warning"
+        ));
+      }
+      if (metrics.k401Contribution < metrics.k401Expected) {
+        alerts.push(cockpitAttentionCard(
+          "401k contributions behind pace",
+          `${formatCurrency(metrics.k401Contribution)} contributed vs ${formatCurrency(metrics.k401Expected)} calendar-year pace.`,
+          "Increase payroll contribution rate or schedule a catch-up contribution.",
+          "warning"
+        ));
+      }
+      if (!readingOnPace) {
+        alerts.push(cockpitAttentionCard(
+          "Reading goal behind pace",
+          `${metrics.reading.completed} completed vs ${metrics.reading.expected} expected by today.`,
+          "Pick the next book and block recurring reading time this week.",
+          "warning"
+        ));
+      }
+      if (metrics.debtTotal > 0) {
+        alerts.push(cockpitAttentionCard(
+          "Debt still needs focus",
+          `${formatCurrency(metrics.debtTotal)} remains across tracked balances.`,
+          "Direct surplus dollars to the highest-priority balance after essentials are covered.",
+          "warning"
+        ));
+      }
+      attentionGrid.innerHTML = alerts.length
+        ? alerts.join("")
+        : cockpitAttentionCard("No major issues detected", "Core money and goals metrics are currently on pace.", "Keep the dashboard current and review again after the next update.", "positive");
+
+      momentumGrid.innerHTML = [
+        cockpitProgressCard(
+          "Commission progress",
+          compPct,
+          `${compPct.toFixed(1)}%`,
+          `${formatCurrency(metrics.comp.earned)} earned · ${formatCurrency(Math.max(metrics.comp.annualTarget - metrics.comp.earned, 0))} remaining.`,
+          compOnPace ? "On pace" : "Behind",
+          compOnPace ? "good" : "watch"
+        ),
+        cockpitProgressCard(
+          "Debt remaining",
+          debtSharePct,
+          formatCurrency(metrics.debtTotal),
+          metrics.debtTotal > 0 ? `Debt is ${debtSharePct.toFixed(1)}% of tracked assets plus debt.` : "No tracked debt remaining.",
+          metrics.debtTotal > 0 ? "Focus" : "Clear",
+          metrics.debtTotal > 0 ? "watch" : "good"
+        ),
+        cockpitProgressCard(
+          "Monthly surplus",
+          Math.max(surplusPct, 0),
+          formatCurrency(metrics.monthlySurplus),
+          globalTotalMonthlyTakeHome > 0 ? `${surplusPct.toFixed(1)}% of monthly take-home remains after budgeted expenses.` : "Add income data to calculate surplus momentum.",
+          metrics.monthlySurplus >= 0 ? "Healthy" : "Deficit",
+          metrics.monthlySurplus >= 0 ? "good" : "danger"
+        ),
+        cockpitProgressCard(
+          "Reading progress",
+          metrics.reading.pct,
+          `${metrics.reading.pct.toFixed(1)}%`,
+          `${metrics.reading.completed} of ${metrics.reading.target} books completed.`,
+          readingOnPace ? "On pace" : "Behind",
+          readingOnPace ? "good" : "watch"
+        )
+      ].join("");
+
+      const projectedCommission = metrics.comp.earned > 0 && metrics.comp.fiscalElapsedPct > 0
+        ? formatCurrency(metrics.comp.projectedAnnual)
+        : "Add more data to forecast";
+      const projected401k = metrics.k401Contribution > 0 && metrics.calendarElapsedPct > 0
+        ? formatCurrency(metrics.k401Projected)
+        : "Add more data to forecast";
+      const projectedBooks = metrics.reading.completed > 0 && metrics.reading.elapsedPct > 0
+        ? `${metrics.reading.projected} books`
+        : "Add more data to forecast";
+
       forecastGrid.innerHTML = [
-        cockpitCard("Projected annual commission", metrics.comp.monthsWithData ? formatCurrency(metrics.comp.projectedAnnual) : "Add more data", metrics.comp.monthsWithData ? "Based on average completed commission months." : "Add more data to forecast."),
-        cockpitCard("Estimated debt-free progress", debtFreeText, metrics.monthlySurplus > 0 ? "Simple estimate using current debt and monthly surplus." : "Add more data to forecast."),
-        cockpitCard("Projected year-end savings", metrics.projectedYearEndSavings > 0 ? formatCurrency(metrics.projectedYearEndSavings) : "Add more data", metrics.projectedYearEndSavings > 0 ? "Monthly surplus multiplied by 12." : "Add more data to forecast."),
-        cockpitCard("Projected books completed", metrics.reading.projected ? `${metrics.reading.projected} books` : "Add more data", metrics.reading.projected ? "Based on year-to-date reading velocity." : "Add more data to forecast.")
+        cockpitCard(
+          "Projected annual commission",
+          projectedCommission,
+          metrics.comp.earned > 0 ? "Earned variable comp divided by fiscal-year elapsed percentage." : "Add commission earnings to forecast."
+        ),
+        cockpitCard(
+          "Estimated year-end 401k contribution",
+          projected401k,
+          metrics.k401Contribution > 0 ? "YTD contribution divided by calendar-year elapsed percentage." : "Add YTD 401k contributions to forecast."
+        ),
+        cockpitCard(
+          "Projected books completed",
+          projectedBooks,
+          metrics.reading.completed > 0 ? "Completed books divided by calendar-year elapsed percentage." : "Complete books to forecast year-end pace."
+        ),
+        cockpitCard(
+          "Net worth snapshot",
+          formatCurrency(metrics.netWorth),
+          `${formatCurrency(metrics.assetsTotal)} tracked assets minus ${formatCurrency(metrics.debtTotal)} tracked debts.`
+        )
       ].join("");
     }
 
