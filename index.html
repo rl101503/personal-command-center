@@ -15,7 +15,9 @@
     }
 
     body {
-      background: #000000;
+      background:
+        radial-gradient(circle at top, rgba(23,151,215,0.12), transparent 30%),
+        linear-gradient(180deg, #020617 0%, #050816 48%, #020617 100%);
       color: #f9fafb;
       min-height: 100vh;
       padding: 2rem 1rem;
@@ -61,11 +63,11 @@
     .auth-tile {
       width: 115px;
       height: 118px;
-      background: #103454;
+      background: #0f172a;
       border-radius: 0.9rem;
       padding: 0.4rem 0.45rem;
       box-shadow: 0 10px 20px rgba(0,0,0,0.6);
-      border: 1px solid #1797d7;
+      border: 1px solid rgba(148, 163, 184, 0.22);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -87,11 +89,11 @@
     }
 
     .card {
-      background: #103454;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.88));
       border-radius: 1rem;
       padding: 1.5rem;
-      box-shadow: 0 14px 30px rgba(0,0,0,0.6);
-      border: 1px solid #1797d7;
+      box-shadow: 0 18px 48px rgba(0,0,0,0.45);
+      border: 1px solid rgba(148, 163, 184, 0.18);
       margin-bottom: 1.2rem;
       width: 100%;
     }
@@ -123,7 +125,7 @@
       padding: 0.5rem 0.6rem;
       border-radius: 0.5rem;
       border: 1px solid #1797d7;
-      background: #000000;
+      background: #020617;
       color: #f9fafb;
       margin-bottom: 0.7rem;
       font-size: 0.85rem;
@@ -263,7 +265,7 @@
     }
 
     th {
-      background: #007f91;
+      background: #0f172a;
       position: sticky;
       top: 0;
       z-index: 1;
@@ -528,7 +530,8 @@
       padding-bottom: 0.5rem;
       position: sticky;
       top: 0;
-      background: #000000;
+      background: rgba(2, 6, 23, 0.94);
+      backdrop-filter: blur(14px);
       z-index: 5;
       padding-top: 0.2rem;
     }
@@ -549,7 +552,7 @@
     }
 
     .tab-button.active {
-      background: #007f91;
+      background: #111827;
       border-color: #ffc532;
       color: #f9fafb;
     }
@@ -619,6 +622,153 @@
 
     .insight-card.accent-red .insight-metric {
       color: #fecdd3;
+    }
+
+
+
+    /* Cockpit command center */
+    .cockpit-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .cockpit-hero {
+      background:
+        radial-gradient(circle at top left, rgba(255,197,50,0.16), transparent 34%),
+        linear-gradient(145deg, #0b1220 0%, #0f172a 55%, #07111f 100%);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.04);
+      margin-bottom: 0;
+    }
+
+    .cockpit-hero h2 {
+      color: #f8fafc;
+      font-size: clamp(2rem, 6vw, 3.4rem);
+      letter-spacing: -0.05em;
+      line-height: 0.95;
+      margin-bottom: 0.35rem;
+    }
+
+    .cockpit-hero p {
+      color: #94a3b8;
+      font-size: 1rem;
+      margin-bottom: 0;
+    }
+
+    .cockpit-section-title {
+      color: #f8fafc;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0.35rem 0 0;
+    }
+
+    .cockpit-kpi-grid,
+    .cockpit-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .cockpit-kpi,
+    .cockpit-card {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.96));
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 1.15rem;
+      padding: 1rem;
+      box-shadow: 0 18px 44px rgba(0,0,0,0.34);
+      min-height: 120px;
+    }
+
+    .cockpit-kpi {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.6rem;
+    }
+
+    .cockpit-label {
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .cockpit-value {
+      color: #f8fafc;
+      font-size: clamp(1.35rem, 5vw, 1.9rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      overflow-wrap: anywhere;
+    }
+
+    .cockpit-helper {
+      color: #94a3b8;
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .cockpit-card-title {
+      color: #f8fafc;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+    }
+
+    .cockpit-card.warning {
+      border-color: rgba(245, 158, 11, 0.5);
+      box-shadow: 0 18px 44px rgba(245, 158, 11, 0.08);
+    }
+
+    .cockpit-card.critical {
+      border-color: rgba(248, 113, 113, 0.55);
+      box-shadow: 0 18px 44px rgba(248, 113, 113, 0.09);
+    }
+
+    .cockpit-card.positive {
+      border-color: rgba(34, 197, 94, 0.55);
+      box-shadow: 0 18px 44px rgba(34, 197, 94, 0.09);
+    }
+
+    .cockpit-progress-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: baseline;
+      margin-bottom: 0.55rem;
+    }
+
+    .cockpit-progress-value {
+      color: #e2e8f0;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .cockpit-progress-track {
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.14);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      overflow: hidden;
+      margin: 0.55rem 0;
+    }
+
+    .cockpit-progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #1797d7, #22c55e);
+      box-shadow: 0 0 18px rgba(34, 197, 94, 0.35);
+    }
+
+    .cockpit-forecast-value {
+      color: #f8fafc;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin: 0.25rem 0;
     }
 
     .cash-on-hand-pill {
@@ -1448,7 +1598,8 @@
 
     @media (max-width: 600px) and (orientation: portrait) {
       thead th {
-        background: #fff;
+        background: #0f172a;
+        color: #f8fafc;
       }
     }
   </style>
@@ -1481,13 +1632,35 @@
       <!-- TAB NAV -->
       <div class="tab-nav">
         <div class="tab-buttons">
-          <button class="tab-button active" data-tab="personal">Personal Finances</button>
+          <button class="tab-button active" data-tab="cockpit">Cockpit</button>
           <button class="tab-button" data-tab="commission">Commission Tracker</button>
+          <button class="tab-button" data-tab="personal">Personal Finances</button>
           <button class="tab-button" data-tab="goals">Goals</button>
           <button class="tab-button" data-tab="insights">Insights</button>
         </div>
         <button type="button" class="save-dashboard-btn" onclick="onSaveDashboardClick()">Save Dashboard</button>
         <span id="saveStatus" style="margin-left: 10px; font-size: 0.85rem;"></span>
+      </div>
+
+
+      <!-- COCKPIT TAB -->
+      <div id="cockpitTab" class="cockpit-shell">
+        <div class="card cockpit-hero">
+          <h2>Cockpit</h2>
+          <p>What matters right now.</p>
+        </div>
+
+        <h3 class="cockpit-section-title">KPI Strip</h3>
+        <div class="cockpit-kpi-grid" id="cockpitKpiGrid"></div>
+
+        <h3 class="cockpit-section-title">Attention Required</h3>
+        <div class="cockpit-card-grid" id="cockpitAttentionGrid"></div>
+
+        <h3 class="cockpit-section-title">Momentum</h3>
+        <div class="cockpit-card-grid" id="cockpitMomentumGrid"></div>
+
+        <h3 class="cockpit-section-title">Forecasts</h3>
+        <div class="cockpit-card-grid" id="cockpitForecastGrid"></div>
       </div>
 
       <!-- COMMISSION TAB -->
@@ -1728,7 +1901,7 @@
       </div> <!-- end commissionTab -->
 
       <!-- PERSONAL FINANCES TAB -->
-      <div id="personalTab">
+      <div id="personalTab" class="hidden">
         <!-- Income summary pills at top -->
         <div class="pf-income-summary">
           <div class="results-grid">
@@ -2529,6 +2702,7 @@
 
     // Tabs
     const tabButtons = document.querySelectorAll(".tab-button");
+    const cockpitTab = document.getElementById("cockpitTab");
     const commissionTab = document.getElementById("commissionTab");
     const personalTab = document.getElementById("personalTab");
     const goalsTab = document.getElementById("goalsTab");
@@ -3296,6 +3470,7 @@
         const surplus = globalTotalMonthlyTakeHome - globalMonthlyExpensesTotal;
         budgetMonthlySurplusEl.textContent = formatCurrency(surplus);
       }
+      renderCockpit();
     }
 
     function updatePf401kInfo() {
@@ -3304,6 +3479,7 @@
       const contributed = isNaN(val) ? 0 : val;
       const pct = PF_401K_TARGET > 0 ? (contributed / PF_401K_TARGET) * 100 : 0;
       pf401kPercentEl.textContent = pct.toFixed(1) + "%";
+      renderCockpit();
     }
 
     function getPf401kContribution() {
@@ -3330,6 +3506,139 @@
       const daysInYear = isLeap ? 366 : 365;
       const dayOfYear = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
       return { dayOfYear, daysInYear };
+    }
+
+
+
+    function getReadingProgress() {
+      const completed = readingCompletedRows.filter(r => (r.title || "").trim()).length;
+      const pct = READING_TARGET > 0 ? (completed / READING_TARGET) * 100 : 0;
+      const { dayOfYear, daysInYear } = getDayOfYearInfo();
+      const expected = Math.round((dayOfYear / daysInYear) * READING_TARGET);
+      const projected = dayOfYear > 0 ? Math.round((completed / dayOfYear) * daysInYear) : 0;
+      return { completed, target: READING_TARGET, pct, expected, projected };
+    }
+
+    function getCompPaceSummary() {
+      const annualTarget = getAnnualCompTarget();
+      const earned = computeCompEarned();
+      const monthsWithData = fiscalMonths.filter(month => (compConfig.monthlyValues[month] || 0) > 0).length;
+      const expectedByEnteredMonths = annualTarget > 0 ? (annualTarget / 12) * Math.max(monthsWithData, 1) : 0;
+      const pacePct = expectedByEnteredMonths > 0 ? (earned / expectedByEnteredMonths) * 100 : 0;
+      const projectedAnnual = monthsWithData > 0 ? (earned / monthsWithData) * 12 : 0;
+      return { annualTarget, earned, monthsWithData, expectedByEnteredMonths, pacePct, projectedAnnual };
+    }
+
+    function getCockpitMetrics() {
+      const assetsTotal = computeAssetsTotal();
+      const debtTotal = computeDebtTotal();
+      const netWorth = assetsTotal - debtTotal;
+      const monthlySurplus = globalTotalMonthlyTakeHome - globalMonthlyExpensesTotal;
+      const k401Contribution = getPf401kContribution();
+      const k401Pct = PF_401K_TARGET > 0 ? (k401Contribution / PF_401K_TARGET) * 100 : 0;
+      const { dayOfYear, daysInYear } = getDayOfYearInfo();
+      const annualPacePct = (dayOfYear / daysInYear) * 100;
+      const comp = getCompPaceSummary();
+      const reading = getReadingProgress();
+      return {
+        assetsTotal,
+        debtTotal,
+        netWorth,
+        monthlySurplus,
+        k401Contribution,
+        k401Pct,
+        annualPacePct,
+        comp,
+        reading,
+        projectedYearEndSavings: monthlySurplus > 0 ? monthlySurplus * 12 : 0
+      };
+    }
+
+    function cockpitCard(title, value, helper = "", extraClass = "") {
+      return `
+        <div class="cockpit-card ${extraClass}">
+          <div class="cockpit-card-title">${escapeHtml(title)}</div>
+          ${value ? `<div class="cockpit-forecast-value">${value}</div>` : ""}
+          <div class="cockpit-helper">${helper}</div>
+        </div>
+      `;
+    }
+
+    function cockpitProgressCard(title, pct, value, helper) {
+      const clamped = Math.min(Math.max(pct || 0, 0), 100);
+      return `
+        <div class="cockpit-card">
+          <div class="cockpit-progress-row">
+            <div class="cockpit-card-title">${escapeHtml(title)}</div>
+            <div class="cockpit-progress-value">${escapeHtml(value)}</div>
+          </div>
+          <div class="cockpit-progress-track"><div class="cockpit-progress-bar" style="width:${clamped}%"></div></div>
+          <div class="cockpit-helper">${helper}</div>
+        </div>
+      `;
+    }
+
+    function renderCockpit() {
+      const kpiGrid = document.getElementById("cockpitKpiGrid");
+      const attentionGrid = document.getElementById("cockpitAttentionGrid");
+      const momentumGrid = document.getElementById("cockpitMomentumGrid");
+      const forecastGrid = document.getElementById("cockpitForecastGrid");
+      if (!kpiGrid || !attentionGrid || !momentumGrid || !forecastGrid) return;
+
+      const metrics = getCockpitMetrics();
+      const compPct = metrics.comp.annualTarget > 0 ? (metrics.comp.earned / metrics.comp.annualTarget) * 100 : 0;
+      const debtBaseline = Math.max(metrics.debtTotal, 600000);
+      const debtReductionPct = debtBaseline > 0 ? ((debtBaseline - metrics.debtTotal) / debtBaseline) * 100 : 0;
+      const surplusPct = globalTotalMonthlyTakeHome > 0 ? (metrics.monthlySurplus / globalTotalMonthlyTakeHome) * 100 : 0;
+
+      kpiGrid.innerHTML = [
+        { label: "Net Worth", value: formatCurrency(metrics.netWorth), helper: `${formatCurrency(metrics.assetsTotal)} assets · ${formatCurrency(metrics.debtTotal)} debt` },
+        { label: "Monthly Surplus", value: formatCurrency(metrics.monthlySurplus), helper: `${formatCurrency(globalTotalMonthlyTakeHome)} income · ${formatCurrency(globalMonthlyExpensesTotal)} expenses` },
+        { label: "Debt Remaining", value: formatCurrency(metrics.debtTotal), helper: `${formatCurrency(computeCreditCardDebtTotal())} credit card debt` },
+        { label: "Commission Pace", value: `${compPct.toFixed(1)}%`, helper: `${formatCurrency(metrics.comp.earned)} of ${formatCurrency(metrics.comp.annualTarget)}` },
+        { label: "401k Progress", value: `${metrics.k401Pct.toFixed(1)}%`, helper: `${formatCurrency(metrics.k401Contribution)} of ${formatCurrency(PF_401K_TARGET)}` },
+        { label: "Reading Goal", value: `${metrics.reading.completed}/${metrics.reading.target}`, helper: `${metrics.reading.expected} expected by today` }
+      ].map(item => `
+        <div class="cockpit-kpi">
+          <div class="cockpit-label">${escapeHtml(item.label)}</div>
+          <div class="cockpit-value">${item.value}</div>
+          <div class="cockpit-helper">${item.helper}</div>
+        </div>
+      `).join("");
+
+      const alerts = [];
+      if (metrics.comp.monthsWithData > 0 && metrics.comp.pacePct < 90) {
+        alerts.push(cockpitCard("Commission pace is behind", "", `${formatCurrency(metrics.comp.earned)} earned vs ${formatCurrency(metrics.comp.expectedByEnteredMonths)} expected for entered months.`, "warning"));
+      }
+      if (metrics.monthlySurplus < 0) {
+        alerts.push(cockpitCard("Monthly surplus is negative", "", `${formatCurrency(Math.abs(metrics.monthlySurplus))} gap based on current income and budget.`, "critical"));
+      } else if (metrics.monthlySurplus < 1000) {
+        alerts.push(cockpitCard("Monthly surplus is tight", "", `${formatCurrency(metrics.monthlySurplus)} projected surplus leaves a thin buffer.`, "warning"));
+      }
+      if (metrics.k401Pct + 5 < metrics.annualPacePct) {
+        alerts.push(cockpitCard("401k progress is behind pace", "", `${metrics.k401Pct.toFixed(1)}% contributed vs ${metrics.annualPacePct.toFixed(1)}% calendar-year pace.`, "warning"));
+      }
+      if (metrics.reading.completed < metrics.reading.expected) {
+        alerts.push(cockpitCard("Reading goal is behind pace", "", `${metrics.reading.completed} completed vs ${metrics.reading.expected} expected by today.`, "warning"));
+      }
+      attentionGrid.innerHTML = alerts.length ? alerts.join("") : cockpitCard("No major issues detected.", "", "Your command center is currently on track across the core metrics.", "positive");
+
+      momentumGrid.innerHTML = [
+        cockpitProgressCard("Commission trend / pace", compPct, `${compPct.toFixed(1)}%`, `${formatCurrency(metrics.comp.projectedAnnual)} projected annual commission.`),
+        cockpitProgressCard("Debt reduction", debtReductionPct, `${Math.max(debtReductionPct, 0).toFixed(1)}%`, `${formatCurrency(metrics.debtTotal)} remaining.`),
+        cockpitProgressCard("Savings / surplus", surplusPct, `${surplusPct.toFixed(1)}%`, `${formatCurrency(metrics.monthlySurplus)} monthly surplus.`),
+        cockpitProgressCard("Reading progress", metrics.reading.pct, `${metrics.reading.pct.toFixed(1)}%`, `${metrics.reading.completed} of ${metrics.reading.target} books completed.`)
+      ].join("");
+
+      const debtFreeText = metrics.monthlySurplus > 0
+        ? `${Math.ceil(metrics.debtTotal / metrics.monthlySurplus)} months at current surplus`
+        : "Add more data to forecast.";
+      forecastGrid.innerHTML = [
+        cockpitCard("Projected annual commission", metrics.comp.monthsWithData ? formatCurrency(metrics.comp.projectedAnnual) : "Add more data", metrics.comp.monthsWithData ? "Based on average completed commission months." : "Add more data to forecast."),
+        cockpitCard("Estimated debt-free progress", debtFreeText, metrics.monthlySurplus > 0 ? "Simple estimate using current debt and monthly surplus." : "Add more data to forecast."),
+        cockpitCard("Projected year-end savings", metrics.projectedYearEndSavings > 0 ? formatCurrency(metrics.projectedYearEndSavings) : "Add more data", metrics.projectedYearEndSavings > 0 ? "Monthly surplus multiplied by 12." : "Add more data to forecast."),
+        cockpitCard("Projected books completed", metrics.reading.projected ? `${metrics.reading.projected} books` : "Add more data", metrics.reading.projected ? "Based on year-to-date reading velocity." : "Add more data to forecast.")
+      ].join("");
     }
 
     function computeDebtTotal() {
@@ -4722,6 +5031,7 @@
       renderDebtSection();
       renderInvestSection();
       renderGoals();
+      renderCockpit();
     }
 
     function getRetirementScenario() {
@@ -5390,6 +5700,8 @@
           { displayLegend: false, showLabels: true }
         );
       }
+
+      renderCockpit();
     }
 
     async function onSaveDashboardClick() {
@@ -5434,35 +5746,29 @@
     window.onSaveDashboardClick = onSaveDashboardClick;
 
     // --- Tabs logic ---
+    function showTab(tab) {
+      tabButtons.forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-tab") === tab);
+      });
+
+      cockpitTab.classList.toggle("hidden", tab !== "cockpit");
+      commissionTab.classList.toggle("hidden", tab !== "commission");
+      personalTab.classList.toggle("hidden", tab !== "personal");
+      goalsTab.classList.toggle("hidden", tab !== "goals");
+      insightsTab.classList.toggle("hidden", tab !== "insights");
+
+      if (tab === "cockpit") {
+        renderCockpit();
+      } else if (tab === "goals") {
+        renderGoals();
+      } else if (tab === "insights") {
+        renderInsights();
+      }
+    }
+
     tabButtons.forEach(btn => {
       btn.addEventListener("click", () => {
-        const tab = btn.getAttribute("data-tab");
-        tabButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        if (tab === "commission") {
-          commissionTab.classList.remove("hidden");
-          personalTab.classList.add("hidden");
-          goalsTab.classList.add("hidden");
-          insightsTab.classList.add("hidden");
-        } else if (tab === "personal") {
-          commissionTab.classList.add("hidden");
-          personalTab.classList.remove("hidden");
-          goalsTab.classList.add("hidden");
-          insightsTab.classList.add("hidden");
-        } else if (tab === "goals") {
-          commissionTab.classList.add("hidden");
-          personalTab.classList.add("hidden");
-          goalsTab.classList.remove("hidden");
-          renderGoals();
-          insightsTab.classList.add("hidden");
-        } else {
-          commissionTab.classList.add("hidden");
-          personalTab.classList.add("hidden");
-          goalsTab.classList.add("hidden");
-          insightsTab.classList.remove("hidden");
-          renderInsights();
-        }
+        showTab(btn.getAttribute("data-tab"));
       });
     });
 
@@ -5500,6 +5806,7 @@
         await loadGoalsDataForUser(user.uid);
         await loadRetirementSettings(user.uid);
         renderPersonalFinance();
+        showTab("cockpit");
 
         const statusEl = document.getElementById("saveStatus");
         if (statusEl) {
