@@ -371,7 +371,7 @@
     }
 
     .hidden {
-      display: none;
+      display: none !important;
     }
 
     .delete-btn {
@@ -2805,6 +2805,14 @@
     const personalTab = document.getElementById("personalTab");
     const goalsTab = document.getElementById("goalsTab");
     const insightsTab = document.getElementById("insightsTab");
+    const tabPanels = {
+      cockpit: cockpitTab,
+      commission: commissionTab,
+      personal: personalTab,
+      goals: goalsTab,
+      insights: insightsTab
+    };
+    let activeTab = "cockpit";
 
     // Insights elements
     const insights401kContributionEl = document.getElementById("insights401kContribution");
@@ -3558,7 +3566,7 @@
         if (budgetMonthlySurplusEl) {
           budgetMonthlySurplusEl.textContent = formatCurrency(-globalMonthlyExpensesTotal);
         }
-        renderCockpit();
+        renderCockpitIfActive();
         return;
       }
       const pct = (globalMonthlyExpensesTotal / globalTotalMonthlyTakeHome) * 100;
@@ -3569,7 +3577,7 @@
         const surplus = globalTotalMonthlyTakeHome - globalMonthlyExpensesTotal;
         budgetMonthlySurplusEl.textContent = formatCurrency(surplus);
       }
-      renderCockpit();
+      renderCockpitIfActive();
     }
 
     function updatePf401kInfo() {
@@ -3578,7 +3586,7 @@
       const contributed = isNaN(val) ? 0 : val;
       const pct = PF_401K_TARGET > 0 ? (contributed / PF_401K_TARGET) * 100 : 0;
       pf401kPercentEl.textContent = pct.toFixed(1) + "%";
-      renderCockpit();
+      renderCockpitIfActive();
     }
 
     function getPf401kContribution() {
@@ -5315,7 +5323,7 @@
       renderDebtSection();
       renderInvestSection();
       renderGoals();
-      renderCockpit();
+      renderCockpitIfActive();
     }
 
     function getRetirementScenario() {
@@ -5985,7 +5993,6 @@
         );
       }
 
-      renderCockpit();
     }
 
     async function onSaveDashboardClick() {
@@ -6030,24 +6037,40 @@
     window.onSaveDashboardClick = onSaveDashboardClick;
 
     // --- Tabs logic ---
-    function showTab(tab) {
-      tabButtons.forEach(btn => {
-        btn.classList.toggle("active", btn.getAttribute("data-tab") === tab);
-      });
-
-      cockpitTab.classList.toggle("hidden", tab !== "cockpit");
-      commissionTab.classList.toggle("hidden", tab !== "commission");
-      personalTab.classList.toggle("hidden", tab !== "personal");
-      goalsTab.classList.toggle("hidden", tab !== "goals");
-      insightsTab.classList.toggle("hidden", tab !== "insights");
-
-      if (tab === "cockpit") {
+    function renderActiveTab() {
+      if (activeTab === "cockpit") {
         renderCockpit();
-      } else if (tab === "goals") {
+      } else if (activeTab === "personal") {
+        renderPersonalFinance();
+      } else if (activeTab === "goals") {
         renderGoals();
-      } else if (tab === "insights") {
+      } else if (activeTab === "insights") {
         renderInsights();
       }
+    }
+
+    function renderCockpitIfActive() {
+      if (activeTab === "cockpit") {
+        renderCockpit();
+      }
+    }
+
+    function showTab(tab) {
+      if (!tabPanels[tab]) return;
+
+      activeTab = tab;
+
+      tabButtons.forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-tab") === activeTab);
+      });
+
+      Object.entries(tabPanels).forEach(([tabName, panel]) => {
+        if (panel) {
+          panel.classList.toggle("hidden", tabName !== activeTab);
+        }
+      });
+
+      renderActiveTab();
     }
 
     tabButtons.forEach(btn => {
