@@ -4,259 +4,164 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Urban Ink & Watercolor — Practice Plan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: Georgia, 'Times New Roman', serif;
-      background: #f5f0e8;
-      color: #2a2118;
-      min-height: 100vh;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Inter Tight", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    /* ── HEADER ── */
+    body {
+      background:
+        radial-gradient(circle at top, rgba(23,151,215,0.12), transparent 30%),
+        linear-gradient(180deg, #020617 0%, #050816 48%, #020617 100%);
+      color: #f9fafb;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    a { color: inherit; }
+
+    #header,
+    #tabs,
+    #content {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
     #header {
-      background: #2a2118;
-      color: #f5f0e8;
-      padding: 28px 20px 20px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.88));
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 18px 48px rgba(0,0,0,0.45);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      margin-bottom: 0.9rem;
       position: relative;
       overflow: hidden;
     }
+
     #header::after {
       content: '';
       position: absolute;
-      top: 0; right: 0;
-      width: 180px; height: 100%;
-      background: repeating-linear-gradient(
-        45deg, transparent, transparent 8px,
-        rgba(255,255,255,0.03) 8px, rgba(255,255,255,0.03) 16px
-      );
+      top: 0;
+      right: 0;
+      width: 180px;
+      height: 100%;
+      background: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.02) 8px, rgba(255,255,255,0.02) 16px);
       pointer-events: none;
     }
-    .header-eyebrow {
-      font-size: 9px; letter-spacing: 3px;
-      color: #c17f3e; margin-bottom: 6px;
-    }
-    .header-title { font-size: 20px; margin-bottom: 4px; font-weight: normal; }
-    .header-sub {
-      font-size: 12px; color: #a89880;
-      font-style: italic; margin-bottom: 16px;
-    }
 
-    /* ── GLOBAL PROGRESS ── */
-    .progress-labels {
-      display: flex; justify-content: space-between;
-      font-size: 9px; letter-spacing: 2px;
-      color: #a89880; margin-bottom: 6px;
-    }
-    .progress-track {
-      background: rgba(255,255,255,0.1);
-      border-radius: 2px; height: 6px; overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #c17f3e, #4a7fa5);
-      border-radius: 2px;
-      transition: width 0.4s ease;
-    }
-    .progress-pct {
-      font-size: 10px; color: #c17f3e;
-      margin-top: 4px; text-align: right;
-    }
+    .header-eyebrow { font-size: 0.65rem; letter-spacing: 0.2em; color: #1797d7; margin-bottom: 0.4rem; }
+    .header-title { font-size: 1.25rem; margin-bottom: 0.25rem; font-weight: 700; color: #ffc532; }
+    .header-sub { font-size: 0.9rem; color: #e5eef7; opacity: 0.85; margin-bottom: 1rem; }
 
-    /* ── NAV TABS ── */
+    .progress-labels { display: flex; justify-content: space-between; font-size: 0.68rem; letter-spacing: 0.12em; color: #94a3b8; margin-bottom: 0.4rem; }
+    .progress-track, .pillar-track { background: #020617; border-radius: 999px; height: 8px; overflow: hidden; border: 1px solid rgba(23,151,215,0.5); }
+    .progress-fill, .pillar-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+    .progress-pct { font-size: 0.78rem; color: #e5eef7; margin-top: 0.4rem; text-align: right; }
+
     #tabs {
       display: flex;
-      border-bottom: 2px solid #2a2118;
+      gap: 0.5rem;
       overflow-x: auto;
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.2rem;
     }
     .tab-btn {
-      flex: 1; min-width: 72px;
-      padding: 10px 6px; border: none;
-      background: transparent; color: #2a2118;
-      font-size: 9px; letter-spacing: 1px;
+      min-width: 120px;
+      border: 1px solid rgba(23,151,215,0.7);
+      background: #020617;
+      color: #e5eef7;
+      border-radius: 0.75rem;
+      padding: 0.6rem;
       cursor: pointer;
-      border-right: 1px solid #2a2118;
-      font-family: Georgia, serif;
-      transition: background 0.2s, color 0.2s;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      transition: border-color 0.15s, color 0.15s, transform 0.1s;
     }
-    .tab-btn.active { color: #fff; }
-    .tab-btn:last-child { border-right: none; }
-    .tab-icon { font-size: 16px; margin-bottom: 3px; }
-    .tab-count { font-size: 8px; color: #a89880; margin-top: 2px; }
-    .tab-btn.active .tab-count { color: rgba(255,255,255,0.75); }
+    .tab-btn.active { border-color: #ffc532; color: #ffc532; background: #111827; }
+    .tab-btn:hover { transform: translateY(-1px); }
+    .tab-icon { font-size: 1rem; margin-bottom: 0.2rem; }
+    .tab-count { font-size: 0.65rem; color: #94a3b8; margin-top: 0.2rem; }
 
-    /* ── MAIN CONTENT ── */
-    #content { padding: 20px 16px; }
-
-    .pillar-meta {
-      display: flex; align-items: center;
-      justify-content: space-between; margin-bottom: 12px;
-    }
-    .weeks-badge {
-      color: #fff; font-size: 8px; letter-spacing: 2px;
-      padding: 3px 10px; border-radius: 2px;
-    }
-    .pillar-done-label {
-      font-size: 10px; letter-spacing: 1px;
-    }
-    .pillar-track {
-      background: #e0d8cc; border-radius: 2px;
-      height: 4px; margin-bottom: 14px; overflow: hidden;
-    }
-    .pillar-fill {
-      height: 100%; border-radius: 2px;
-      transition: width 0.4s ease;
-    }
-    .pillar-title { font-size: 18px; margin-bottom: 6px; font-weight: normal; }
-    .pillar-desc {
-      font-size: 12px; color: #6b5040;
-      font-style: italic; margin-bottom: 20px; line-height: 1.6;
+    #content {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.88));
+      border-radius: 1rem;
+      padding: 1.25rem;
+      box-shadow: 0 18px 48px rgba(0,0,0,0.45);
+      border: 1px solid rgba(148, 163, 184, 0.18);
     }
 
-    /* ── SECTION LABELS ── */
-    .section-label {
-      font-size: 9px; letter-spacing: 3px;
-      margin-bottom: 10px; font-family: Georgia, serif;
+    .pillar-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.7rem; gap: 0.6rem; }
+    .weeks-badge, .weekly-badge {
+      color: #fff;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.15);
     }
+    .pillar-done-label, .save-notice, .weekly-day, .weekly-task, .section-label { color: #e5eef7; }
+    .pillar-done-label, .save-notice { font-size: 0.78rem; opacity: 0.85; }
+    .pillar-title { font-size: 1.2rem; margin: 0.9rem 0 0.4rem; color: #ffc532; }
+    .pillar-desc { font-size: 0.92rem; color: #e5eef7; opacity: 0.9; margin-bottom: 1rem; line-height: 1.6; }
+    .section-label { font-size: 0.68rem; letter-spacing: 0.14em; margin-bottom: 0.7rem; opacity: 0.8; text-transform: uppercase; }
 
-    /* ── DRILLS ── */
-    .drill-card {
-      margin-bottom: 10px;
-      border-left: 3px solid #e0d8cc;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-      transition: background 0.2s, border-color 0.2s;
-      background: #fff;
+    .drill-card, .artist-card, .resource-link, .quote-box {
+      background: #020617;
+      border: 1px solid rgba(23,151,215,0.6);
+      border-radius: 0.75rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      margin-bottom: 0.65rem;
     }
-    .drill-card.done { border-left-color: var(--pillar-color); }
-    .drill-row {
-      display: flex; align-items: flex-start;
-      gap: 10px; padding: 12px 12px 10px;
-    }
+    .drill-card.done { border-left: 3px solid var(--pillar-color); }
+    .drill-row { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.85rem; }
     .drill-checkbox {
-      width: 22px; height: 22px; border-radius: 3px;
-      border: 2px solid var(--pillar-color);
-      background: transparent;
-      cursor: pointer; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s; margin-top: 1px;
-      font-size: 12px; color: #fff;
+      width: 22px; height: 22px; border-radius: 0.35rem; border: 2px solid var(--pillar-color);
+      background: transparent; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      margin-top: 1px; font-size: 12px; color: #fff;
     }
     .drill-checkbox.checked { background: var(--pillar-color); }
-    .drill-text {
-      flex: 1; font-size: 12px; line-height: 1.6;
-      font-family: Georgia, serif;
-      transition: color 0.2s, text-decoration 0.2s;
+    .drill-text { flex: 1; font-size: 0.86rem; line-height: 1.55; color: #f9fafb; }
+    .drill-text.done { color: #94a3b8; text-decoration: line-through; }
+    .drill-expand, #reset-btn {
+      background: transparent; border-radius: 999px; padding: 0.35rem 0.7rem; cursor: pointer;
+      font-size: 0.68rem; letter-spacing: 0.08em; border: 1px solid rgba(23,151,215,0.8); color: #e5eef7;
     }
-    .drill-text.done { color: #a89880; text-decoration: line-through; }
-    .drill-expand {
-      background: transparent;
-      border-radius: 2px; padding: 3px 7px;
-      cursor: pointer; font-size: 9px;
-      letter-spacing: 1px; flex-shrink: 0;
-      font-family: Georgia, serif;
-    }
-    .drill-links {
-      padding: 0 12px 12px 44px;
-      border-top: 1px solid rgba(0,0,0,0.06);
-      display: none;
-    }
+    .drill-links { padding: 0 0.9rem 0.8rem 2.6rem; border-top: 1px solid rgba(23,151,215,0.3); display: none; }
     .drill-links.open { display: block; }
-    .drill-link {
-      display: block; font-size: 11px;
-      text-decoration: none; padding: 5px 0;
-      line-height: 1.4;
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-      font-family: Georgia, serif;
-    }
+    .drill-link { display: block; font-size: 0.8rem; text-decoration: none; padding: 0.35rem 0; line-height: 1.35; border-bottom: 1px solid rgba(23,151,215,0.25); color: #93c5fd; }
     .drill-link:last-child { border-bottom: none; }
 
-    /* ── ARTISTS ── */
-    .artist-card {
-      display: block; padding: 10px 14px; margin-bottom: 8px;
-      border-radius: 2px; text-decoration: none; color: #2a2118;
-      transition: opacity 0.15s;
-    }
-    .artist-card:hover { opacity: 0.85; }
-    .artist-name {
-      font-weight: bold; font-size: 12px;
-      margin-bottom: 2px;
-    }
-    .artist-note {
-      font-size: 11px; color: #6b5040; font-style: italic;
-    }
+    .artist-card, .resource-link { padding: 0.7rem 0.85rem; text-decoration: none; color: #f9fafb; }
+    .artist-card:hover, .resource-link:hover { border-color: #ffc532; }
+    .artist-name { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.2rem; color: #ffc532; }
+    .artist-note { font-size: 0.8rem; color: #cbd5e1; }
 
-    /* ── RESOURCES ── */
-    .resource-link {
-      display: block; padding: 10px 14px; margin-bottom: 6px;
-      text-decoration: none; color: #2a2118;
-      font-size: 12px; border-radius: 2px;
-      border-left: 3px solid var(--pillar-color);
-      font-family: Georgia, serif;
-      transition: opacity 0.15s;
-    }
-    .resource-link:hover { opacity: 0.8; }
+    .weekly-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0; border-bottom: 1px solid rgba(23,151,215,0.25); }
+    .weekly-day { font-size: 0.72rem; font-weight: 700; min-width: 34px; color: #94a3b8; }
+    .weekly-task { font-size: 0.82rem; }
 
-    /* ── WEEKLY SCHEDULE ── */
-    .weekly-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 0; border-bottom: 1px solid #e0d8cc;
-    }
-    .weekly-day {
-      font-size: 10px; font-weight: bold;
-      min-width: 30px; color: #a89880;
-    }
-    .weekly-badge {
-      font-size: 8px; letter-spacing: 1px; color: #fff;
-      padding: 2px 6px; border-radius: 2px;
-      min-width: 58px; text-align: center;
-      font-family: Georgia, serif;
-    }
-    .weekly-task { font-size: 11px; line-height: 1.4; }
+    .footer-row { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; margin: 1rem 0; flex-wrap: wrap; }
+    .quote-box { padding: 0.9rem; font-size: 0.83rem; line-height: 1.6; color: #e5eef7; font-style: italic; }
 
-    /* ── FOOTER ── */
-    .footer-row {
-      display: flex; align-items: center;
-      justify-content: space-between; margin-bottom: 16px;
-    }
-    .save-notice {
-      font-size: 10px; color: #a89880; font-style: italic;
-    }
-    #reset-btn {
-      background: transparent; border: 1px solid #a89880;
-      border-radius: 2px; padding: 4px 10px;
-      font-size: 9px; letter-spacing: 1px;
-      color: #a89880; cursor: pointer;
-      font-family: Georgia, serif;
-    }
-    .quote-box {
-      padding: 14px; background: #2a2118; color: #f5f0e8;
-      font-size: 11px; line-height: 1.7;
-      font-style: italic; border-radius: 2px;
-    }
-
-    /* ── TOAST ── */
     #toast {
-      position: fixed; bottom: 20px; left: 50%;
-      transform: translateX(-50%);
-      background: #2a2118; color: #f5f0e8;
-      padding: 8px 16px; border-radius: 4px;
-      font-size: 11px; font-family: Georgia, serif;
-      opacity: 0; transition: opacity 0.3s;
-      pointer-events: none; z-index: 999;
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #0f172a; color: #e5eef7; padding: 0.55rem 1rem; border-radius: 999px;
+      font-size: 0.78rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999;
+      border: 1px solid rgba(23,151,215,0.7);
     }
     #toast.show { opacity: 1; }
 
-    /* ── LOADING ── */
-    #loading {
-      text-align: center; padding: 40px 20px;
-      font-size: 12px; color: #a89880; font-style: italic;
-    }
+    #loading { text-align: center; padding: 2rem 1rem; font-size: 0.9rem; color: #94a3b8; }
 
-    @media (min-width: 600px) {
-      #header { padding: 36px 32px 24px; }
-      #content { padding: 28px 32px; max-width: 720px; margin: 0 auto; }
-      #tabs { max-width: 720px; margin: 0 auto; }
+    @media (max-width: 600px) {
+      body { padding: 0.75rem; }
+      #header, #content { padding: 1rem; border-radius: 0.9rem; }
+      .tab-btn { min-width: 110px; }
+      .drill-row { padding: 0.75rem; }
     }
   </style>
 </head>
