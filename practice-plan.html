@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urban Ink & Watercolor — Practice Plan</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: #f5f0e8;
+      color: #2a2118;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    #header {
+      background: #2a2118;
+      color: #f5f0e8;
+      padding: 28px 20px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    #header::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 180px; height: 100%;
+      background: repeating-linear-gradient(
+        45deg, transparent, transparent 8px,
+        rgba(255,255,255,0.03) 8px, rgba(255,255,255,0.03) 16px
+      );
+      pointer-events: none;
+    }
+    .header-eyebrow {
+      font-size: 9px; letter-spacing: 3px;
+      color: #c17f3e; margin-bottom: 6px;
+    }
+    .header-title { font-size: 20px; margin-bottom: 4px; font-weight: normal; }
+    .header-sub {
+      font-size: 12px; color: #a89880;
+      font-style: italic; margin-bottom: 16px;
+    }
+
+    /* ── GLOBAL PROGRESS ── */
+    .progress-labels {
+      display: flex; justify-content: space-between;
+      font-size: 9px; letter-spacing: 2px;
+      color: #a89880; margin-bottom: 6px;
+    }
+    .progress-track {
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px; height: 6px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #c17f3e, #4a7fa5);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+    .progress-pct {
+      font-size: 10px; color: #c17f3e;
+      margin-top: 4px; text-align: right;
+    }
+
+    /* ── NAV TABS ── */
+    #tabs {
+      display: flex;
+      border-bottom: 2px solid #2a2118;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      flex: 1; min-width: 72px;
+      padding: 10px 6px; border: none;
+      background: transparent; color: #2a2118;
+      font-size: 9px; letter-spacing: 1px;
+      cursor: pointer;
+      border-right: 1px solid #2a2118;
+      font-family: Georgia, serif;
+      transition: background 0.2s, color 0.2s;
+    }
+    .tab-btn.active { color: #fff; }
+    .tab-btn:last-child { border-right: none; }
+    .tab-icon { font-size: 16px; margin-bottom: 3px; }
+    .tab-count { font-size: 8px; color: #a89880; margin-top: 2px; }
+    .tab-btn.active .tab-count { color: rgba(255,255,255,0.75); }
+
+    /* ── MAIN CONTENT ── */
+    #content { padding: 20px 16px; }
+
+    .pillar-meta {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 12px;
+    }
+    .weeks-badge {
+      color: #fff; font-size: 8px; letter-spacing: 2px;
+      padding: 3px 10px; border-radius: 2px;
+    }
+    .pillar-done-label {
+      font-size: 10px; letter-spacing: 1px;
+    }
+    .pillar-track {
+      background: #e0d8cc; border-radius: 2px;
+      height: 4px; margin-bottom: 14px; overflow: hidden;
+    }
+    .pillar-fill {
+      height: 100%; border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+    .pillar-title { font-size: 18px; margin-bottom: 6px; font-weight: normal; }
+    .pillar-desc {
+      font-size: 12px; color: #6b5040;
+      font-style: italic; margin-bottom: 20px; line-height: 1.6;
+    }
+
+    /* ── SECTION LABELS ── */
+    .section-label {
+      font-size: 9px; letter-spacing: 3px;
+      margin-bottom: 10px; font-family: Georgia, serif;
+    }
+
+    /* ── DRILLS ── */
+    .drill-card {
+      margin-bottom: 10px;
+      border-left: 3px solid #e0d8cc;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      transition: background 0.2s, border-color 0.2s;
+      background: #fff;
+    }
+    .drill-card.done { border-left-color: var(--pillar-color); }
+    .drill-row {
+      display: flex; align-items: flex-start;
+      gap: 10px; padding: 12px 12px 10px;
+    }
+    .drill-checkbox {
+      width: 22px; height: 22px; border-radius: 3px;
+      border: 2px solid var(--pillar-color);
+      background: transparent;
+      cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s; margin-top: 1px;
+      font-size: 12px; color: #fff;
+    }
+    .drill-checkbox.checked { background: var(--pillar-color); }
+    .drill-text {
+      flex: 1; font-size: 12px; line-height: 1.6;
+      font-family: Georgia, serif;
+      transition: color 0.2s, text-decoration 0.2s;
+    }
+    .drill-text.done { color: #a89880; text-decoration: line-through; }
+    .drill-expand {
+      background: transparent;
+      border-radius: 2px; padding: 3px 7px;
+      cursor: pointer; font-size: 9px;
+      letter-spacing: 1px; flex-shrink: 0;
+      font-family: Georgia, serif;
+    }
+    .drill-links {
+      padding: 0 12px 12px 44px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      display: none;
+    }
+    .drill-links.open { display: block; }
+    .drill-link {
+      display: block; font-size: 11px;
+      text-decoration: none; padding: 5px 0;
+      line-height: 1.4;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      font-family: Georgia, serif;
+    }
+    .drill-link:last-child { border-bottom: none; }
+
+    /* ── ARTISTS ── */
+    .artist-card {
+      display: block; padding: 10px 14px; margin-bottom: 8px;
+      border-radius: 2px; text-decoration: none; color: #2a2118;
+      transition: opacity 0.15s;
+    }
+    .artist-card:hover { opacity: 0.85; }
+    .artist-name {
+      font-weight: bold; font-size: 12px;
+      margin-bottom: 2px;
+    }
+    .artist-note {
+      font-size: 11px; color: #6b5040; font-style: italic;
+    }
+
+    /* ── RESOURCES ── */
+    .resource-link {
+      display: block; padding: 10px 14px; margin-bottom: 6px;
+      text-decoration: none; color: #2a2118;
+      font-size: 12px; border-radius: 2px;
+      border-left: 3px solid var(--pillar-color);
+      font-family: Georgia, serif;
+      transition: opacity 0.15s;
+    }
+    .resource-link:hover { opacity: 0.8; }
+
+    /* ── WEEKLY SCHEDULE ── */
+    .weekly-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; border-bottom: 1px solid #e0d8cc;
+    }
+    .weekly-day {
+      font-size: 10px; font-weight: bold;
+      min-width: 30px; color: #a89880;
+    }
+    .weekly-badge {
+      font-size: 8px; letter-spacing: 1px; color: #fff;
+      padding: 2px 6px; border-radius: 2px;
+      min-width: 58px; text-align: center;
+      font-family: Georgia, serif;
+    }
+    .weekly-task { font-size: 11px; line-height: 1.4; }
+
+    /* ── FOOTER ── */
+    .footer-row {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 16px;
+    }
+    .save-notice {
+      font-size: 10px; color: #a89880; font-style: italic;
+    }
+    #reset-btn {
+      background: transparent; border: 1px solid #a89880;
+      border-radius: 2px; padding: 4px 10px;
+      font-size: 9px; letter-spacing: 1px;
+      color: #a89880; cursor: pointer;
+      font-family: Georgia, serif;
+    }
+    .quote-box {
+      padding: 14px; background: #2a2118; color: #f5f0e8;
+      font-size: 11px; line-height: 1.7;
+      font-style: italic; border-radius: 2px;
+    }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: #2a2118; color: #f5f0e8;
+      padding: 8px 16px; border-radius: 4px;
+      font-size: 11px; font-family: Georgia, serif;
+      opacity: 0; transition: opacity 0.3s;
+      pointer-events: none; z-index: 999;
+    }
+    #toast.show { opacity: 1; }
+
+    /* ── LOADING ── */
+    #loading {
+      text-align: center; padding: 40px 20px;
+      font-size: 12px; color: #a89880; font-style: italic;
+    }
+
+    @media (min-width: 600px) {
+      #header { padding: 36px 32px 24px; }
+      #content { padding: 28px 32px; max-width: 720px; margin: 0 auto; }
+      #tabs { max-width: 720px; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDaUhACWzw3VQWf3lJWcmuSYp8ti2FxG3I",
+    authDomain:        "commission-calculator-2c9b5.firebaseapp.com",
+    projectId:         "commission-calculator-2c9b5",
+    storageBucket:     "commission-calculator-2c9b5.firebasestorage.app",
+    messagingSenderId: "808002258792",
+    appId:             "1:808002258792:web:db8677e98715f06ee8f8dd"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const db   = getFirestore(app);
+  const auth = getAuth(app);
+</script>
+</body>
+</html>
