@@ -520,6 +520,32 @@
       flex: 1 1 0;
     }
 
+
+
+    .amy-payoff-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(140px, 1fr));
+      gap: 0.55rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .amy-payoff-chart-wrap { margin-bottom: 0.7rem; }
+
+    #amyCarPayoffChart { width: 100%; max-height: 280px; }
+
+    .amy-payoff-grid-wrapper { overflow-x: auto; }
+
+    .amy-payoff-grid th,
+    .amy-payoff-grid td {
+      white-space: nowrap;
+      font-size: 0.76rem;
+      padding: 0.25rem 0.35rem;
+    }
+
+    .amy-status-ahead { color: #22c55e; font-weight: 600; }
+    .amy-status-behind { color: #ef4444; font-weight: 600; }
+    .amy-status-ontrack { color: #cbd5e1; font-weight: 600; }
+
     /* Tabs */
     .tab-nav {
       display: flex;
@@ -1469,6 +1495,7 @@
       th, td {
         padding: 0.2rem 0.3rem;
       }
+      .amy-payoff-summary-grid { grid-template-columns: 1fr; }
       .comp-chart-container {
         flex: 1 1 100%;
         max-width: 100%;
@@ -2072,6 +2099,35 @@
                       <td id="debtTotal">$0</td>
                     </tr>
                   </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="history-header-row">
+                <div>
+                  <h2>Amy’s Car Payoff Tracker</h2>
+                  <p>Payoff target from May 2026 through May 2027, with target vs actual debt balance for Amy’s Car.</p>
+                </div>
+              </div>
+
+              <div class="amy-payoff-summary-grid">
+                <div class="result-pill"><div class="result-label">Current Balance</div><div class="result-value" id="amyCarCurrentBalance">$0</div></div>
+                <div class="result-pill"><div class="result-label">Target Balance This Month</div><div class="result-value" id="amyCarTargetThisMonth">$0</div></div>
+                <div class="result-pill"><div class="result-label">Ahead / Behind</div><div class="result-value" id="amyCarAheadBehind">$0</div></div>
+                <div class="result-pill"><div class="result-label">Required Extra Monthly Payoff Remaining</div><div class="result-value" id="amyCarRequiredExtra">$0</div></div>
+              </div>
+
+              <div class="amy-payoff-chart-wrap"><canvas id="amyCarPayoffChart"></canvas></div>
+
+              <div class="history-wrapper amy-payoff-grid-wrapper">
+                <table class="amy-payoff-grid">
+                  <thead>
+                    <tr>
+                      <th>Month</th><th>Target Balance</th><th>Actual Balance</th><th>Scheduled Auto-Draft</th><th>Extra Lump-Sum Payment</th><th>Total Paid This Month</th><th>Ahead / Behind Target</th>
+                    </tr>
+                  </thead>
+                  <tbody id="amyCarPayoffBody"></tbody>
                 </table>
               </div>
             </div>
@@ -2962,6 +3018,12 @@
     let readingToReadRows = Array.from({ length: 5 }).map(() => createBookToReadRow());
 
     let debtStrategyNotes = "";
+    const AMY_CAR_START_BALANCE = 57159;
+    const AMY_CAR_AUTODRAFT = 1284.21;
+    const AMY_CAR_MONTHLY_TARGET_REDUCTION = 4763.25;
+    const amyCarMonths = ["May 2026","Jun 2026","Jul 2026","Aug 2026","Sep 2026","Oct 2026","Nov 2026","Dec 2026","Jan 2027","Feb 2027","Mar 2027","Apr 2027","May 2027"];
+    let amyCarPayoffChart = null;
+    let amyCarExtraLumpSums = {};
 
     let budgetSortAmountAsc = true;
     let budgetSortCategoryAsc = true;
@@ -3009,7 +3071,8 @@
       storePeriodHeaders: [],
       storeSpendingRows: [],
       upcomingRows: [],
-      debtRows: []
+      debtRows: [],
+      amyCarExtraLumpSums: {}
     };
 
     const defaultPersonalBudgetRows = JSON.parse(JSON.stringify(personalBudgetRows));
@@ -3066,7 +3129,8 @@
         storeSpendingRows: JSON.parse(JSON.stringify(defaultStoreSpendingRows)),
         storePeriodHeaders: [...defaultStorePeriodHeaders],
         upcomingRows: JSON.parse(JSON.stringify(defaultUpcomingRows)),
-        debtRows: JSON.parse(JSON.stringify(defaultDebtRows))
+        debtRows: JSON.parse(JSON.stringify(defaultDebtRows)),
+        amyCarExtraLumpSums: {}
       };
       personalBudgetRows = JSON.parse(JSON.stringify(defaultPersonalBudgetRows));
       investmentRows = JSON.parse(JSON.stringify(defaultInvestmentRows));
@@ -3185,7 +3249,8 @@
         debtRows: debtRows.map(row => ({
           name: row.name || "",
           balance: typeof row.balance === "number" ? row.balance : null
-        }))
+        })),
+        amyCarExtraLumpSums: { ...amyCarExtraLumpSums }
       };
     }
 
@@ -3246,7 +3311,10 @@
               name: row.name || "",
               balance: typeof row.balance === "number" ? row.balance : null
             }))
-          : JSON.parse(JSON.stringify(defaultDebtRows))
+          : JSON.parse(JSON.stringify(defaultDebtRows)),
+        amyCarExtraLumpSums: safeState.amyCarExtraLumpSums && typeof safeState.amyCarExtraLumpSums === "object"
+          ? { ...safeState.amyCarExtraLumpSums }
+          : {}
       };
 
       personalBudgetRows = personalFinanceState.budgetRows;
@@ -3258,6 +3326,7 @@
       upcomingRows = personalFinanceState.upcomingRows;
       debtRows = personalFinanceState.debtRows;
       debtStrategyNotes = personalFinanceState.debtNotes || "";
+      amyCarExtraLumpSums = personalFinanceState.amyCarExtraLumpSums || {};
 
       if (pf401kTrackerInput) {
         pf401kTrackerInput.value = personalFinanceState.pf401k != null
@@ -4724,6 +4793,7 @@
       if (updates.upcomingRows) upcomingRows = updates.upcomingRows;
       if (updates.debtRows) debtRows = updates.debtRows;
       if (typeof updates.debtNotes === "string") debtStrategyNotes = updates.debtNotes;
+      if (updates.amyCarExtraLumpSums && typeof updates.amyCarExtraLumpSums === "object") amyCarExtraLumpSums = updates.amyCarExtraLumpSums;
       if (typeof updates.pf401k === "number" && pf401kTrackerInput) {
         pf401kTrackerInput.value = formatNumberWithCommas(updates.pf401k.toString());
       }
@@ -5322,6 +5392,7 @@
       renderStoreSection();
       renderUpcomingSection();
       renderDebtSection();
+      renderAmyCarPayoffTracker();
       renderInvestSection();
       renderGoals();
       renderCockpitIfActive();
@@ -5372,6 +5443,46 @@
         ? nominal / Math.pow(1 + inflationRate, years)
         : nominal;
       return { value, years, nominal };
+    }
+
+
+    function getAmyCarDebtBalance() {
+      const row = debtRows.find(r => (r.name || "").trim().toLowerCase() === "amy’s car".toLowerCase() || (r.name || "").trim().toLowerCase() === "amy's car");
+      return row && typeof row.balance === "number" ? row.balance : null;
+    }
+
+    function renderAmyCarPayoffTracker() {
+      const body = document.getElementById("amyCarPayoffBody");
+      const currentEl = document.getElementById("amyCarCurrentBalance");
+      const targetEl = document.getElementById("amyCarTargetThisMonth");
+      const aheadEl = document.getElementById("amyCarAheadBehind");
+      const requiredEl = document.getElementById("amyCarRequiredExtra");
+      const chartEl = document.getElementById("amyCarPayoffChart");
+      if (!body || !chartEl) return;
+      const actualBalance = getAmyCarDebtBalance();
+      const targetBalances = amyCarMonths.map((_, idx) => Math.max(AMY_CAR_START_BALANCE - (AMY_CAR_MONTHLY_TARGET_REDUCTION * idx), 0));
+      const autoDraftBalances = amyCarMonths.map((_, idx) => Math.max(AMY_CAR_START_BALANCE - (AMY_CAR_AUTODRAFT * idx), 0));
+      const todayIdx = Math.min(Math.max((new Date().getFullYear()-2026)*12 + new Date().getMonth()-4,0), amyCarMonths.length-1);
+      body.innerHTML = amyCarMonths.map((m, idx) => {
+        const target = targetBalances[idx];
+        const extra = typeof amyCarExtraLumpSums[m] === "number" ? amyCarExtraLumpSums[m] : 0;
+        const actual = idx === todayIdx ? actualBalance : null;
+        const totalPaid = AMY_CAR_AUTODRAFT + extra;
+        const diff = actual != null ? actual - target : null;
+        const status = diff == null ? "—" : (diff < 0 ? `<span class="amy-status-ahead">Ahead ${formatCurrency(Math.abs(diff))}</span>` : diff > 0 ? `<span class="amy-status-behind">Behind ${formatCurrency(diff)}</span>` : '<span class="amy-status-ontrack">On track</span>');
+        return `<tr><td>${m}</td><td>${formatCurrency(target)}</td><td>${actual != null ? formatCurrency(actual) : "—"}</td><td>${formatCurrency(AMY_CAR_AUTODRAFT)}</td><td><input ${currencyInputAttrString} class="amy-extra-input" data-month="${m}" value="${extra ? formatNumberWithCommas(extra.toString()) : ""}" /></td><td>${formatCurrency(totalPaid)}</td><td>${status}</td></tr>`;
+      }).join("");
+      document.querySelectorAll('.amy-extra-input').forEach(input=>{input.addEventListener('input',e=>{e.target.value=formatNumberWithCommas(e.target.value);}); input.addEventListener('blur', async e=>{const month=e.target.getAttribute('data-month');const v=getNumericValue(e.target.value);amyCarExtraLumpSums[month]=isNaN(v)?0:v;await savePersonalFinanceData({amyCarExtraLumpSums});renderAmyCarPayoffTracker();});});
+      const targetThisMonth = targetBalances[todayIdx];
+      const delta = actualBalance != null ? actualBalance - targetThisMonth : null;
+      const monthsRemaining = Math.max((amyCarMonths.length - 1) - todayIdx, 1);
+      const requiredExtra = actualBalance != null ? Math.max((actualBalance / monthsRemaining) - AMY_CAR_AUTODRAFT, 0) : 0;
+      if (currentEl) currentEl.textContent = actualBalance != null ? formatCurrency(actualBalance) : "Not found";
+      if (targetEl) targetEl.textContent = formatCurrency(targetThisMonth);
+      if (aheadEl) aheadEl.textContent = delta == null ? "—" : (delta < 0 ? `Ahead ${formatCurrency(Math.abs(delta))}` : delta > 0 ? `Behind ${formatCurrency(delta)}` : "On track");
+      if (requiredEl) requiredEl.textContent = formatCurrency(requiredExtra);
+      const actualData = amyCarMonths.map((_, idx) => idx === todayIdx ? actualBalance : null);
+      if (!amyCarPayoffChart) { amyCarPayoffChart = new Chart(chartEl,{type:'line',data:{labels:amyCarMonths,datasets:[{label:'Target Balance',data:targetBalances,borderColor:'#2563eb',backgroundColor:'transparent',borderWidth:2,tension:0.2},{label:'Actual Balance',data:actualData,borderColor:'#22c55e',backgroundColor:'transparent',borderWidth:2,tension:0.2},{label:'Scheduled Auto-Draft Path',data:autoDraftBalances,borderColor:'#9ca3af',backgroundColor:'transparent',borderDash:[6,4],borderWidth:2,tension:0.2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#cbd5e1'}}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8',callback:(v)=>formatCurrency(v)}}}}}); } else { amyCarPayoffChart.data.labels=amyCarMonths; amyCarPayoffChart.data.datasets[0].data=targetBalances; amyCarPayoffChart.data.datasets[1].data=actualData; amyCarPayoffChart.data.datasets[2].data=autoDraftBalances; amyCarPayoffChart.update(); }
     }
 
     function renderGoals() {
