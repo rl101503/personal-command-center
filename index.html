@@ -520,32 +520,6 @@
       flex: 1 1 0;
     }
 
-
-
-    .amy-payoff-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(140px, 1fr));
-      gap: 0.55rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .amy-payoff-chart-wrap { margin-bottom: 0.7rem; }
-
-    #amyCarPayoffChart { width: 100%; max-height: 280px; }
-
-    .amy-payoff-grid-wrapper { overflow-x: auto; }
-
-    .amy-payoff-grid th,
-    .amy-payoff-grid td {
-      white-space: nowrap;
-      font-size: 0.76rem;
-      padding: 0.25rem 0.35rem;
-    }
-
-    .amy-status-ahead { color: #22c55e; font-weight: 600; }
-    .amy-status-behind { color: #ef4444; font-weight: 600; }
-    .amy-status-ontrack { color: #cbd5e1; font-weight: 600; }
-
     /* Tabs */
     .tab-nav {
       display: flex;
@@ -1495,7 +1469,6 @@
       th, td {
         padding: 0.2rem 0.3rem;
       }
-      .amy-payoff-summary-grid { grid-template-columns: 1fr; }
       .comp-chart-container {
         flex: 1 1 100%;
         max-width: 100%;
@@ -1762,7 +1735,6 @@
           <button class="tab-button" data-tab="personal">Personal Finances</button>
           <button class="tab-button" data-tab="goals">Goals</button>
           <button class="tab-button" data-tab="insights">Insights</button>
-          <button type="button" class="tab-button" onclick="window.location.href='/practice-plan2.html'">Practice Plan</button>
         </div>
         <button type="button" class="save-dashboard-btn" onclick="onSaveDashboardClick()">Save Dashboard</button>
         <span id="saveStatus" style="margin-left: 10px; font-size: 0.85rem;"></span>
@@ -2102,36 +2074,6 @@
                 </table>
               </div>
             </div>
-
-            <div class="card">
-              <div class="history-header-row">
-                <div>
-                  <h2>Amy’s Car Payoff Tracker</h2>
-                  <p>Payoff target from May 2026 through May 2027, with target vs actual debt balance for Amy’s Car.</p>
-                </div>
-              </div>
-
-              <div class="amy-payoff-summary-grid">
-                <div class="result-pill"><div class="result-label">Current Balance</div><div class="result-value" id="amyCarCurrentBalance">$0</div></div>
-                <div class="result-pill"><div class="result-label">Target Balance This Month</div><div class="result-value" id="amyCarTargetThisMonth">$0</div></div>
-                <div class="result-pill"><div class="result-label">Ahead / Behind</div><div class="result-value" id="amyCarAheadBehind">$0</div></div>
-                <div class="result-pill"><div class="result-label">Required Extra Monthly Payoff Remaining</div><div class="result-value" id="amyCarRequiredExtra">$0</div></div>
-              </div>
-
-              <div class="amy-payoff-chart-wrap"><canvas id="amyCarPayoffChart"></canvas></div>
-
-              <div class="history-wrapper amy-payoff-grid-wrapper">
-                <table class="amy-payoff-grid">
-                  <thead>
-                    <tr>
-                      <th>Month</th><th>Target Balance</th><th>Actual Balance</th><th>Scheduled Auto-Draft</th><th>Extra Lump-Sum Payment</th><th>Total Paid This Month</th><th>Ahead / Behind Target</th>
-                    </tr>
-                  </thead>
-                  <tbody id="amyCarPayoffBody"></tbody>
-                </table>
-              </div>
-            </div>
-
             <div class="card">
               <div class="history-header-row">
                 <div>
@@ -2313,7 +2255,7 @@
                   <h2>Groceries & Retail Averages</h2>
                   <p>
                     Store-level monthly averages for Amazon, Teeter, Walmart, Publix, and Target.
-                    Period headers are editable so you can label any time ranges (e.g., Feb24–Jan25).
+                    Track Dec24-Nov25 alongside the editable Dec25-Apr26 averages.
                   </p>
                 </div>
                 <button type="button" id="storeEditBtn" class="btn-secondary btn-small">Edit</button>
@@ -2335,7 +2277,6 @@
                       <td>Total (all stores)</td>
                       <td id="storeTotalCol1">$0</td>
                       <td id="storeTotalCol2">$0</td>
-                      <td id="storeTotalCol3">$0</td>
                     </tr>
                   </tbody>
                 </table>
@@ -2969,14 +2910,14 @@
     ];
 
     let storeSpendingRows = [
-      { store: "Amazon", col1: 1176, col2: 1094, col3: 1354 },
-      { store: "Teeter", col1: 829, col2: 901, col3: 996 },
-      { store: "Walmart", col1: 215, col2: 18.5, col3: 564 },
-      { store: "Publix", col1: 317, col2: 300, col3: 159 },
-      { store: "Target", col1: 397, col2: 342, col3: 385 }
+      { store: "Amazon", col1: 1354, col2: null },
+      { store: "Teeter", col1: 996, col2: null },
+      { store: "Walmart", col1: 564, col2: null },
+      { store: "Publix", col1: 159, col2: null },
+      { store: "Target", col1: 385, col2: null }
     ];
 
-    let storePeriodHeaders = ["Period 1", "Period 2", "Period 3"];
+    let storePeriodHeaders = ["Dec24-Nov25", "Dec25-Apr26"];
 
     let debtRows = [
       { name: "Half Pint Loop Mortgage", balance: 318986 },
@@ -3018,12 +2959,6 @@
     let readingToReadRows = Array.from({ length: 5 }).map(() => createBookToReadRow());
 
     let debtStrategyNotes = "";
-    const AMY_CAR_START_BALANCE = 57159;
-    const AMY_CAR_AUTODRAFT = 1284.21;
-    const AMY_CAR_MONTHLY_TARGET_REDUCTION = 4763.25;
-    const amyCarMonths = ["May 2026","Jun 2026","Jul 2026","Aug 2026","Sep 2026","Oct 2026","Nov 2026","Dec 2026","Jan 2027","Feb 2027","Mar 2027","Apr 2027","May 2027"];
-    let amyCarPayoffChart = null;
-    let amyCarExtraLumpSums = {};
 
     let budgetSortAmountAsc = true;
     let budgetSortCategoryAsc = true;
@@ -3071,8 +3006,7 @@
       storePeriodHeaders: [],
       storeSpendingRows: [],
       upcomingRows: [],
-      debtRows: [],
-      amyCarExtraLumpSums: {}
+      debtRows: []
     };
 
     const defaultPersonalBudgetRows = JSON.parse(JSON.stringify(personalBudgetRows));
@@ -3118,6 +3052,37 @@
       }));
     }
 
+
+    const STORE_PERIOD_HEADERS = ["Dec24-Nov25", "Dec25-Apr26"];
+
+    function normalizeStorePeriodHeaders(headers = []) {
+      const hasLegacyPeriodHeader = headers.some(header => /^period\s+[12]$/i.test(String(header || "").trim()));
+      if (headers.length === 2 && !hasLegacyPeriodHeader) {
+        return [headers[0] || STORE_PERIOD_HEADERS[0], headers[1] || STORE_PERIOD_HEADERS[1]];
+      }
+      return [...STORE_PERIOD_HEADERS];
+    }
+
+    function getStoreColumnValue(row, index) {
+      const value = row ? row[`col${index + 1}`] : null;
+      return typeof value === "number" ? value : null;
+    }
+
+    function normalizeStoreSpendingRows(rows = [], headers = []) {
+      const normalizedHeader = value => String(value || "").trim().toLowerCase().replace(/[–—]/g, "-");
+      const normalizedHeaders = headers.map(normalizedHeader);
+      const dec24Index = normalizedHeaders.indexOf("dec24-nov25");
+      const dec25Index = normalizedHeaders.indexOf("dec25-apr26");
+      const sourceDec24Index = dec24Index >= 0 ? dec24Index : (headers.length >= 3 ? 2 : 0);
+      const sourceDec25Index = dec25Index >= 0 ? dec25Index : -1;
+
+      return rows.map(row => ({
+        store: row.store || "",
+        col1: getStoreColumnValue(row, sourceDec24Index),
+        col2: sourceDec25Index >= 0 ? getStoreColumnValue(row, sourceDec25Index) : null
+      }));
+    }
+
     function resetPersonalFinanceState() {
       personalFinanceState = {
         pf401k: null,
@@ -3129,8 +3094,7 @@
         storeSpendingRows: JSON.parse(JSON.stringify(defaultStoreSpendingRows)),
         storePeriodHeaders: [...defaultStorePeriodHeaders],
         upcomingRows: JSON.parse(JSON.stringify(defaultUpcomingRows)),
-        debtRows: JSON.parse(JSON.stringify(defaultDebtRows)),
-        amyCarExtraLumpSums: {}
+        debtRows: JSON.parse(JSON.stringify(defaultDebtRows))
       };
       personalBudgetRows = JSON.parse(JSON.stringify(defaultPersonalBudgetRows));
       investmentRows = JSON.parse(JSON.stringify(defaultInvestmentRows));
@@ -3235,12 +3199,11 @@
           title: row.title || "",
           author: row.author || ""
         })),
-        storePeriodHeaders: [...storePeriodHeaders],
+        storePeriodHeaders: normalizeStorePeriodHeaders(storePeriodHeaders),
         storeSpendingRows: storeSpendingRows.map(row => ({
           store: row.store || "",
           col1: typeof row.col1 === "number" ? row.col1 : null,
-          col2: typeof row.col2 === "number" ? row.col2 : null,
-          col3: typeof row.col3 === "number" ? row.col3 : null
+          col2: typeof row.col2 === "number" ? row.col2 : null
         })),
         upcomingRows: upcomingRows.map(row => ({
           category: row.category || "",
@@ -3249,8 +3212,7 @@
         debtRows: debtRows.map(row => ({
           name: row.name || "",
           balance: typeof row.balance === "number" ? row.balance : null
-        })),
-        amyCarExtraLumpSums: { ...amyCarExtraLumpSums }
+        }))
       };
     }
 
@@ -3289,16 +3251,16 @@
         readingToReadRows: Array.isArray(safeState.readingToReadRows) && safeState.readingToReadRows.length
           ? normalizeBooksToReadRows(safeState.readingToReadRows)
           : JSON.parse(JSON.stringify(defaultReadingToReadRows)),
-        storePeriodHeaders: Array.isArray(safeState.storePeriodHeaders) && safeState.storePeriodHeaders.length
-          ? [...safeState.storePeriodHeaders]
-          : [...defaultStorePeriodHeaders],
+        storePeriodHeaders: normalizeStorePeriodHeaders(
+          Array.isArray(safeState.storePeriodHeaders) && safeState.storePeriodHeaders.length
+            ? safeState.storePeriodHeaders
+            : defaultStorePeriodHeaders
+        ),
         storeSpendingRows: Array.isArray(safeState.storeSpendingRows) && safeState.storeSpendingRows.length
-          ? safeState.storeSpendingRows.map(row => ({
-              store: row.store || "",
-              col1: typeof row.col1 === "number" ? row.col1 : null,
-              col2: typeof row.col2 === "number" ? row.col2 : null,
-              col3: typeof row.col3 === "number" ? row.col3 : null
-            }))
+          ? normalizeStoreSpendingRows(
+              safeState.storeSpendingRows,
+              Array.isArray(safeState.storePeriodHeaders) ? safeState.storePeriodHeaders : []
+            )
           : JSON.parse(JSON.stringify(defaultStoreSpendingRows)),
         upcomingRows: Array.isArray(safeState.upcomingRows) && safeState.upcomingRows.length
           ? safeState.upcomingRows.map(row => ({
@@ -3311,10 +3273,7 @@
               name: row.name || "",
               balance: typeof row.balance === "number" ? row.balance : null
             }))
-          : JSON.parse(JSON.stringify(defaultDebtRows)),
-        amyCarExtraLumpSums: safeState.amyCarExtraLumpSums && typeof safeState.amyCarExtraLumpSums === "object"
-          ? { ...safeState.amyCarExtraLumpSums }
-          : {}
+          : JSON.parse(JSON.stringify(defaultDebtRows))
       };
 
       personalBudgetRows = personalFinanceState.budgetRows;
@@ -3326,7 +3285,6 @@
       upcomingRows = personalFinanceState.upcomingRows;
       debtRows = personalFinanceState.debtRows;
       debtStrategyNotes = personalFinanceState.debtNotes || "";
-      amyCarExtraLumpSums = personalFinanceState.amyCarExtraLumpSums || {};
 
       if (pf401kTrackerInput) {
         pf401kTrackerInput.value = personalFinanceState.pf401k != null
@@ -4793,7 +4751,6 @@
       if (updates.upcomingRows) upcomingRows = updates.upcomingRows;
       if (updates.debtRows) debtRows = updates.debtRows;
       if (typeof updates.debtNotes === "string") debtStrategyNotes = updates.debtNotes;
-      if (updates.amyCarExtraLumpSums && typeof updates.amyCarExtraLumpSums === "object") amyCarExtraLumpSums = updates.amyCarExtraLumpSums;
       if (typeof updates.pf401k === "number" && pf401kTrackerInput) {
         pf401kTrackerInput.value = formatNumberWithCommas(updates.pf401k.toString());
       }
@@ -5025,7 +4982,6 @@
       const storeTableBody = document.getElementById("storeTableBody");
       const storeTotalCol1 = document.getElementById("storeTotalCol1");
       const storeTotalCol2 = document.getElementById("storeTotalCol2");
-      const storeTotalCol3 = document.getElementById("storeTotalCol3");
       const editBtn = document.getElementById("storeEditBtn");
       const addBtn = document.getElementById("storeAddRowBtn");
       if (!storeTableHead || !storeTableBody) return;
@@ -5041,7 +4997,7 @@
       if (addBtn) {
         addBtn.classList.toggle("hidden", !storeEditMode);
         addBtn.onclick = () => {
-          storeSpendingRows.push({ store: "", col1: null, col2: null, col3: null });
+          storeSpendingRows.push({ store: "", col1: null, col2: null });
           renderStoreSection();
         };
       }
@@ -5058,27 +5014,23 @@
           <td><button type="button" class="delete-btn store-delete-row" data-index="${idx}" title="Delete row">−</button> <input type="text" class="store-name" data-index="${idx}" value="${escapeHtml(row.store)}" /></td>
           <td><input ${currencyInputAttrString} class="store-amount" data-row="${idx}" data-col="1" value="${row.col1 != null ? formatNumberWithCommas(row.col1.toString()) : ""}" /></td>
           <td><input ${currencyInputAttrString} class="store-amount" data-row="${idx}" data-col="2" value="${row.col2 != null ? formatNumberWithCommas(row.col2.toString()) : ""}" /></td>
-          <td><input ${currencyInputAttrString} class="store-amount" data-row="${idx}" data-col="3" value="${row.col3 != null ? formatNumberWithCommas(row.col3.toString()) : ""}" /></td>
         </tr>
       ` : `
         <tr>
           <td>${escapeHtml(row.store)}</td>
           <td>${row.col1 != null ? formatCurrency(row.col1) : ""}</td>
           <td>${row.col2 != null ? formatCurrency(row.col2) : ""}</td>
-          <td>${row.col3 != null ? formatCurrency(row.col3) : ""}</td>
         </tr>
       `).join("");
 
       function recalcStoreTotals() {
-        let t1 = 0, t2 = 0, t3 = 0;
+        let t1 = 0, t2 = 0;
         storeSpendingRows.forEach(row => {
           t1 += row.col1 || 0;
           t2 += row.col2 || 0;
-          t3 += row.col3 || 0;
         });
         if (storeTotalCol1) storeTotalCol1.textContent = formatCurrency(t1);
         if (storeTotalCol2) storeTotalCol2.textContent = formatCurrency(t2);
-        if (storeTotalCol3) storeTotalCol3.textContent = formatCurrency(t3);
       }
 
       if (storeEditMode) {
@@ -5392,7 +5344,6 @@
       renderStoreSection();
       renderUpcomingSection();
       renderDebtSection();
-      renderAmyCarPayoffTracker();
       renderInvestSection();
       renderGoals();
       renderCockpitIfActive();
@@ -5443,46 +5394,6 @@
         ? nominal / Math.pow(1 + inflationRate, years)
         : nominal;
       return { value, years, nominal };
-    }
-
-
-    function getAmyCarDebtBalance() {
-      const row = debtRows.find(r => (r.name || "").trim().toLowerCase() === "amy’s car".toLowerCase() || (r.name || "").trim().toLowerCase() === "amy's car");
-      return row && typeof row.balance === "number" ? row.balance : null;
-    }
-
-    function renderAmyCarPayoffTracker() {
-      const body = document.getElementById("amyCarPayoffBody");
-      const currentEl = document.getElementById("amyCarCurrentBalance");
-      const targetEl = document.getElementById("amyCarTargetThisMonth");
-      const aheadEl = document.getElementById("amyCarAheadBehind");
-      const requiredEl = document.getElementById("amyCarRequiredExtra");
-      const chartEl = document.getElementById("amyCarPayoffChart");
-      if (!body || !chartEl) return;
-      const actualBalance = getAmyCarDebtBalance();
-      const targetBalances = amyCarMonths.map((_, idx) => Math.max(AMY_CAR_START_BALANCE - (AMY_CAR_MONTHLY_TARGET_REDUCTION * idx), 0));
-      const autoDraftBalances = amyCarMonths.map((_, idx) => Math.max(AMY_CAR_START_BALANCE - (AMY_CAR_AUTODRAFT * idx), 0));
-      const todayIdx = Math.min(Math.max((new Date().getFullYear()-2026)*12 + new Date().getMonth()-4,0), amyCarMonths.length-1);
-      body.innerHTML = amyCarMonths.map((m, idx) => {
-        const target = targetBalances[idx];
-        const extra = typeof amyCarExtraLumpSums[m] === "number" ? amyCarExtraLumpSums[m] : 0;
-        const actual = idx === todayIdx ? actualBalance : null;
-        const totalPaid = AMY_CAR_AUTODRAFT + extra;
-        const diff = actual != null ? actual - target : null;
-        const status = diff == null ? "—" : (diff < 0 ? `<span class="amy-status-ahead">Ahead ${formatCurrency(Math.abs(diff))}</span>` : diff > 0 ? `<span class="amy-status-behind">Behind ${formatCurrency(diff)}</span>` : '<span class="amy-status-ontrack">On track</span>');
-        return `<tr><td>${m}</td><td>${formatCurrency(target)}</td><td>${actual != null ? formatCurrency(actual) : "—"}</td><td>${formatCurrency(AMY_CAR_AUTODRAFT)}</td><td><input ${currencyInputAttrString} class="amy-extra-input" data-month="${m}" value="${extra ? formatNumberWithCommas(extra.toString()) : ""}" /></td><td>${formatCurrency(totalPaid)}</td><td>${status}</td></tr>`;
-      }).join("");
-      document.querySelectorAll('.amy-extra-input').forEach(input=>{input.addEventListener('input',e=>{e.target.value=formatNumberWithCommas(e.target.value);}); input.addEventListener('blur', async e=>{const month=e.target.getAttribute('data-month');const v=getNumericValue(e.target.value);amyCarExtraLumpSums[month]=isNaN(v)?0:v;await savePersonalFinanceData({amyCarExtraLumpSums});renderAmyCarPayoffTracker();});});
-      const targetThisMonth = targetBalances[todayIdx];
-      const delta = actualBalance != null ? actualBalance - targetThisMonth : null;
-      const monthsRemaining = Math.max((amyCarMonths.length - 1) - todayIdx, 1);
-      const requiredExtra = actualBalance != null ? Math.max((actualBalance / monthsRemaining) - AMY_CAR_AUTODRAFT, 0) : 0;
-      if (currentEl) currentEl.textContent = actualBalance != null ? formatCurrency(actualBalance) : "Not found";
-      if (targetEl) targetEl.textContent = formatCurrency(targetThisMonth);
-      if (aheadEl) aheadEl.textContent = delta == null ? "—" : (delta < 0 ? `Ahead ${formatCurrency(Math.abs(delta))}` : delta > 0 ? `Behind ${formatCurrency(delta)}` : "On track");
-      if (requiredEl) requiredEl.textContent = formatCurrency(requiredExtra);
-      const actualData = amyCarMonths.map((_, idx) => idx === todayIdx ? actualBalance : null);
-      if (!amyCarPayoffChart) { amyCarPayoffChart = new Chart(chartEl,{type:'line',data:{labels:amyCarMonths,datasets:[{label:'Target Balance',data:targetBalances,borderColor:'#2563eb',backgroundColor:'transparent',borderWidth:2,tension:0.2},{label:'Actual Balance',data:actualData,borderColor:'#22c55e',backgroundColor:'transparent',borderWidth:2,tension:0.2},{label:'Scheduled Auto-Draft Path',data:autoDraftBalances,borderColor:'#9ca3af',backgroundColor:'transparent',borderDash:[6,4],borderWidth:2,tension:0.2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#cbd5e1'}}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8',callback:(v)=>formatCurrency(v)}}}}}); } else { amyCarPayoffChart.data.labels=amyCarMonths; amyCarPayoffChart.data.datasets[0].data=targetBalances; amyCarPayoffChart.data.datasets[1].data=actualData; amyCarPayoffChart.data.datasets[2].data=autoDraftBalances; amyCarPayoffChart.update(); }
     }
 
     function renderGoals() {
