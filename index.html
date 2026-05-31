@@ -1549,6 +1549,20 @@
       line-height: 1.25;
     }
 
+    .nyc-stop-title a,
+    .nyc-idea-card a {
+      color: #7dd3fc;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(125, 211, 252, 0.55);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nyc-stop-title a:hover,
+    .nyc-idea-card a:hover {
+      color: #ffc532;
+      border-bottom-color: rgba(255, 197, 50, 0.75);
+    }
+
     .nyc-stop-note {
       color: #cbd5e1;
       font-size: 0.88rem;
@@ -3145,8 +3159,8 @@
           <p>Clean daily plan for moving through New York with less backtracking, quick check-offs, and flexible low-energy pivots.</p>
         </div>
 
-        <div class="nyc-card nyc-checklist-card is-open" id="nycMasterChecklistCard">
-          <button type="button" class="nyc-checklist-toggle" data-nyc-toggle="master" aria-expanded="true" aria-controls="nycMasterChecklistBody">
+        <div class="nyc-card nyc-checklist-card" id="nycMasterChecklistCard">
+          <button type="button" class="nyc-checklist-toggle" data-nyc-toggle="master" aria-expanded="false" aria-controls="nycMasterChecklistBody">
             <span class="nyc-section-title-wrap">
               <span class="nyc-pill gold">NYC Site Checklist</span>
               <span class="nyc-theme">All planned sites and stops across the trip.</span>
@@ -3154,7 +3168,7 @@
             <span class="nyc-progress-copy" id="nycMasterProgress">0 of 26 sites complete</span>
             <span class="nyc-chevron" aria-hidden="true">⌄</span>
           </button>
-          <div class="nyc-collapsible is-open" id="nycMasterChecklistBody">
+          <div class="nyc-collapsible" id="nycMasterChecklistBody">
             <div class="nyc-collapsible-inner">
               <div class="nyc-checklist-grid" id="nycMasterChecklist"></div>
               <div class="nyc-reset-row">
@@ -3165,12 +3179,19 @@
           </div>
         </div>
 
-        <div class="nyc-card nyc-rain-card">
-          <div class="nyc-topline" style="margin-bottom:0.45rem;">
-            <span class="nyc-pill blue">Rain or Low-Energy Pivots</span>
+        <div class="nyc-card nyc-rain-card" data-nyc-section-card="rain">
+          <button type="button" class="nyc-section-toggle" data-nyc-toggle="rain" aria-expanded="false" aria-controls="nyc-section-rain">
+            <span class="nyc-section-title-wrap">
+              <span class="nyc-pill blue">Rain or Low-Energy Pivots</span>
+              <span class="nyc-theme">Easy swaps if weather, tired legs, or timing changes the day.</span>
+            </span>
+            <span class="nyc-chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div class="nyc-collapsible" id="nyc-section-rain" data-nyc-section-body="rain">
+            <div class="nyc-collapsible-inner">
+              <div class="nyc-badge-row" id="nycRainPivots"></div>
+            </div>
           </div>
-          <p style="margin-bottom:0.75rem;">Easy swaps if weather, tired legs, or timing changes the day.</p>
-          <div class="nyc-badge-row" id="nycRainPivots"></div>
         </div>
 
         <div id="nycDaySections"></div>
@@ -6672,12 +6693,12 @@
         id: "friday",
         title: "Friday, June 5 — Arrival + Midtown / Flatiron",
         theme: "Ease in, explore Midtown, then finish with Times Square energy.",
-        defaultOpen: true,
+        defaultOpen: false,
         stops: [
           { time: "10:00 AM", title: "Land at Newark (EWR)", note: "Arrival buffer and bathroom/snack reset before heading into the city.", badges: ["TRAVEL"] },
           { time: "11:30 AM", title: "Check in / drop bags", note: "Keep the first move simple so everyone can reset before Midtown.", badges: ["REST"] },
-          { time: "12:00 PM", title: "Lunch near Bryant Park", note: "Easy first NYC meal with Bryant Park as the anchor.", badges: ["FOOD"] },
-          { time: "1:00 PM", title: "Double Decker Bus Tour", note: "Good arrival-day overview without adding extra walking.", badges: ["PHOTO STOP"] },
+          { time: "12:00 PM", title: "Lunch near Bryant Park", note: "Joe’s Pizza; Los Tacos No. 1; Blue Bottle Coffee / light bites.", badges: ["FOOD"] },
+          { time: "1:00 PM", title: "Double Decker Bus Tour — Big Bus Tours NYC", url: "https://www.bigbustours.com/en/new-york/new-york-bus-tours", note: "Good arrival-day overview without adding extra walking.", badges: ["PHOTO STOP"] },
           { time: "3:30 PM", title: "Harry Potter New York", note: "Grouped with Flatiron stops to reduce Midtown-to-Flatiron backtracking.", badges: ["OPTIONAL"] },
           { time: "4:15 PM", title: "Walk toward Flatiron / Madison Square Park", note: "Madison Square Park is an optional quick reset between Harry Potter and Malbon.", badges: ["WALK", "OPTIONAL"] },
           { time: "4:30 PM", title: "Malbon Store", note: "Quick Flatiron-area stop before returning toward Times Square.", badges: ["WALK"] },
@@ -6702,7 +6723,7 @@
         stops: [
           { time: "7:30 AM", title: "Breakfast / Bagels to go", note: "Keep breakfast portable before the ferry morning.", badges: ["FOOD"] },
           { time: "9:00 AM", title: "Statue of Liberty & Ellis Island", note: "Reserved landmark morning. Build in patience for security/ferry timing.", badges: ["RESERVED", "PHOTO STOP"] },
-          { time: "1:30 PM", title: "Lunch at Hudson Eats / Brookfield Place", note: "Easy food hall option after returning downtown.", badges: ["FOOD"] },
+          { time: "1:30 PM", title: "Hudson Eats at Brookfield Place", url: "https://www.bfplny.com/food-drink/", note: "Easy food hall option after returning downtown.", badges: ["FOOD"] },
           { time: "2:30 PM", title: "Cab/Uber to Chelsea area", note: "Recommended from Brookfield Place to reduce post-Statue transit friction.", badges: ["CAB/UBER"] },
           { time: "2:45 PM", title: "High Line", note: "Start the relaxed Chelsea afternoon with a scenic walk.", badges: ["WALK", "PHOTO STOP"] },
           { time: "3:30 PM", title: "Chelsea Market", note: "Indoor-friendly wandering, snacks, shops, and bathrooms.", badges: ["FOOD"] },
@@ -6723,11 +6744,10 @@
         defaultOpen: false,
         stops: [
           { time: "8:00 AM", title: "Breakfast", note: "Start with a calm breakfast before the reserved view.", badges: ["FOOD"] },
-          { time: "9:15 AM", title: "SUMMIT One Vanderbilt", note: "Reserved morning views above Midtown.", badges: ["RESERVED", "PHOTO STOP"] },
-          { time: "11:00 AM", title: "Rockefeller Plaza", note: "Classic Midtown stop after SUMMIT.", badges: ["PHOTO STOP", "WALK"] },
+          { time: "9:15 AM", title: "SUMMIT One Vanderbilt", note: "Amy, Cece, and Cooper: SUMMIT One Vanderbilt. Ryan: McNally Jackson Books.", badges: ["RESERVED", "PHOTO STOP"] },
+          { time: "11:00 AM", title: "Regroup near Rockefeller Plaza", note: "Meet back up after the SUMMIT / McNally Jackson Books split.", badges: ["PHOTO STOP", "WALK"] },
           { time: "11:30 AM", title: "FAO Schwarz", note: "Iconic toy-store stop near Rockefeller Plaza.", badges: ["OPTIONAL"] },
           { time: "12:00 PM", title: "Central Park quick walk", note: "Enter near 59th St, see The Pond / Gapstow Bridge area, then exit back toward Midtown.", badges: ["WALK", "PHOTO STOP"] },
-          { time: "12:30 PM", title: "McNally Jackson Books", note: "Short bookstore stop before lunch and theater.", badges: ["WALK"] },
           { time: "12:45 PM", title: "Lunch near Theater District", note: "Keep lunch close to the show to preserve energy.", badges: ["FOOD"] },
           { time: "1:00 PM", title: "Broadway Show", note: "Reserved matinee. Prioritize bathroom/snacks before seats.", badges: ["RESERVED"] },
           { time: "5:00 PM", title: "Dinner at Becco", note: "Reserved dinner after the show.", badges: ["RESERVED", "FOOD"] }
@@ -6740,25 +6760,25 @@
       },
       {
         id: "monday",
-        title: "Monday, June 8 — 9/11 Memorial + Departure",
-        theme: "Downtown morning, then airport.",
+        title: "Monday, June 8 — Departure",
+        theme: "Simple breakfast, checkout, airport departure, and flight home.",
         defaultOpen: false,
         stops: [
           { time: "7:30 AM", title: "Breakfast / classic NYC diner", note: "Simple departure-day breakfast.", badges: ["FOOD"] },
-          { time: "9:00 AM", title: "9/11 Memorial & The Oculus", note: "Keep the morning focused. The Oculus is worth a short architecture/photo stop.", badges: ["PHOTO STOP"] },
           { time: "10:15 AM", title: "Return to hotel / checkout", note: "Avoid adding extra stops before the airport.", badges: ["REST"] },
           { time: "10:45 AM", title: "Depart for Newark Airport", note: "Build in traffic and airport buffer.", badges: ["TRAVEL"] },
           { time: "1:30 PM", title: "Flight home", note: "Final checkpoint for the family trip.", badges: ["TRAVEL"] }
         ],
         notes: [
           "Keep this morning simple and avoid overloading the departure day.",
-          "The Oculus is worth a short architecture/photo stop."
+          "Save downtown optional stops for another day if timing opens up."
         ]
       }
     ];
     const nycOtherIdeas = [
       { title: "MoMA", note: "Good rain option / indoor museum option." },
-      { title: "Au Cheval", note: "Burger option in Meatpacking District." }
+      { title: "Au Cheval", note: "Burger option in Meatpacking District." },
+      { title: "9/11 Memorial & The Oculus", note: "Best treated as optional for this trip. It is difficult to fit cleanly without creating extra downtown travel or overloading departure day." }
     ];
     let nycCompletedStops = new Set();
     let nycOpenSections = new Set();
@@ -6775,13 +6795,8 @@
         console.warn("Unable to load NYC checklist state", err);
         nycCompletedStops = new Set();
       }
-      try {
-        const savedOpen = JSON.parse(localStorage.getItem(NYC_OPEN_STORAGE_KEY) || "null");
-        nycOpenSections = new Set(Array.isArray(savedOpen) ? savedOpen : nycDays.filter(day => day.defaultOpen).map(day => day.id).concat("other"));
-      } catch (err) {
-        console.warn("Unable to load NYC section state", err);
-        nycOpenSections = new Set(nycDays.filter(day => day.defaultOpen).map(day => day.id).concat("other"));
-      }
+      // Sections intentionally start collapsed on every page load; only checklist completion is persisted.
+      nycOpenSections = new Set();
     }
 
     function saveNycCompletedState() {
@@ -6910,13 +6925,16 @@
 
     function renderNycStop(day, stop, index) {
       const stopId = `nyc-${day.id}-${index}-${nycSlug(stop.title)}`;
+      const stopTitle = stop.url
+        ? `<a href="${stop.url}" target="_blank" rel="noopener noreferrer">${stop.title}</a>`
+        : stop.title;
       return `
         <article class="nyc-stop-card" data-nyc-stop-card="${stopId}">
           <button type="button" class="nyc-check" data-nyc-stop-id="${stopId}" aria-label="Toggle ${stop.title}"></button>
           <div class="nyc-stop-body">
             <div class="nyc-stop-top">
               <div class="nyc-stop-time">${stop.time}</div>
-              <div class="nyc-stop-title">${stop.title}</div>
+              <div class="nyc-stop-title">${stopTitle}</div>
             </div>
             <div class="nyc-stop-note">${stop.note}</div>
             <div class="nyc-badge-row">
