@@ -1789,6 +1789,7 @@
     }
 
     .nyc-drag-handle,
+    .nyc-destination-edit,
     .nyc-destination-delete {
       display: inline-flex;
       align-items: center;
@@ -1813,6 +1814,23 @@
 
     .nyc-drag-handle:active {
       cursor: grabbing;
+    }
+
+    .nyc-destination-edit {
+      width: auto;
+      min-width: 2.4rem;
+      padding: 0 0.45rem;
+      border: 1px solid rgba(23,151,215,0.72);
+      background: rgba(23,151,215,0.08);
+      color: #e5eef7;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .nyc-destination-edit:hover {
+      border-color: #ffc532;
+      color: #ffc532;
     }
 
     .nyc-destination-delete {
@@ -2336,6 +2354,7 @@
       }
 
       .nyc-drag-handle,
+      .nyc-destination-edit,
       .nyc-destination-delete,
       .nyc-modal-close {
         width: var(--tap-height);
@@ -3481,7 +3500,8 @@
       deleteDoc,
       addDoc,
       writeBatch,
-      serverTimestamp
+      serverTimestamp,
+      onSnapshot
     } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
     // === FIREBASE CONFIG ===
     const firebaseConfig = {
@@ -7046,6 +7066,8 @@
     let nycHasRendered = false;
     let nycStateLoaded = false;
     let nycDraggedDestinationId = null;
+    let nycEditingDestinationId = null;
+    let unsubscribeNycState = null;
     let nycDestinationFormInitialized = false;
 
     function nycSlug(value) {
@@ -7123,6 +7145,12 @@
       };
     }
 
+    function renderNycFromCurrentState() {
+      if (!nycHasRendered) return;
+      renderNycMasterChecklist();
+      refreshNycProgress();
+    }
+
     function applyNycState(state) {
       const safeState = state || {};
       nycCompletedStops = new Set(Array.isArray(safeState.completedStops) ? safeState.completedStops : []);
@@ -7167,7 +7195,10 @@
       saveNycLocalState();
       if (!uid) return;
       const ref = doc(db, "dashboards", uid);
-      await setDoc(ref, { nycItinerary: buildNycState() }, { merge: true });
+      await setDoc(ref, {
+        nycItinerary: buildNycState(),
+        nycItineraryUpdatedAt: serverTimestamp()
+      }, { merge: true });
     }
 
     async function saveNycState() {
@@ -7181,6 +7212,29 @@
       }
     }
 
+    function subscribeNycStateForUser(uid) {
+      if (unsubscribeNycState) {
+        unsubscribeNycState();
+        unsubscribeNycState = null;
+      }
+      if (!uid) return;
+      const ref = doc(db, "dashboards", uid);
+      unsubscribeNycState = onSnapshot(ref, (snap) => {
+        if (!currentUser || currentUser.uid !== uid) return;
+        if (snap.exists() && snap.data().nycItinerary) {
+          applyNycState(snap.data().nycItinerary);
+          saveNycLocalState();
+          renderNycFromCurrentState();
+        }
+      }, (err) => {
+        console.error("Error listening for NYC itinerary state", err);
+        if (!nycStateLoaded) {
+          loadNycState();
+          renderNycFromCurrentState();
+        }
+      });
+    }
+
     async function loadNycStateForUser(uid) {
       try {
         const ref = doc(db, "dashboards", uid);
@@ -7192,6 +7246,7 @@
           loadNycState();
           await saveNycStateForUser(uid);
         }
+        subscribeNycStateForUser(uid);
       } catch (err) {
         console.error("Error loading NYC itinerary state", err);
         loadNycState();
@@ -7297,7 +7352,7 @@
             </span>
             <span class="nyc-master-actions">
               <span class="nyc-drag-handle" aria-hidden="true" title="Drag to reorder">⋮⋮</span>
-              ${destination.custom ? `<span class="nyc-destination-delete" role="button" tabindex="0" data-nyc-delete-destination="${escapeHtml(destination.id)}" aria-label="Delete ${escapeHtml(destination.name)}">✕</span>` : ""}
+              ${destination.custom ? `<span class="nyc-destination-edit" role="button" tabindex="0" data-nyc-edit-destination="${escapeHtml(destination.id)}" aria-label="Edit ${escapeHtml(destination.name)}">Edit</span><span class="nyc-destination-delete" role="button" tabindex="0" data-nyc-delete-destination="${escapeHtml(destination.id)}" aria-label="Delete ${escapeHtml(destination.name)}">✕</span>` : ""}
             </span>
           </div>
         `;
@@ -7309,7 +7364,7 @@
       document.querySelectorAll("[data-nyc-destination-id]").forEach(btn => {
         const destinationId = btn.getAttribute("data-nyc-destination-id");
         const toggleDestination = (event) => {
-          if (event.target.closest("a, [data-nyc-delete-destination], .nyc-drag-handle")) return;
+          if (event.target.closest("a, [data-nyc-edit-destination], [data-nyc-delete-destination], .nyc-drag-handle")) return;
           const destination = findNycDestinationById(destinationId);
           if (!destination) return;
           setNycDestinationComplete(destination, !isNycDestinationComplete(destination));
@@ -7342,6 +7397,21 @@
           btn.classList.remove("drag-over");
           const draggedId = event.dataTransfer.getData("text/plain") || nycDraggedDestinationId;
           reorderNycDestination(draggedId, destinationId);
+        });
+      });
+
+      document.querySelectorAll("[data-nyc-edit-destination]").forEach(btn => {
+        const editDestination = () => openNycDestinationModal(btn.getAttribute("data-nyc-edit-destination"));
+        btn.addEventListener("click", (event) => {
+          event.stopPropagation();
+          editDestination();
+        });
+        btn.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            event.stopPropagation();
+            editDestination();
+          }
         });
       });
 
@@ -7386,17 +7456,30 @@
       refreshNycProgress();
     }
 
-    function openNycDestinationModal() {
+    function openNycDestinationModal(destinationId = null) {
       const modal = document.getElementById("nycDestinationModal");
+      const form = document.getElementById("nycDestinationForm");
       const nameInput = document.getElementById("nycDestinationName");
+      const urlInput = document.getElementById("nycDestinationUrl");
+      const notesInput = document.getElementById("nycDestinationNotes");
+      const titleEl = document.getElementById("nycDestinationModalTitle");
       if (!modal || !nameInput) return;
+      const destination = destinationId ? nycCustomDestinations.find(item => item.id === destinationId) : null;
+      nycEditingDestinationId = destination ? destination.id : null;
+      form?.reset();
+      if (titleEl) titleEl.textContent = destination ? "Edit Destination" : "Add Destination";
+      if (destination) {
+        nameInput.value = destination.name || "";
+        if (urlInput) urlInput.value = destination.url || "";
+        if (notesInput) notesInput.value = destination.notes || "";
+      }
       modal.classList.remove("hidden");
-      document.getElementById("nycDestinationForm")?.reset();
       setTimeout(() => nameInput.focus(), 0);
     }
 
     function closeNycDestinationModal() {
       const modal = document.getElementById("nycDestinationModal");
+      nycEditingDestinationId = null;
       if (modal) modal.classList.add("hidden");
     }
 
@@ -7426,9 +7509,17 @@
             document.getElementById("nycDestinationName")?.focus();
             return;
           }
-          const destination = { id: customNycDestinationId(), name, url, notes, custom: true };
-          nycCustomDestinations.push(destination);
-          nycDestinationOrder.push(destination.id);
+          if (nycEditingDestinationId) {
+            nycCustomDestinations = nycCustomDestinations.map(destination => (
+              destination.id === nycEditingDestinationId
+                ? { ...destination, name, url, notes, custom: true }
+                : destination
+            ));
+          } else {
+            const destination = { id: customNycDestinationId(), name, url, notes, custom: true };
+            nycCustomDestinations.push(destination);
+            nycDestinationOrder.push(destination.id);
+          }
           saveNycState();
           renderNycMasterChecklist();
           refreshNycProgress();
@@ -7652,6 +7743,10 @@
         signInBtn.classList.remove("hidden");
         signOutBtn.classList.add("hidden");
         appContent.classList.add("hidden");
+        if (unsubscribeNycState) {
+          unsubscribeNycState();
+          unsubscribeNycState = null;
+        }
         resetPersonalFinanceState();
         historyBody.innerHTML = "";
         totalsAmountEl.textContent = "$0";
