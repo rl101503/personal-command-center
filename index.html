@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Inter Tight font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQngK42T8fY+q1WJgKa7PCb9GQY3Or8=" crossorigin="" />
   <style>
     * {
       box-sizing: border-box;
@@ -519,6 +520,96 @@
     .comp-table-wrapper {
       flex: 1 1 0;
     }
+
+
+
+    /* Myrtle Golf Map */
+    .myrtle-golf-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .myrtle-map-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.85fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    #myrtleGolfMapCanvas {
+      width: 100%;
+      min-height: 620px;
+      border-radius: 1rem;
+      overflow: hidden;
+      border: 1px solid rgba(23,151,215,0.65);
+      box-shadow: 0 18px 48px rgba(0,0,0,0.45);
+      background: #020617;
+    }
+
+    .myrtle-course-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      max-height: 620px;
+      overflow-y: auto;
+      padding-right: 0.15rem;
+    }
+
+    .myrtle-course-card {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.96));
+      border: 1px solid rgba(23,151,215,0.5);
+      border-radius: 0.95rem;
+      padding: 0.85rem;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.32);
+    }
+
+    .myrtle-course-card.active {
+      border-color: #ffc532;
+      box-shadow: 0 0 0 1px rgba(255,197,50,0.35), 0 16px 34px rgba(255,197,50,0.1);
+    }
+
+    .myrtle-course-button {
+      width: 100%;
+      text-align: left;
+      margin: 0 0 0.55rem;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #f8fafc;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+
+    .myrtle-course-button:hover { transform: none; filter: none; color: #ffc532; }
+
+    .myrtle-course-name { font-weight: 800; font-size: 0.98rem; }
+    .myrtle-course-rate { color: #a7f3d0; font-size: 0.78rem; white-space: nowrap; }
+
+    .myrtle-pill-row { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.35rem 0 0.55rem; }
+    .myrtle-pill {
+      border: 1px solid rgba(148,163,184,0.28);
+      border-radius: 999px;
+      padding: 0.18rem 0.45rem;
+      font-size: 0.72rem;
+      color: #e5eef7;
+      background: rgba(2,6,23,0.75);
+    }
+    .myrtle-pill.gold { border-color: rgba(255,197,50,0.55); color: #fde68a; }
+    .myrtle-pill.blue { border-color: rgba(23,151,215,0.75); color: #bfdbfe; }
+
+    .myrtle-edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+    .myrtle-edit-grid label:first-child { grid-column: 1 / -1; }
+    .myrtle-course-card textarea, .myrtle-course-card select { margin-bottom: 0; font-size: 0.78rem; }
+    .myrtle-save-status { min-height: 1rem; font-size: 0.75rem; color: #94a3b8; margin-top: 0.45rem; }
+
+    .myrtle-popup { color: #0f172a; min-width: 220px; }
+    .myrtle-popup h3 { margin: 0 0 0.35rem; color: #0f172a; font-size: 1rem; }
+    .myrtle-popup-row { display: flex; justify-content: space-between; gap: 0.75rem; border-bottom: 1px solid #dbeafe; padding: 0.15rem 0; font-size: 0.82rem; }
+    .myrtle-popup a { color: #0369a1; font-weight: 800; }
+    .leaflet-container { font-family: "Inter Tight", system-ui, sans-serif; }
 
     /* Tabs */
     .tab-nav {
@@ -1943,6 +2034,7 @@
         min-height: 38px;
       }
 
+      .myrtle-map-layout,
       .cockpit-kpi-grid,
       .cockpit-card-grid,
       .insights-grid,
@@ -2053,6 +2145,7 @@
 
       .cockpit-shell,
       .nyc-shell,
+      .myrtle-golf-shell,
       .reading-tables {
         gap: var(--mobile-gap);
       }
@@ -2068,6 +2161,7 @@
         font-size: 0.9rem;
       }
 
+      .myrtle-map-layout,
       .cockpit-kpi-grid,
       .cockpit-card-grid,
       .insights-grid,
@@ -2080,6 +2174,20 @@
       .singledeal-inputs-row {
         grid-template-columns: 1fr;
         gap: var(--mobile-gap);
+      }
+
+      #myrtleGolfMapCanvas {
+        min-height: 430px;
+      }
+
+      .myrtle-course-list {
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
+      }
+
+      .myrtle-edit-grid {
+        grid-template-columns: 1fr;
       }
 
       .pf-row,
@@ -2503,6 +2611,7 @@
           <button class="tab-button" data-tab="goals">Goals</button>
           <button class="tab-button" data-tab="insights">Insights</button>
           <button class="tab-button" data-tab="nyc">NYC Itinerary</button>
+          <button class="tab-button" data-tab="myrtleGolf">Myrtle Golf Map</button>
         </div>
         <button type="button" class="save-dashboard-btn" onclick="onSaveDashboardClick()">Save Dashboard</button>
         <span id="saveStatus" style="margin-left: 10px; font-size: 0.85rem;"></span>
@@ -3450,6 +3559,18 @@
         <div id="nycDaySections"></div>
       </div> <!-- end nycTab -->
 
+      <!-- MYRTLE GOLF MAP TAB -->
+      <div id="myrtleGolfTab" class="myrtle-golf-shell hidden">
+        <div class="card cockpit-hero">
+          <h2>Myrtle Golf Map</h2>
+          <p>Interactive Prime Times course map with June 2026 card rates, course links, and synced personal notes.</p>
+        </div>
+        <div class="myrtle-map-layout">
+          <div id="myrtleGolfMapCanvas" aria-label="Interactive Myrtle Beach Prime Times golf course map"></div>
+          <div class="myrtle-course-list" id="myrtleCourseList" aria-label="Prime Times course list"></div>
+        </div>
+      </div>
+
     </div> <!-- end appContent -->
   </div>
 
@@ -3478,6 +3599,7 @@
   <!-- Firebase SDKs -->
   <!-- Chart.js for charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -3649,13 +3771,15 @@
     const goalsTab = document.getElementById("goalsTab");
     const insightsTab = document.getElementById("insightsTab");
     const nycTab = document.getElementById("nycTab");
+    const myrtleGolfTab = document.getElementById("myrtleGolfTab");
     const tabPanels = {
       cockpit: cockpitTab,
       commission: commissionTab,
       personal: personalTab,
       goals: goalsTab,
       insights: insightsTab,
-      nyc: nycTab
+      nyc: nycTab,
+      myrtleGolf: myrtleGolfTab
     };
     let activeTab = "cockpit";
 
@@ -6919,6 +7043,8 @@
         renderInsights();
       } else if (activeTab === "nyc") {
         renderNycItinerary();
+      } else if (activeTab === "myrtleGolf") {
+        initMyrtleGolfMap();
       }
     }
 
@@ -6952,6 +7078,167 @@
       });
     });
 
+
+
+
+
+    // --- Myrtle Golf Map ---
+    const myrtleCourseListEl = document.getElementById("myrtleCourseList");
+    const myrtleMapCanvas = document.getElementById("myrtleGolfMapCanvas");
+    const myrtleGolfState = {};
+    let myrtleMap = null;
+    let myrtleMarkers = {};
+    let myrtleMapInitialized = false;
+    let myrtleSaveTimer = null;
+    let myrtleSaveStatusTimer = null;
+
+    const rate35 = { eighteenAm: "$35 or 1400 points", eighteenPm: "$32 or 1280 points", nineAm: "$21 or 840 points", ninePm: "$19 or 760 points", maxRate: "$39" };
+    const rate39 = { eighteenAm: "$39 or 1560 points", eighteenPm: "$32 or 1280 points", nineAm: "$23 or 920 points", ninePm: "$19 or 760 points", maxRate: "$39" };
+    const rate45 = { eighteenAm: "$45 or 1800 points", eighteenPm: "$39 or 1560 points", nineAm: "$26 or 1040 points", ninePm: "$23 or 920 points", maxRate: "$45" };
+    const rate49 = { eighteenAm: "$49 or 1960 points", eighteenPm: "$39 or 1560 points", nineAm: "$28 or 1120 points", ninePm: "$23 or 920 points", maxRate: "$49" };
+    const rate55 = { eighteenAm: "$55 or 2200 points", eighteenPm: "$42 or 1680 points", nineAm: "$31 or 1240 points", ninePm: "$24 or 960 points", maxRate: "$55" };
+    const rate65 = { eighteenAm: "$65 or 2600 points", eighteenPm: "$52 or 2080 points", nineAm: "$36 or 1440 points", ninePm: "$29 or 1160 points", maxRate: "$65" };
+    const rate69 = { eighteenAm: "$69 or 2760 points", eighteenPm: "$55 or 2200 points", nineAm: "$38 or 1520 points", ninePm: "$31 or 1240 points", maxRate: "N/A" };
+    const rate89 = { eighteenAm: "$89 or 3560 points", eighteenPm: "$65 or 2600 points", nineAm: "$49 or 1960 points", ninePm: "$39 or 1560 points", maxRate: "N/A" };
+    const rateClosed = { eighteenAm: "Closed for Renovations", eighteenPm: "Closed for Renovations", nineAm: "Closed for Renovations", ninePm: "Closed for Renovations", maxRate: "$49" };
+
+    const myrtleCourses = [
+      { id: "colonial-charters", name: "Colonial Charters", link: "https://primetimescard.com/course/colonial-charters-golf-club/", lat: 33.8973, lng: -78.7328, rates: rate35 },
+      { id: "aberdeen-cc", name: "Aberdeen CC", link: "https://primetimescard.com/course/aberdeen-country-club/", lat: 33.8742, lng: -78.6506, rates: rate35 },
+      { id: "burning-ridge", name: "Burning Ridge", link: "https://primetimescard.com/course/burning-ridge-golf-club/", lat: 33.7916, lng: -78.9792, rates: rate35 },
+      { id: "founders-club", name: "Founders Club", link: "https://primetimescard.com/course/founders-club-at-pawleys-island/", lat: 33.4475, lng: -79.1379, rates: rate35 },
+      { id: "litchfield-cc", name: "Litchfield CC", link: "https://primetimescard.com/course/litchfield-country-club/", lat: 33.4803, lng: -79.1054, rates: rate39 },
+      { id: "southcreek-mbn", name: "SouthCreek at MBN", link: "https://primetimescard.com/course/southcreek-at-myrtle-beach-national/", lat: 33.7624, lng: -78.9194, rates: rate39 },
+      { id: "west-course-mbn", name: "West Course at MBN", link: "https://primetimescard.com/course/west-course-at-myrtle-beach-national/", lat: 33.7606, lng: -78.9198, rates: rate39 },
+      { id: "river-hills", name: "River Hills", link: "https://primetimescard.com/course/river-hills-golf-club/", lat: 33.8812, lng: -78.6338, rates: rate45 },
+      { id: "long-bay", name: "Long Bay", link: "https://primetimescard.com/course/long-bay-club/", lat: 33.9271, lng: -78.7544, rates: { ...rate45, maxRate: "$49" } },
+      { id: "river-club", name: "River Club", link: "https://primetimescard.com/course/river-club/", lat: 33.4706, lng: -79.1372, rates: rate49 },
+      { id: "tradition", name: "Tradition", link: "https://primetimescard.com/course/tradition-golf-club/", lat: 33.4791, lng: -79.1210, rates: rate49 },
+      { id: "wild-wing", name: "Wild Wing", link: "https://primetimescard.com/course/wild-wing-golf-club/", lat: 33.7896, lng: -78.9580, rates: rateClosed, defaultNotes: "Closed for Renovations" },
+      { id: "myrtlewood-palmetto", name: "Myrtlewood Palmetto", link: "https://primetimescard.com/course/myrtlewood-golf-club-palmetto/", lat: 33.7371, lng: -78.8617, rates: rate55 },
+      { id: "myrtlewood-pine-hills", name: "Myrtlewood Pine Hills", link: "https://primetimescard.com/course/myrtlewood-golf-club-pinehills/", lat: 33.7390, lng: -78.8586, rates: rate55 },
+      { id: "willbrook-plantation", name: "Willbrook Plantation", link: "https://primetimescard.com/course/willbrook-plantation/", lat: 33.4553, lng: -79.1291, rates: rate55 },
+      { id: "world-tour", name: "World Tour", link: "https://primetimescard.com/course/world-tour-golf-links/", lat: 33.7490, lng: -78.9158, rates: rate65 },
+      { id: "pine-lakes", name: "Pine Lakes", link: "https://primetimescard.com/course/pine-lakes-country-club/", lat: 33.7269, lng: -78.8455, rates: rate69 },
+      { id: "kings-north", name: "King’s North", link: "https://primetimescard.com/course/kings-north-at-myrtle-beach-national/", lat: 33.7629, lng: -78.9255, rates: rate89 },
+      { id: "grande-dunes", name: "Grande Dunes", link: "https://primetimescard.com/course/grande-dunes-resort-club/", lat: 33.7660, lng: -78.8134, rates: rate89 },
+      { id: "pawleys-plantation", name: "Pawleys Plantation", link: "https://primetimescard.com/course/pawleys-plantation-golf-country-club/", lat: 33.4298, lng: -79.1419, rates: rate89 },
+      { id: "tpc", name: "TPC", link: "https://primetimescard.com/course/tpc-myrtle-beach/", lat: 33.5867, lng: -79.0449, rates: rate89 }
+    ];
+
+    function getMyrtleCourseState(course) {
+      return myrtleGolfState[course.id] || { notes: course.defaultNotes || "", rating: "", playedStatus: "Not Played" };
+    }
+
+    function renderMyrtlePopup(course) {
+      const state = getMyrtleCourseState(course);
+      const r = course.rates;
+      return `<div class="myrtle-popup"><h3>${escapeHtml(course.name)}</h3>
+        <div class="myrtle-popup-row"><span>18 AM</span><strong>${escapeHtml(r.eighteenAm)}</strong></div>
+        <div class="myrtle-popup-row"><span>18 PM</span><strong>${escapeHtml(r.eighteenPm)}</strong></div>
+        <div class="myrtle-popup-row"><span>9 AM</span><strong>${escapeHtml(r.nineAm)}</strong></div>
+        <div class="myrtle-popup-row"><span>9 PM</span><strong>${escapeHtml(r.ninePm)}</strong></div>
+        <div class="myrtle-popup-row"><span>Max</span><strong>${escapeHtml(r.maxRate)}</strong></div>
+        <p><strong>Notes:</strong> ${escapeHtml(state.notes || "—")}</p><p><strong>Rating:</strong> ${escapeHtml(state.rating || "—")}</p><p><strong>Status:</strong> ${escapeHtml(state.playedStatus || "Not Played")}</p>
+        <a href="${escapeHtml(course.link)}" target="_blank" rel="noopener noreferrer">Course page</a></div>`;
+    }
+
+    function saveMyrtleStateSoon() {
+      clearTimeout(myrtleSaveTimer);
+      myrtleSaveTimer = setTimeout(async () => {
+        if (!currentUser) return;
+        try {
+          await setDoc(doc(db, "dashboards", currentUser.uid), { myrtleGolfMap: myrtleGolfState }, { merge: true });
+          const status = document.getElementById("myrtleSaveStatus");
+          if (status) {
+            status.textContent = "Saved to Firebase";
+            clearTimeout(myrtleSaveStatusTimer);
+            myrtleSaveStatusTimer = setTimeout(() => { status.textContent = ""; }, 1800);
+          }
+        } catch (err) {
+          console.error("Error saving Myrtle Golf Map state", err);
+        }
+      }, 450);
+    }
+
+    function updateMyrtleCourseState(courseId, patch) {
+      myrtleGolfState[courseId] = { ...getMyrtleCourseState(myrtleCourses.find(c => c.id === courseId) || {}), ...patch };
+      const course = myrtleCourses.find(c => c.id === courseId);
+      if (course && myrtleMarkers[courseId]) myrtleMarkers[courseId].setPopupContent(renderMyrtlePopup(course));
+      saveMyrtleStateSoon();
+    }
+
+    function focusMyrtleCourse(courseId) {
+      const course = myrtleCourses.find(c => c.id === courseId);
+      if (!course || !myrtleMap) return;
+      myrtleMap.setView([course.lat, course.lng], 13, { animate: true });
+      if (myrtleMarkers[courseId]) myrtleMarkers[courseId].openPopup();
+      document.querySelectorAll(".myrtle-course-card").forEach(card => card.classList.toggle("active", card.dataset.courseId === courseId));
+    }
+
+    function renderMyrtleCourseList() {
+      if (!myrtleCourseListEl) return;
+      myrtleCourseListEl.innerHTML = `<div id="myrtleSaveStatus" class="myrtle-save-status"></div>` + myrtleCourses.map(course => {
+        const state = getMyrtleCourseState(course);
+        const r = course.rates;
+        return `<article class="myrtle-course-card" data-course-id="${escapeHtml(course.id)}">
+          <button type="button" class="myrtle-course-button" data-myrtle-focus="${escapeHtml(course.id)}"><span class="myrtle-course-name">${escapeHtml(course.name)}</span><span class="myrtle-course-rate">${escapeHtml(r.eighteenAm)}</span></button>
+          <div class="myrtle-pill-row"><span class="myrtle-pill gold">18 PM ${escapeHtml(r.eighteenPm)}</span><span class="myrtle-pill blue">9 AM ${escapeHtml(r.nineAm)}</span><span class="myrtle-pill">Max ${escapeHtml(r.maxRate)}</span></div>
+          <div class="myrtle-edit-grid">
+            <label>Notes<textarea data-myrtle-field="notes" data-course-id="${escapeHtml(course.id)}" placeholder="Add notes...">${escapeHtml(state.notes || "")}</textarea></label>
+            <label>Rating<select data-myrtle-field="rating" data-course-id="${escapeHtml(course.id)}"><option value="">Blank</option>${[1,2,3,4,5].map(n => `<option value="${n}" ${String(state.rating) === String(n) ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+            <label>Played Status<select data-myrtle-field="playedStatus" data-course-id="${escapeHtml(course.id)}">${["Not Played","Played","Want to Play"].map(v => `<option value="${v}" ${state.playedStatus === v ? "selected" : ""}>${v}</option>`).join("")}</select></label>
+          </div>
+        </article>`;
+      }).join("");
+    }
+
+    function initMyrtleGolfMap() {
+      renderMyrtleCourseList();
+      if (!myrtleMapCanvas || typeof L === "undefined") return;
+      if (!myrtleMapInitialized) {
+        myrtleMap = L.map(myrtleMapCanvas).setView([33.685, -78.97], 10);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap contributors" }).addTo(myrtleMap);
+        myrtleCourses.forEach(course => {
+          myrtleMarkers[course.id] = L.marker([course.lat, course.lng]).addTo(myrtleMap).bindPopup(renderMyrtlePopup(course));
+          myrtleMarkers[course.id].on("click", () => focusMyrtleCourse(course.id));
+        });
+        myrtleMapInitialized = true;
+      } else {
+        myrtleCourses.forEach(course => myrtleMarkers[course.id]?.setPopupContent(renderMyrtlePopup(course)));
+      }
+      setTimeout(() => myrtleMap.invalidateSize(), 100);
+    }
+
+    async function loadMyrtleGolfStateForUser(uid) {
+      try {
+        const snap = await getDoc(doc(db, "dashboards", uid));
+        if (snap.exists() && snap.data().myrtleGolfMap) {
+          Object.assign(myrtleGolfState, snap.data().myrtleGolfMap);
+        }
+      } catch (err) {
+        console.error("Error loading Myrtle Golf Map state", err);
+      }
+      renderMyrtleCourseList();
+      if (myrtleMapInitialized) initMyrtleGolfMap();
+    }
+
+    if (myrtleCourseListEl) {
+      myrtleCourseListEl.addEventListener("click", (event) => {
+        const focusBtn = event.target.closest("[data-myrtle-focus]");
+        if (focusBtn) focusMyrtleCourse(focusBtn.dataset.myrtleFocus);
+      });
+      myrtleCourseListEl.addEventListener("input", (event) => {
+        const field = event.target.dataset.myrtleField;
+        const courseId = event.target.dataset.courseId;
+        if (field && courseId) updateMyrtleCourseState(courseId, { [field]: event.target.value });
+      });
+      myrtleCourseListEl.addEventListener("change", (event) => {
+        const field = event.target.dataset.myrtleField;
+        const courseId = event.target.dataset.courseId;
+        if (field && courseId) updateMyrtleCourseState(courseId, { [field]: event.target.value });
+      });
+    }
 
 
     // --- NYC Itinerary data + localStorage checklist ---
@@ -7731,6 +8018,7 @@
         await loadGoalsDataForUser(user.uid);
         await loadRetirementSettings(user.uid);
         await loadNycStateForUser(user.uid);
+        await loadMyrtleGolfStateForUser(user.uid);
         renderPersonalFinance();
         showTab("cockpit");
 
