@@ -539,8 +539,9 @@
 
     #myrtleGolfMapCanvas {
       width: 100%;
-      min-height: 620px;
       height: 60vh;
+      min-height: 500px;
+      max-height: 750px;
       border-radius: 1rem;
       overflow: hidden;
       border: 1px solid rgba(23,151,215,0.65);
@@ -2178,8 +2179,9 @@
       }
 
       #myrtleGolfMapCanvas {
-        min-height: 430px;
-        height: 55vh;
+        height: 60vh;
+        min-height: 500px;
+        max-height: 750px;
       }
 
       .myrtle-course-list {
@@ -7087,11 +7089,12 @@
 
     // --- Myrtle Golf Map ---
     const myrtleCourseListEl = document.getElementById("myrtleCourseList");
-    const myrtleMapCanvas = document.getElementById("myrtleGolfMapCanvas");
+    const myrtleGolfMapCanvas = document.getElementById("myrtleGolfMapCanvas");
     const myrtleGolfState = {};
-    let myrtleMap = null;
+    let myrtleGolfMap = null;
     let myrtleMarkers = {};
-    let myrtleMapInitialized = false;
+    let myrtleGolfMapInitialized = false;
+    let myrtleGolfMapInitializing = false;
     let myrtleSaveTimer = null;
     let myrtleSaveStatusTimer = null;
 
@@ -7177,8 +7180,8 @@
 
     function focusMyrtleCourse(courseId) {
       const course = myrtleCourses.find(c => c.id === courseId);
-      if (!course || !myrtleMap || !isValidMyrtleCoordinate(course)) return;
-      myrtleMap.setView([course.lat, course.lng], 13, { animate: true });
+      if (!course || !myrtleGolfMap || !isValidMyrtleCoordinate(course)) return;
+      myrtleGolfMap.setView([course.lat, course.lng], 13, { animate: true });
       if (myrtleMarkers[courseId]) myrtleMarkers[courseId].openPopup();
       document.querySelectorAll(".myrtle-course-card").forEach(card => card.classList.toggle("active", card.dataset.courseId === courseId));
     }
@@ -7201,6 +7204,32 @@
     }
 
     let myrtleLeafletLoadPromise = null;
+
+    function isMyrtleGolfTabVisible() {
+      return Boolean(myrtleGolfTab && !myrtleGolfTab.classList.contains("hidden") && myrtleGolfMapCanvas?.getClientRects().length);
+    }
+
+    function invalidateMyrtleGolfMapAfter(delay) {
+      if (!myrtleGolfMap) return;
+      setTimeout(() => {
+        if (isMyrtleGolfTabVisible()) {
+          myrtleGolfMap.invalidateSize();
+        }
+      }, delay);
+    }
+
+    function ensureMyrtleLeafletCssLoaded() {
+      const hasLeafletCss = Array.from(document.styleSheets).some(sheet => sheet.href?.includes("leaflet")) ||
+        Boolean(document.querySelector('link[rel="stylesheet"][href*="leaflet"]'));
+      if (hasLeafletCss) return;
+
+      const leafletCss = document.createElement("link");
+      leafletCss.rel = "stylesheet";
+      leafletCss.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      leafletCss.integrity = "sha256-p4NxAoJBhIINfQngK42T8fY+q1WJgKa7PCb9GQY3Or8=";
+      leafletCss.crossOrigin = "";
+      document.head.appendChild(leafletCss);
+    }
 
     function ensureMyrtleLeafletLoaded() {
       if (typeof L !== "undefined") return Promise.resolve();
@@ -7228,37 +7257,47 @@
 
     async function initMyrtleGolfMap() {
       renderMyrtleCourseList();
-      if (!myrtleMapCanvas) {
+      if (!myrtleGolfMapCanvas) {
         console.error("Myrtle Golf Map container not found");
         return;
       }
 
-      try {
-        await ensureMyrtleLeafletLoaded();
-      } catch (err) {
-        console.error("Unable to load Leaflet for Myrtle Golf Map", err);
+      if (!isMyrtleGolfTabVisible()) {
         return;
       }
 
-      if (!myrtleMapInitialized) {
-        myrtleMap = L.map(myrtleMapCanvas).setView([33.685, -78.97], 10);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap contributors" }).addTo(myrtleMap);
+      if (myrtleGolfMapInitialized) {
+        myrtleCourses.forEach(course => myrtleMarkers[course.id]?.setPopupContent(renderMyrtlePopup(course)));
+        invalidateMyrtleGolfMapAfter(150);
+        return;
+      }
+
+      if (myrtleGolfMapInitializing) return;
+      myrtleGolfMapInitializing = true;
+
+      try {
+        ensureMyrtleLeafletCssLoaded();
+        await ensureMyrtleLeafletLoaded();
+
+        if (!isMyrtleGolfTabVisible() || myrtleGolfMapInitialized) return;
+
+        myrtleGolfMap = L.map(myrtleGolfMapCanvas).setView([33.685, -78.97], 10);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap contributors" }).addTo(myrtleGolfMap);
         myrtleCourses.forEach(course => {
           if (!isValidMyrtleCoordinate(course)) {
             console.warn("Skipping Myrtle Golf course with invalid coordinates", course);
             return;
           }
-          myrtleMarkers[course.id] = L.marker([course.lat, course.lng]).addTo(myrtleMap).bindPopup(renderMyrtlePopup(course));
+          myrtleMarkers[course.id] = L.marker([course.lat, course.lng]).addTo(myrtleGolfMap).bindPopup(renderMyrtlePopup(course));
           myrtleMarkers[course.id].on("click", () => focusMyrtleCourse(course.id));
         });
-        myrtleMapInitialized = true;
-      } else {
-        myrtleCourses.forEach(course => myrtleMarkers[course.id]?.setPopupContent(renderMyrtlePopup(course)));
+        myrtleGolfMapInitialized = true;
+        invalidateMyrtleGolfMapAfter(250);
+      } catch (err) {
+        console.error("Unable to load Leaflet for Myrtle Golf Map", err);
+      } finally {
+        myrtleGolfMapInitializing = false;
       }
-
-      requestAnimationFrame(() => {
-        if (myrtleMap) myrtleMap.invalidateSize();
-      });
     }
 
     async function saveMyrtleGolfStateForUser(uid) {
@@ -7280,7 +7319,7 @@
         console.error("Error loading Myrtle Golf Map state", err);
       }
       renderMyrtleCourseList();
-      if (myrtleMapInitialized) initMyrtleGolfMap();
+      if (myrtleGolfMapInitialized) initMyrtleGolfMap();
     }
 
     if (myrtleCourseListEl) {
