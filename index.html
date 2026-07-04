@@ -315,22 +315,6 @@
       margin-bottom: 0.3rem;
     }
 
-    /* Zebra stripes for history */
-    #historyBody tr:nth-child(odd) {
-      background-color: #f8f8f8;
-      color: #000000;
-    }
-
-    #historyBody tr:nth-child(even) {
-      background-color: #82889b;
-      color: #f8f8f8;
-    }
-
-    #historyBody tr td button.delete-btn {
-      color: #ffc532;
-      border-color: #e24301;
-      background: transparent;
-    }
 
     .history-header-row {
       display: flex;
@@ -1346,37 +1330,6 @@
       border: 1px solid #1797d7;
     }
 
-    /* Single Deal layout */
-    .singledeal-layout {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.2rem;
-      margin-top: 0.6rem;
-      align-items: flex-start;
-    }
-
-    .singledeal-inputs {
-      flex: 1 1 300px;
-      min-width: 0;
-    }
-
-    .singledeal-results {
-      flex: 0 0 280px;
-      max-width: 280px;
-    }
-
-    .singledeal-inputs-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 0.6rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .singledeal-notes {
-      margin-top: 0.3rem;
-    }
-
-
 
     /* NYC Itinerary */
     .nyc-shell {
@@ -2173,8 +2126,7 @@
       .reading-pill-row,
       .retirement-contrib-grid,
       .nyc-checklist-grid,
-      .nyc-flex-grid,
-      .singledeal-inputs-row {
+      .nyc-flex-grid {
         grid-template-columns: 1fr;
         gap: var(--mobile-gap);
       }
@@ -2198,7 +2150,6 @@
       .pf-row,
       .comp-layout,
       .comp-tables-row,
-      .singledeal-layout,
       .retirement-controls {
         flex-direction: column;
         gap: var(--mobile-gap);
@@ -2208,8 +2159,6 @@
       .comp-settings,
       .comp-chart-container,
       .comp-table-wrapper,
-      .singledeal-inputs,
-      .singledeal-results,
       .reading-table,
       .retirement-control {
         width: 100%;
@@ -2643,88 +2592,6 @@
 
       <!-- COMMISSION TAB -->
       <div id="commissionTab" class="hidden">
-        <!-- SINGLE DEAL CALCULATOR -->
-        <div class="card">
-          <h2>Single Deal Calculator</h2>
-          <p>
-            Enter the deal amount (ARR or TCV), pick the deal type and term, and we’ll calculate
-            your total commission, post-tax amount, and first-month payout. Each calculation will
-            be saved to your history in the cloud.
-          </p>
-
-          <div class="singledeal-layout">
-            <!-- Left: inputs -->
-            <div class="singledeal-inputs">
-              <div class="singledeal-inputs-row">
-                <div>
-                  <label for="dealAmount">Deal Amount (USD)</label>
-                  <input
-                    id="dealAmount"
-                    type="text"
-                    inputmode="decimal"
-                    pattern="[0-9]*[.,]?[0-9]*"
-                    enterkeyhint="done"
-                    autocomplete="off"
-                    placeholder="e.g., 250,000"
-                  />
-                </div>
-                <div>
-                  <label for="dealType">Deal Type</label>
-                  <select id="dealType">
-                    <option value="New">New business</option>
-                    <option value="RenewalOut">Renewal with any-time out clause</option>
-                    <option value="Renewal&lt;100%">Renewal &lt;100%</option>
-                    <option value="Renewal=100%">Renewal =100%</option>
-                    <option value="Renewal&gt;100%">Renewal &gt;100%</option>
-                  </select>
-                </div>
-                <div id="termRow">
-                  <label for="dealTerm">Term</label>
-                  <select id="dealTerm"></select>
-                </div>
-              </div>
-
-              <div class="singledeal-notes">
-                <label for="dealNotes">Deal Notes (optional)</label>
-                <textarea
-                  id="dealNotes"
-                  placeholder="e.g., Client signed at steering committee; includes add-on analytics module."
-                ></textarea>
-              </div>
-
-              <button type="button" id="calcBtn">Calculate Commission</button>
-
-              <p class="tiny">
-                Assumes 34% tax (you keep 66%). For <strong>new business</strong>, assumes 50% of the commission is paid in month 1 (≈33% of total commission pre-tax). For <strong>renewals</strong>, 100% of commission is paid in the first month.
-              </p>
-            </div>
-
-            <!-- Right: results pills -->
-            <div class="singledeal-results">
-              <div class="results">
-                <div class="results-grid">
-                  <div class="result-pill highlight">
-                    <div class="result-label">First-month commission (post-tax)</div>
-                    <div class="result-value" id="firstMonthDisplay">–</div>
-                  </div>
-                  <div class="result-pill">
-                    <div class="result-label">Total commission (post-tax)</div>
-                    <div class="result-value" id="totalCommissionPostTaxDisplay">–</div>
-                  </div>
-                  <div class="result-pill">
-                    <div class="result-label">Total commission (pre-tax)</div>
-                    <div class="result-value" id="totalCommissionDisplay">–</div>
-                  </div>
-                  <div class="result-pill">
-                    <div class="result-label">Rate used</div>
-                    <div class="result-value" id="rateDisplay">–</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- VARIABLE COMP TRACKER -->
         <div class="card">
           <div class="history-header-row">
@@ -2804,78 +2671,6 @@
           </div>
         </div>
 
-        <!-- HISTORY -->
-        <div class="card">
-          <div class="history-header-row">
-            <div>
-              <h2>History</h2>
-              <p class="tiny" style="margin-top:0;">
-                Stored in Firestore for your account. Sign in on any device with the same Google account
-                to see the same history.
-              </p>
-            </div>
-            <button type="button" id="clearHistoryBtn" class="btn-secondary btn-small">Clear History</button>
-          </div>
-
-          <!-- Mini dashboard strip -->
-          <div class="kpi-row">
-            <div class="kpi-card">
-              <div class="kpi-label">This month (post-tax)</div>
-              <div class="kpi-value" id="kpiThisMonth">$0</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Fiscal YTD (post-tax)</div>
-              <div class="kpi-value" id="kpiFiscalYtd">$0</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Largest deal amount</div>
-              <div class="kpi-value" id="kpiLargestDeal">$0</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Fiscal YTD first-month</div>
-              <div class="kpi-value" id="kpiFiscalYtdFirst">$0</div>
-            </div>
-          </div>
-
-          <div class="history-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Deal Type</th>
-                  <th>Term</th>
-                  <th>Amount</th>
-                  <th>Total Post-tax</th>
-                  <th>First Month</th>
-                  <th>Notes</th>
-                  <th></th> <!-- delete column -->
-                </tr>
-              </thead>
-              <tbody id="historyBody">
-                <!-- rows added by JS -->
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Totals always visible -->
-          <div class="totals-summary">
-            <table class="totals-table">
-              <tbody>
-                <tr class="totals-row">
-                  <td>Totals</td>
-                  <td colspan="2" class="totals-note">
-                    Amount = deal size; Total Post-tax = total commission after tax; First Month = post-tax commission paid in month 1.
-                  </td>
-                  <td id="totalsAmount">$0</td>
-                  <td id="totalsPostTax">$0</td>
-                  <td id="totalsFirstMonth">$0</td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div> <!-- end commissionTab -->
 
       <!-- PERSONAL FINANCES TAB -->
@@ -3625,13 +3420,6 @@
       doc,
       getDoc,
       setDoc,
-      collection,
-      query,
-      where,
-      getDocs,
-      deleteDoc,
-      addDoc,
-      writeBatch,
       serverTimestamp,
       onSnapshot
     } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -3691,66 +3479,12 @@
       aggressive: { label: "Aggressive", rate: 0.10 }
     };
 
-    // ---- RATE TABLE ----
-    const rateTable = {
-      "New": 0.00408,                // New business, any term
-      "RenewalOut|Out": 0.00032,     // 0.032%
-      "Renewal<100%|1-2": 0.00079,   // 0.079%
-      "Renewal<100%|3+": 0.00079,    // 0.079%
-      "Renewal=100%|1-2": 0.00118,   // 0.118%
-      "Renewal=100%|3+": 0.00118,    // 0.118%
-      "Renewal>100%|1-2": 0.00157,   // 0.157%
-      "Renewal>100%|3+": 0.00157     // 0.157%
-    };
-
-    const termOptionsByType = {
-      "RenewalOut": [
-        { value: "Out", label: "Any-time out clause" }
-      ],
-      "Renewal<100%": [
-        { value: "1-2", label: "1–2 years" },
-        { value: "3+", label: "3+ years" }
-      ],
-      "Renewal=100%": [
-        { value: "1-2", label: "1–2 years" },
-        { value: "3+", label: "3+ years" }
-      ],
-      "Renewal>100%": [
-        { value: "1-2", label: "1–2 years" },
-        { value: "3+", label: "3+ years" }
-      ]
-    };
-
     // DOM elements
     const signInBtn = document.getElementById("signInBtn");
     const signOutBtn = document.getElementById("signOutBtn");
     const authStatus = document.getElementById("authStatus");
     const appContent = document.getElementById("appContent");
 
-    const dealAmountInput = document.getElementById("dealAmount");
-    const dealTypeSelect = document.getElementById("dealType");
-    const dealTermSelect = document.getElementById("dealTerm");
-    const termRow = document.getElementById("termRow");
-    const dealNotesInput = document.getElementById("dealNotes");
-    const calcBtn = document.getElementById("calcBtn");
-
-    const rateDisplay = document.getElementById("rateDisplay");
-    const totalCommissionDisplay = document.getElementById("totalCommissionDisplay");
-    const totalCommissionPostTaxDisplay = document.getElementById("totalCommissionPostTaxDisplay");
-    const firstMonthDisplay = document.getElementById("firstMonthDisplay");
-
-    const historyBody = document.getElementById("historyBody");
-    const clearHistoryBtn = document.getElementById("clearHistoryBtn");
-
-    const totalsAmountEl = document.getElementById("totalsAmount");
-    const totalsPostTaxEl = document.getElementById("totalsPostTax");
-    const totalsFirstMonthEl = document.getElementById("totalsFirstMonth");
-
-    // KPI elements
-    const kpiThisMonth = document.getElementById("kpiThisMonth");
-    const kpiFiscalYtd = document.getElementById("kpiFiscalYtd");
-    const kpiLargestDeal = document.getElementById("kpiLargestDeal");
-    const kpiFiscalYtdFirst = document.getElementById("kpiFiscalYtdFirst");
 
     // Comp tracker elements
     const compEditBtn = document.getElementById("compEditBtn");
@@ -5081,282 +4815,6 @@
       existingChart.update();
       return existingChart;
     }
-
-    // --- Term dropdown handling ---
-    function populateTerms() {
-      const type = dealTypeSelect.value;
-
-      if (type === "New") {
-        termRow.classList.add("hidden");
-        dealTermSelect.innerHTML = "";
-        return;
-      }
-
-      termRow.classList.remove("hidden");
-      const options = termOptionsByType[type] || [];
-      dealTermSelect.innerHTML = options
-        .map(o => `<option value="${o.value}">${o.label}</option>`)
-        .join("");
-    }
-
-    dealTypeSelect.addEventListener("change", populateTerms);
-
-    // Ensure commas for deal amount
-    dealAmountInput.addEventListener("input", (e) => {
-      e.target.value = formatNumberWithCommas(e.target.value);
-    });
-    dealAmountInput.addEventListener("blur", (e) => {
-      e.target.value = formatNumberWithCommas(e.target.value);
-    });
-
-    // --- Firestore helpers for History ---
-    async function fetchHistory() {
-      if (!currentUser) return [];
-      const dealsRef = collection(db, "deals");
-      const snapshot = await getDocs(query(dealsRef, where("userId", "==", currentUser.uid)));
-
-      const items = snapshot.docs.map(snap => ({
-        id: snap.id,
-        ...snap.data()
-      }));
-
-      items.sort((a, b) => {
-        const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-        const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
-        return tb - ta;
-      });
-
-      return items;
-    }
-
-    async function deleteEntry(id) {
-      if (!currentUser) return;
-      try {
-        await deleteDoc(doc(db, "deals", id));
-        await renderHistory();
-      } catch (err) {
-        console.error("Error deleting entry", err);
-        alert("Error deleting entry.");
-      }
-    }
-
-    async function clearHistoryForUser() {
-      if (!currentUser) return;
-      const dealsRef = collection(db, "deals");
-      const snapshot = await getDocs(query(dealsRef, where("userId", "==", currentUser.uid)));
-
-      const batch = writeBatch(db);
-      snapshot.docs.forEach(snap => batch.delete(snap.ref));
-      await batch.commit();
-      await renderHistory();
-    }
-
-    clearHistoryBtn.addEventListener("click", () => {
-      if (confirm("Clear all saved history for this account?")) {
-        clearHistoryForUser();
-      }
-    });
-
-    function isSameMonthYear(date, now) {
-      return (
-        date.getFullYear() === now.getFullYear() &&
-        date.getMonth() === now.getMonth()
-      );
-    }
-
-    function getFiscalYearStart(now) {
-      const year = now.getFullYear();
-      if (now.getMonth() >= 6) {
-        return new Date(year, 6, 1);
-      } else {
-        return new Date(year - 1, 6, 1);
-      }
-    }
-
-    function isInFiscalYear(date, now) {
-      const fyStart = getFiscalYearStart(now);
-      return date >= fyStart && date <= now;
-    }
-
-    async function renderHistory() {
-      if (!currentUser) {
-        historyBody.innerHTML = `
-          <tr>
-            <td colspan="8" style="opacity:0.7;">Sign in to see your history.</td>
-          </tr>`;
-        totalsAmountEl.textContent = "$0";
-        totalsPostTaxEl.textContent = "$0";
-        totalsFirstMonthEl.textContent = "$0";
-        kpiThisMonth.textContent = "$0";
-        kpiFiscalYtd.textContent = "$0";
-        kpiLargestDeal.textContent = "$0";
-        kpiFiscalYtdFirst.textContent = "$0";
-        return;
-      }
-
-      const history = await fetchHistory();
-      historyBody.innerHTML = "";
-
-      if (!history.length) {
-        historyBody.innerHTML = `
-          <tr>
-            <td colspan="8" style="opacity:0.7;">No deals recorded yet.</td>
-          </tr>`;
-        totalsAmountEl.textContent = "$0";
-        totalsPostTaxEl.textContent = "$0";
-        totalsFirstMonthEl.textContent = "$0";
-        kpiThisMonth.textContent = "$0";
-        kpiFiscalYtd.textContent = "$0";
-        kpiLargestDeal.textContent = "$0";
-        kpiFiscalYtdFirst.textContent = "$0";
-        return;
-      }
-
-      let totalAmount = 0;
-      let totalPostTax = 0;
-      let totalFirstMonth = 0;
-
-      let thisMonthPostTax = 0;
-      let fiscalYtdPostTax = 0;
-      let fiscalYtdFirstMonth = 0;
-      let largestDealAmount = 0;
-
-      const now = new Date();
-
-      let rowsHtml = "";
-
-      history.forEach(entry => {
-        totalAmount += entry.amount || 0;
-        totalPostTax += entry.totalPostTax || 0;
-        totalFirstMonth += entry.firstMonthPostTax || 0;
-
-        const createdDate = entry.createdAt && entry.createdAt.toDate ? entry.createdAt.toDate() : null;
-        if (createdDate) {
-          if (isSameMonthYear(createdDate, now)) {
-            thisMonthPostTax += entry.totalPostTax || 0;
-          }
-          if (isInFiscalYear(createdDate, now)) {
-            fiscalYtdPostTax += entry.totalPostTax || 0;
-            fiscalYtdFirstMonth += entry.firstMonthPostTax || 0;
-          }
-        }
-
-        if (entry.amount && entry.amount > largestDealAmount) {
-          largestDealAmount = entry.amount;
-        }
-
-        const safeDate = escapeHtml(entry.date || "");
-        const safeType = escapeHtml(entry.dealType || "");
-        const safeTerm = escapeHtml(entry.termLabel || entry.termValue || "");
-        const safeNotes = escapeHtml(entry.notes || "");
-
-        rowsHtml += `
-          <tr>
-            <td>${safeDate}</td>
-            <td>${safeType}</td>
-            <td>${safeTerm}</td>
-            <td>${formatCurrency(entry.amount)}</td>
-            <td>${formatCurrency(entry.totalPostTax)}</td>
-            <td>${formatCurrency(entry.firstMonthPostTax)}</td>
-            <td title="${safeNotes}">${safeNotes}</td>
-            <td>
-              <button class="delete-btn" onclick="deleteEntry('${entry.id}')">x</button>
-            </td>
-          </tr>
-        `;
-      });
-
-      historyBody.innerHTML = rowsHtml;
-
-      totalsAmountEl.textContent = formatCurrency(totalAmount);
-      totalsPostTaxEl.textContent = formatCurrency(totalPostTax);
-      totalsFirstMonthEl.textContent = formatCurrency(totalFirstMonth);
-
-      kpiThisMonth.textContent = formatCurrency(thisMonthPostTax);
-      kpiFiscalYtd.textContent = formatCurrency(fiscalYtdPostTax);
-      kpiLargestDeal.textContent = formatCurrency(largestDealAmount);
-      kpiFiscalYtdFirst.textContent = formatCurrency(fiscalYtdFirstMonth);
-    }
-
-    window.deleteEntry = deleteEntry;
-
-    // --- Main calculation ---
-    calcBtn.addEventListener("click", async () => {
-      if (!currentUser) {
-        alert("Please sign in first.");
-        return;
-      }
-
-      const amount = getNumericValue(dealAmountInput.value);
-
-      if (isNaN(amount) || amount <= 0) {
-        alert("Please enter a deal amount greater than 0.");
-        return;
-      }
-
-      const type = dealTypeSelect.value;
-      let termValue = "";
-      let key = "";
-
-      if (type === "New") {
-        key = "New";
-        termValue = "Any";
-      } else {
-        termValue = dealTermSelect.value;
-        key = `${type}|${termValue}`;
-      }
-
-      const rate = rateTable[key];
-
-      if (rate === undefined) {
-        alert("No rate found for this combination of deal type and term.");
-        return;
-      }
-
-      const notes = dealNotesInput.value.trim();
-
-      const totalCommission = amount * rate;
-      const totalCommissionPostTax = totalCommission * 0.66;
-
-      // First-month logic:
-      // - New business: 50% of post-tax in month 1
-      // - Renewals: 100% of post-tax in month 1
-      let firstMonthCommission;
-      if (type.startsWith("Renewal")) {
-        firstMonthCommission = totalCommissionPostTax;
-      } else {
-        firstMonthCommission = totalCommissionPostTax * 0.5;
-      }
-
-      rateDisplay.textContent = (rate * 100).toFixed(3) + "%";
-      totalCommissionDisplay.textContent = formatCurrency(totalCommission);
-      totalCommissionPostTaxDisplay.textContent = formatCurrency(totalCommissionPostTax);
-      firstMonthDisplay.textContent = formatCurrency(firstMonthCommission);
-
-      const now = new Date();
-      const dateStr = now.toLocaleString("en-US", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-
-      const entry = {
-        userId: currentUser.uid,
-        date: dateStr,
-        dealType: type,
-        termValue: termValue,
-        notes: notes,
-        amount: amount,
-        totalPostTax: totalCommissionPostTax,
-        firstMonthPostTax: firstMonthCommission,
-        createdAt: serverTimestamp()
-      };
-
-      await addDoc(collection(db, "deals"), entry);
-      await renderHistory();
-    });
 
     // --- Comp Tracker Firestore helpers ---
     async function loadCompTracker() {
@@ -7999,8 +7457,6 @@
         signInBtn.classList.add("hidden");
         signOutBtn.classList.remove("hidden");
         appContent.classList.remove("hidden");
-        populateTerms();
-        await runDashboardLoadStep("commission history", renderHistory);
         await runDashboardLoadStep("commission tracker", loadCompTracker);
         await runDashboardLoadStep("personal finances", loadPersonalFinanceData);
         await runDashboardLoadStep("goals", () => loadGoalsDataForUser(user.uid));
@@ -8024,14 +7480,6 @@
           unsubscribeNycState = null;
         }
         resetPersonalFinanceState();
-        historyBody.innerHTML = "";
-        totalsAmountEl.textContent = "$0";
-        totalsPostTaxEl.textContent = "$0";
-        totalsFirstMonthEl.textContent = "$0";
-        kpiThisMonth.textContent = "$0";
-        kpiFiscalYtd.textContent = "$0";
-        kpiLargestDeal.textContent = "$0";
-        kpiFiscalYtdFirst.textContent = "$0";
         compSummaryEl.textContent = "Sign in to view your compensation tracker.";
         if (compPieChart) {
           compPieChart.destroy();
@@ -8049,8 +7497,6 @@
       }
     });
 
-    // Initialize term dropdown on first load
-    populateTerms();
   </script>
 </body>
 </html>
