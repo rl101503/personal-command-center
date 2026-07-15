@@ -2845,6 +2845,41 @@
                 </table>
               </div>
             </div>
+
+            <div class="card card-invest" style="margin-top:1rem;">
+              <div class="history-header-row">
+                <div>
+                  <h2>Real Estate</h2>
+                  <p>
+                    Property values are stored with the same asset records and included in total assets.
+                  </p>
+                </div>
+              </div>
+
+              <div class="history-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Property</th>
+                      <th>Value (USD)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="realEstateTableBody">
+                    <!-- populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="totals-summary">
+                <table class="totals-table">
+                  <tbody>
+                    <tr class="totals-row">
+                      <td>Real Estate Subtotal</td>
+                      <td id="realEstateTotal">$0</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -3651,7 +3686,8 @@
       { name: "Myrtle Beach Checking Balance", balance: null },
       { name: "Premier 401k", balance: null },
       { name: "Half Pint Value", balance: null },
-      { name: "Asheville land value", balance: null }
+      { name: "Asheville Land Value", balance: null },
+      { name: "Myrtle Beach Value", balance: null }
     ];
 
     const assetLinkMap = {
@@ -4008,7 +4044,8 @@
       }
 
       const amyIraAdded = ensureInvestmentRowExists("Amy IRA");
-      if (amyIraAdded) {
+      const myrtleBeachValueAdded = ensureInvestmentRowExists("Myrtle Beach Value");
+      if (amyIraAdded || myrtleBeachValueAdded) {
         personalFinanceState.investmentRows = investmentRows;
       }
 
@@ -4715,6 +4752,24 @@
           return sum + val;
         }
         return sum;
+      }, 0);
+    }
+
+    const realEstateAssetNames = [
+      "half pint value",
+      "asheville land value",
+      "myrtle beach value"
+    ];
+
+    function isRealEstateAsset(row) {
+      return realEstateAssetNames.includes((row.name || "").trim().toLowerCase());
+    }
+
+    function computeRealEstateTotal() {
+      return investmentRows.reduce((sum, row) => {
+        if (!isRealEstateAsset(row)) return sum;
+        const val = row.balance || 0;
+        return !isNaN(val) ? sum + val : sum;
       }, 0);
     }
 
@@ -5681,10 +5736,12 @@
     function renderInvestSection() {
       const investLiquidTableBody = document.getElementById("investLiquidTableBody");
       const investStaticTableBody = document.getElementById("investStaticTableBody");
+      const realEstateTableBody = document.getElementById("realEstateTableBody");
       const investTotalEl = document.getElementById("investTotal");
+      const realEstateTotalEl = document.getElementById("realEstateTotal");
       const editBtn = document.getElementById("investEditBtn");
       const addBtn = document.getElementById("investAddRowBtn");
-      if (!investLiquidTableBody || !investStaticTableBody || !investTotalEl) return;
+      if (!investLiquidTableBody || !investStaticTableBody || !realEstateTableBody || !investTotalEl || !realEstateTotalEl) return;
 
       if (editBtn) {
         editBtn.textContent = investEditMode ? "Done" : "Edit";
@@ -5724,11 +5781,13 @@
         `).join("");
 
       investLiquidTableBody.innerHTML = buildRowsMarkup(isLiquidAsset);
-      investStaticTableBody.innerHTML = buildRowsMarkup(row => !isLiquidAsset(row));
+      investStaticTableBody.innerHTML = buildRowsMarkup(row => !isLiquidAsset(row) && !isRealEstateAsset(row));
+      realEstateTableBody.innerHTML = buildRowsMarkup(isRealEstateAsset);
 
       function recalcInvestTotal() {
         const total = computeAssetsTotal();
         investTotalEl.textContent = formatCurrency(total);
+        realEstateTotalEl.textContent = formatCurrency(computeRealEstateTotal());
         renderGoals();
         renderInsights();
       }
